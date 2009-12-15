@@ -7,7 +7,7 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
     {
 
         $oLocation = &oxNew('d3geoip');
-        $oLocation->setUserCountry();
+        //$oLocation->setUserCountry();
         $oLocation->setCountryCurrency();
 
         return parent::init();

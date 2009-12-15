@@ -27,11 +27,11 @@ class d3GeoIP extends oxI18n
         {
             $sIP = $_SERVER['REMOTE_ADDR'];
 
-            /*
-            $sIP = '62.4.77.32';
-            $sIP = '62.4.77.48';
-            $sIP = '41.188.100.127';
-            */
+
+//            $sIP = '62.4.77.32';            // Deutschland
+//            $sIP = '62.4.77.48';            // Deutschland
+//            $sIP = '41.188.100.127';        // Mauretanien
+//            $sIP = '4.18.40.144';           // US
 
             $iIPNum = $this->_getNumIp($sIP);
             $sISOAlpha = $this->LoadByIPNum($iIPNum);
@@ -57,12 +57,13 @@ class d3GeoIP extends oxI18n
     public function getCountryObject($sISOAlpha)
     {
         $oCountry = &oxNew('oxcountry');
-        $sSelect = "SELECT oxid FROM ".$oCountry->getViewName()." WHERE OXISOALPHA2 = '".$sISOAlpha."'";
+        $sSelect = "SELECT oxid FROM ".$oCountry->getViewName()." WHERE OXISOALPHA2 = '".$sISOAlpha."' AND OXACTIVE = '1'";
         $oCountry->load(oxDb::getDb()->getOne($sSelect));
 
         return $oCountry;
     }
 
+/*
     public function setUserCountry()
     {
         if (!$this->getUser()) {
@@ -75,17 +76,18 @@ class d3GeoIP extends oxI18n
 
         return;
     }
+*/
 
     public function setCountryLanguage()
     {
         $oCountry = $this->getUserLocationCountryObject();
-        $aCountryLangs = $this->getConfig()->getConfigParam('aCountryLangs');
 
-        if (!$this->getSession()->getVar('d3isSetLang') && $aCountryLangs && $oCountry->getFieldData('oxisoalpha2') && isset($aCountryLangs[$oCountry->getFieldData('oxisoalpha2')]))
+        $this->performShopSwitch();
+
+        if (!$this->isAdmin() && oxUtils::getInstance()->isSearchEngine() === false && $this->getSession()->getVar('d3isSetLang') === null && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1)
         {
-            $iNewLanguage = $aCountryLangs[$oCountry->getFieldData('oxisoalpha2')];
-            oxLang::getInstance()->setTplLanguage((int) $iNewLanguage);
-            oxLang::getInstance()->setBaseLanguage((int) $iNewLanguage);
+            oxLang::getInstance()->setTplLanguage((int) $oCountry->getFieldData('d3geoiplang'));
+            oxLang::getInstance()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
             $this->getSession()->setVar('d3isSetLang', true);
         }
 
@@ -94,14 +96,51 @@ class d3GeoIP extends oxI18n
     public function setCountryCurrency()
     {
         $oCountry = $this->getUserLocationCountryObject();
-        $aCountryCurrs = $this->getConfig()->getConfigParam('aCountryCurrs');
 
-        if (!$this->getSession()->getVar('d3isSetCurr') && $aCountryCurrs && $oCountry->getFieldData('oxisoalpha2') && isset($aCountryCurrs[$oCountry->getFieldData('oxisoalpha2')]))
+        if (!$this->isAdmin() && oxUtils::getInstance()->isSearchEngine() === false && !$this->getSession()->getVar('d3isSetCurr') && $oCountry->getId() && $oCountry->getFieldData('d3geoipcur') > -1)
         {
-            $iNewCurrency = $aCountryCurrs[$oCountry->getFieldData('oxisoalpha2')];
-            $this->getConfig()->setActShopCurrency((int) $iNewCurrency );
+            $this->getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
             $this->getSession()->setVar('d3isSetCurr', true);
         }
 
+    }
+
+    public function performShopSwitch()
+    {
+        $oCountry = $this->getUserLocationCountryObject();
+
+        $iNewShop = $oCountry->getFieldData('d3geoipshop');
+
+        $aShopLinks = $this->getShopUrls();
+
+        if (!$this->isAdmin() && oxUtils::getInstance()->isSearchEngine() === false && $oCountry->getId() && $this->getConfig()->isMall() && $iNewShop > -1 && $iNewShop != $this->getConfig()->getShopId())
+        {
+                $oNewConf = new oxConfig();
+                $oNewConf->setShopId($iNewShop);
+                $oNewConf->init();
+
+                $this->getConfig()->onShopChange();
+
+                if (!$this->getSession()->getVar('d3isSetLang') && $oCountry->getFieldData('d3geoiplang') > -1)
+                    $sLangId = $oCountry->getFieldData('d3geoiplang');
+                else
+                    $sLangId = '';
+
+                header("Location: ".$oNewConf->getShopHomeUrl($sLangId));
+                exit();
+        }
+    }
+
+    public function getShopUrls()
+    {
+
+        $oShoplist = oxNew( 'oxshoplist' );
+        $oShoplist->getList();
+        $aShopUrls = array();
+        foreach ( $oShoplist as $sId => $oShop ) {
+            $aShopUrls[$sId] = $this->getConfig()->getShopConfVar( 'sMallShopURL', $sId );
+        }
+
+        return $aShopUrls;
     }
 }
