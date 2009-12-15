@@ -6,7 +6,11 @@ copy_this/modules/d3_geoip/views/d3_oxcmp_cur_geoip.php -text
 copy_this/modules/d3_geoip/views/d3_oxcmp_lang_geoip.php -text
 copy_this/out/admin/de/d3_geoip_lang.php -text
 copy_this/out/admin/tpl/d3_country_geoip.tpl -text
-setup+doku/geoip.sql -text
+setup+doku/IPNum-Berechnung.xls -text
+setup+doku/geoip-Data.sql -text
+setup+doku/geoip-Struktur.sql -text
 setup+doku/install.sql -text
 setup+doku/install.txt -text
 setup+doku/licence.txt -text
+setup+doku/update.sql -text
+setup+doku/update.txt -text

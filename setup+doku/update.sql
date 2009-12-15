@@ -1,0 +1,4 @@
+# =========== 1.0 => 1.1 ==============
+
+ ALTER TABLE `d3_geoip_test` CHANGE `D3STARTIPNUM` `D3ENDIPNUM` BIGINT( 10 ) NOT NULL;
+ ALTER TABLE `d3_geoip_test` CHANGE `D3ENDIPNUM` `D3ENDIPNUM` BIGINT( 10 ) NOT NULL;
