@@ -1,0 +1,17 @@
+oxcmp_cur => d3_geoip/views/d3_oxcmp_cur_geoip
+oxcmp_lang => d3_geoip/views/d3_oxcmp_lang_geoip
+
+
+config.inc.php:
+
+    // Key ist ISO-Alpha2-Code in Großbuchstaben (analog Datenbank) // Value ist ID der Sprache (beginnend bei 0)
+    $this->aCountryLangs = array();
+    $this->aCountryLangs['DE'] = 0;
+    $this->aCountryLangs['EN'] = 1;
+    $this->aCountryLangs['MR'] = 1;
+
+    // Key ist ISO-Alpha2-Code in Großbuchstaben (analog Datenbank) // Value ist ID der Währung (beginnend bei 0)
+    $this->aCountryCurrs = array();
+    $this->aCountryCurrs['DE'] = 0;
+    $this->aCountryCurrs['EN'] = 1;
+    $this->aCountryCurrs['MR'] = 1;

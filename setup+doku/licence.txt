@@ -1,0 +1,6 @@
+GeoIP Country light
+
+GeoIp-Data based on GeoIp Country Light by Maxmind (July 2009).
+These database will be published under GPL3 by Maxmind. Please see www.maxmind.com for updates.
+
+Maxmind offers more accuracy data for cash. More informations about this you'll find on www.maxmind.com.

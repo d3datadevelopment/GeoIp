@@ -1,1 +1,7 @@
 * text=auto !eol
+copy_this/core/d3geoip.php -text
+copy_this/modules/d3_geoip/views/d3_oxcmp_cur_geoip.php -text
+copy_this/modules/d3_geoip/views/d3_oxcmp_lang_geoip.php -text
+setup+doku/install.sql -text
+setup+doku/install.txt -text
+setup+doku/licence.txt -text
