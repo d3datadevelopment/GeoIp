@@ -9,6 +9,14 @@ copy_this/out/admin/tpl/d3_country_geoip.tpl -text
 setup+doku/IPNum-Berechnung.xls -text
 setup+doku/geoip-Data_2011-10-13.sql -text
 setup+doku/geoip-Struktur.sql -text
+setup+doku/geoip_data_parts/1.sql -text
+setup+doku/geoip_data_parts/2.sql -text
+setup+doku/geoip_data_parts/3.sql -text
+setup+doku/geoip_data_parts/4.sql -text
+setup+doku/geoip_data_parts/5.sql -text
+setup+doku/geoip_data_parts/6.sql -text
+setup+doku/geoip_data_parts/7.sql -text
+setup+doku/geoip_data_parts/8.sql -text
 setup+doku/install.sql -text
 setup+doku/install.txt -text
 setup+doku/licence.txt -text
