@@ -2,7 +2,7 @@
 *                                                                                          *
 *  Modul "GeoIP-Kundenleitsystem" für OXID eSales Version EE 4.2.0                         *
 *  Version 1.0 (30.10.2009)                                                                *
-*  Datenbasis: MaxMind GeoLite Country, Version Oktober 2009 
+*  Datenbasis: MaxMind GeoLite Country, Version Oktober 2011 
 *  (C) D³ Data Development                                                                 *
 *  Bearbeiter: DS                                                                          *
 *                                                                                          *
