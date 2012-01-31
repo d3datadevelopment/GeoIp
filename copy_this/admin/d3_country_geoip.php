@@ -1,13 +1,19 @@
-<?
+<?php
 
 class d3_country_geoip extends oxAdminView
 {
     protected $_sDefSort = 'sort';
 
     protected $_sThisTemplate = 'd3_country_geoip.tpl';
+    
+    private $_oSet;
+    
+    private $_sModId = 'd3_geoip';
 
     public function render()
     {
+        $this->_oSet = d3_cfg_mod::get($this->_sModId);
+
         $myConfig = $this->getConfig();
 
             if ( !$myConfig->getConfigParam( 'blAllowSharedEdit' ) )
@@ -65,9 +71,15 @@ class d3_country_geoip extends oxAdminView
 
         $this->oShopList->selectString($sSelect);
 
-$this->getLangList();
+        $this->getLangList();
 
         return $ret;
+    }
+    
+    public function getModCfgValue($sIdent)
+    {
+        $this->_oSet = d3_cfg_mod::get($this->_sModId);
+        return $this->_oSet->getValue($sIdent);
     }
 
     public function saveshop()

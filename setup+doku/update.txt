@@ -1,3 +1,0 @@
-CSV-Datei über Editor von Anführungszeichen befreien, aufladen und über Konsole in geleerte Tabelle schreiben:
-
-LOAD DATA LOCAL INFILE 'filename' INTO TABLE 'tablename' FIELDS TERMINATED BY ',';

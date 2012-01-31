@@ -7,4 +7,12 @@
             </SUBMENU>
         </MAINMENU>
     </OXMENU>
+    <OXMENU id="d3mxd3modules">
+        <MAINMENU id="d3mxgeoip">
+            <SUBMENU id="d3mxgeoip_settings" cl="d3_cfg_geoipset" list="d3_cfg_geoipset_list">
+                <TAB id="d3tbclgeoip_settings_main" cl="d3_cfg_geoipset_main" />
+                <TAB id="d3tbcl_licence" cl="d3_cfg_geoipset_licence" />
+            </SUBMENU>
+        </MAINMENU>
+    </OXMENU>
 </OX>
