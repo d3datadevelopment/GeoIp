@@ -31,4 +31,19 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
 
         return $sTitle;
     }
+    
+    public function getCountryList()
+    {
+        $oCountryList = oxNew('oxcountrylist');
+        if ($oCountryList->getBaseObject()->isMultilang())
+        {
+            $oCountryList->getBaseObject()->setLanguage(oxLang::getInstance()->getTplLanguage());
+        }
+        $oListObject = $oCountryList->getBaseObject();
+        $sFieldList = $oListObject->getSelectFields();
+        $sQ = "select $sFieldList from " . $oListObject->getViewName();
+        $oCountryList->selectString($sQ);
+
+        return $oCountryList;
+    }
 }

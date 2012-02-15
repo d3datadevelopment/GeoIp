@@ -36,6 +36,7 @@ $aLang = array(
 'D3_GEOIP_SET_OPTIONS_CHANGECURR'               => 'Währung wechseln, wenn eingestellt',
 'D3_GEOIP_SET_OPTIONS_CHANGELANG'               => 'Sprache wechseln, wenn eingestellt',
 'D3_GEOIP_SET_OPTIONS_CHANGEURL'                => 'URL wechseln, wenn eingestellt',
+'D3_GEOIP_SET_OPTIONS_NOCOUNTRY'                => 'Shop verwendet die Einstellung dieses Landes, wenn IP nicht zuzuordnen ist',
 'D3_GEOIP_SET_IP'                               => 'IP-Einstellungen',
 'D3_GEOIP_SET_IP_TESTIP'                        => 'statt Kunden-IP immer diese IP-Adresse verwenden',
 'D3_GEOIP_SET_IP_CHECKIP'                       => 'diese IP-Adresse prüfen',

@@ -252,6 +252,22 @@ td.edittext {
                             </dd>
                             <div class="spacer"></div>
                         </dl>
+                        <dl>
+                            <dt>
+                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_NOCOUNTRY"}]
+                                <input type="hidden" name="value[blUseFallback]" value="0">
+                                <input class="edittext ext_edittext" type="checkbox" name="value[blUseFallback]" value='1' [{if $edit->getValue('blUseFallback') == 1}]checked[{/if}]>
+                            </dt>
+                            <dd>
+                                <select size="5" name="value[sFallbackCountryId]">
+                                    [{foreach from=$oView->getCountryList() item="oCountry"}]
+                                        <option value="[{$oCountry->getId()}]" [{if $edit->getValue('sFallbackCountryId') == $oCountry->getId()}] selected[{/if}]>[{$oCountry->oxcountry__oxtitle->value}]</option>
+                                    [{/foreach}]
+                                </select>
+                                [{ oxinputhelp ident="D3_GEOIP_SET_OPTIONS_NOCOUNTRY_DESC" }]
+                            </dd>
+                            <div class="spacer"></div>
+                        </dl>
                     </div>
                 </div>
                     

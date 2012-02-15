@@ -1,5 +1,18 @@
 <?php
 
+// @copyright © D³ Data Development
+//
+// This Software is the property of Data Development and is protected
+// by copyright law - it is NOT Freeware.
+//
+// Any unauthorized use of this software without a valid license key
+// is a violation of the license agreement and will be prosecuted by
+// civil and criminal law.
+//
+// http://www.shopmodule.com
+
+// AUTOR Daniel Seifert <ds@shopmodule.com>
+
 class d3GeoIP extends oxI18n
 {
     /**
@@ -35,7 +48,7 @@ class d3GeoIP extends oxI18n
             if (!$sISOAlpha)
             {
                 $this->_getLog()->setLog('error', __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP failed', $sIP);
-                $this->oCountry = oxNew('oxcountry');
+                $this->oCountry = $this->getCountryFallBackObject();
             }
             else
             {
@@ -70,9 +83,21 @@ class d3GeoIP extends oxI18n
 
     public function getCountryObject($sISOAlpha)
     {
-        $oCountry = &oxNew('oxcountry');
+        $oCountry = oxNew('oxcountry');
         $sSelect = "SELECT oxid FROM ".$oCountry->getViewName()." WHERE OXISOALPHA2 = '".$sISOAlpha."' AND OXACTIVE = '1'";
         $oCountry->load(oxDb::getDb()->getOne($sSelect));
+
+        return $oCountry;
+    }
+    
+    public function getCountryFallBackObject()
+    {
+        $oCountry = oxNew('oxcountry');
+        
+        if ($this->_getConfig()->getValue('blUseFallback') && $this->_getConfig()->getValue('sFallbackCountryId'))
+        {
+            $oCountry->Load($this->_getConfig()->getValue('sFallbackCountryId'));
+        }
 
         return $oCountry;
     }
