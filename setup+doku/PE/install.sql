@@ -1,5 +1,5 @@
 INSERT INTO `d3_cfg_mod` (`OXID`, `OXSHOPID`, `OXMODID`, `OXNAME`, `OXACTIVE`, `OXSERIAL`, `OXINSTALLDATE`, `OXVERSION`, `OXSHOPVERSION`, `OXISMODULELOG`, `OXREQUIREMENTS`, `OXVALUE`, `OXVALUE_1`, `OXVALUE_2`, `OXREVISION`, `OXNEWREVISION`) VALUES
-(MD5(RAND()), 'oxbaseshop', 'd3_geoip', 'GeoIP', 1, '', NOW(), '2.1.0', 'PE4', 0, '', '', '', '', 18, 18);
+(MD5(RAND()), 'oxbaseshop', 'd3_geoip', 'GeoIP', 1, '', NOW(), '2.1.1', 'PE4', 0, '', '', '', '', 24, 24);
 
 ALTER TABLE `oxcountry` ADD `D3GEOIPSHOP` VARCHAR( 10 ) NOT NULL DEFAULT 'oxbaseshop',
 ADD `D3GEOIPLANG` TINYINT( 2 ) NOT NULL DEFAULT '-1',
