@@ -19,8 +19,6 @@ class d3_cfg_geoipset_licence extends d3_cfg_mod_licence
 
     protected $_hasLicence = false;
 
-    protected $_hasUpdate = false;
-
     protected $_hasNewsletterForm = false;
 
     protected $_sMenuItemTitle = 'd3mxgeoip';
