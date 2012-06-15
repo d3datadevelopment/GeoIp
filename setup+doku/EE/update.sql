@@ -16,3 +16,7 @@ UPDATE `d3_cfg_mod` SET `OXVERSION` = '2.1.0', `OXREVISION` = '18', `OXNEWREVISI
 
 # ==== 2.1.0 PE4 => 2.1.1 PE4 ====
 UPDATE `d3_cfg_mod` SET `OXVERSION` = '2.1.1', `OXREVISION` = '24', `OXNEWREVISION` = '24' WHERE OXMODID = 'd3_geoip';
+
+# ==== 2.1.1 PE4 => 2.1.2 PE4 ====
+UPDATE `d3_cfg_mod` SET `OXVERSION` = '2.1.2', `OXNEWREVISION` = '26' WHERE OXMODID = 'd3_geoip';
+UPDATE `d3_cfg_mod` SET `OXREVISION` = `OXNEWREVISION` WHERE `OXMODID` = 'd3_geoip';

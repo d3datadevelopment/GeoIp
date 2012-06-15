@@ -3,13 +3,14 @@
  * Module information
  */
 $aModule = array(
-    'id'           => 'd3ordermanager',
-    'title'        => 'D³ Auftragsmanager Pro / Order Manager Pro',
-    'description'  => 'Führt ausgeführte Aufträge nach definierten Regeln weiter.<br>Aktiviere Sie die Moduleinträge bitte immer und steuern Sie die Modulaktivität ausschließlich im Adminbereich des Moduls.',
+    'id'           => 'd3_geoip',
+    'title'        => oxLang::getInstance()->translateString('D3_GEOIP_METADATA_TITLE'),
+    'description'  => oxLang::getInstance()->translateString('D3_GEOIP_METADATA_DESC'),
     'thumbnail'    => 'picture.png',
-    'version'      => '1.0.0',
-    'author'       => 'D³ Data Development',
+    'version'      => '2.1.1',
+    'author'       => oxLang::getInstance()->translateString('D3_MOD_LIB_METADATA_AUTHOR'),
     'extend'      => array(
-        'oxemail' => 'd3ordermanager/core/d3_oxemail_ordermanager'
+        'oxcmp_cur' => 'd3_geoip/views/d3_oxcmp_cur_geoip',
+        'oxcmp_lang' => 'd3_geoip/views/d3_oxcmp_lang_geoip',
     )
 );

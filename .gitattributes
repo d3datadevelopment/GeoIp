@@ -1,10 +1,7 @@
 * text=auto !eol
-changed_full/EE/EE420-EE456/out/admin/de/d3_geoip_lang.php -text
-changed_full/EE/EE420-EE456/out/admin/tpl/d3_cfg_geoipset_main.tpl -text
-changed_full/EE/EE420-EE456/out/admin/tpl/d3_country_geoip.tpl -text
-changed_full/PE/PE420-PE456/out/admin/de/d3_geoip_lang.php -text
-changed_full/PE/PE420-PE456/out/admin/tpl/d3_cfg_geoipset_main.tpl -text
-changed_full/PE/PE420-PE456/out/admin/tpl/d3_country_geoip.tpl -text
+changed_full/420-461/out/admin/de/d3_geoip_lang.php -text
+changed_full/420-461/out/admin/tpl/d3_cfg_geoipset_main.tpl -text
+changed_full/420-461/out/admin/tpl/d3_country_geoip.tpl -text
 copy_this/admin/d3_cfg_geoipset.php -text
 copy_this/admin/d3_cfg_geoipset_licence.php -text
 copy_this/admin/d3_cfg_geoipset_list.php -text
