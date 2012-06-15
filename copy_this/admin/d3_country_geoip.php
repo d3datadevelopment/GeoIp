@@ -5,9 +5,9 @@ class d3_country_geoip extends oxAdminView
     protected $_sDefSort = 'sort';
 
     protected $_sThisTemplate = 'd3_country_geoip.tpl';
-    
+
     private $_oSet;
-    
+
     private $_sModId = 'd3_geoip';
 
     public function render()
@@ -75,7 +75,7 @@ class d3_country_geoip extends oxAdminView
 
         return $ret;
     }
-    
+
     public function getModCfgValue($sIdent)
     {
         $this->_oSet = d3_cfg_mod::get($this->_sModId);
@@ -135,7 +135,7 @@ class d3_country_geoip extends oxAdminView
         $aCurrencies = array();
 
         $sQ = "select DECODE( oxvarvalue, '".$this->getConfig()->getConfigParam( 'sConfigKey' )."') as oxvarvalue from oxconfig where oxshopid = '".$this->oCountry->getFieldData('d3geoipshop')."' AND oxvarname = 'aCurrencies'";
-        $sCurs = oxDb::getDb(1)->getOne($sQ);
+        $sCurs = oxDb::getDb(2)->getOne($sQ);
         foreach (unserialize($sCurs) as $sKey => $sValue)
         {
             $aFields = explode('@', $sValue);

@@ -32,6 +32,12 @@ setup+doku/geoip_data_parts/6.sql -text
 setup+doku/geoip_data_parts/7.sql -text
 setup+doku/geoip_data_parts/8.sql -text
 setup+doku/licence.txt -text
+sources/CSVtoSQLconvert_perl.zip -text
+sources/Doku/Drucken[!!-~]-[!!-~]Bartomedia[!!-~]-[!!-~]Web[!!-~]Design[!!-~]Distinction_[!!-~]Geo[!!-~]IP[!!-~]-[!!-~]install[!!-~]Maxmind[!!-~]GeoIP[!!-~]using[!!-~]PHP[!!-~]+[!!-~]MySQL.pdf -text svneol=unset#unset
+sources/Doku/Drucken[!!-~]-[!!-~]Bartomedia[!!-~]-[!!-~]Web[!!-~]Design[!!-~]Distinction_[!!-~]Maxmind[!!-~]GeoIP[!!-~]install[!!-~]setup[!!-~]tutorial[!!-~]using[!!-~]PHPMyAdmin.pdf -text
+sources/Doku/Drucken[!!-~]-[!!-~]MaxMind[!!-~]Forum[!!-~]•[!!-~]View[!!-~]topic[!!-~]-[!!-~]Fast[!!-~]SQL[!!-~]Queries[!!-~]Using[!!-~]the[!!-~]CSV[!!-~]Database.pdf -text
+sources/Doku/Drucken[!!-~]-[!!-~]On[!!-~]efficiently[!!-~]geo-referencing[!!-~]IPs[!!-~]with[!!-~]MaxMind[!!-~]GeoIP[!!-~]and[!!-~]MySQL[!!-~]GIS[!!-~]«[!!-~]Jeremy[!!-~]Cole.pdf -text svneol=unset#unset
+sources/Doku/Drucken[!!-~]-[!!-~]Vincent[!!-~]de[!!-~]Lau_[!!-~]HOW-TO[!!-~]Import[!!-~]the[!!-~]MaxMind[!!-~]GeoIP[!!-~]Free[!!-~]Country[!!-~]CSV[!!-~]file[!!-~]into[!!-~]MySQL[!!-~]and[!!-~]save[!!-~]diskspace.pdf -text svneol=unset#unset
 sources/GeoIP-Installation.docx -text
 sources/GeoIPCountryCSV.zip -text
 sources/GeoIPv6.csv/GeoIPv6-20120304.csv -text
