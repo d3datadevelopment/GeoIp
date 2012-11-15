@@ -4,3 +4,8 @@ IP-Syntaxcheck bei Eingabe im Admin
 MaxMind-CSV-Import
 
 IPV6-Pflege
+
+- metadata.php ohne Email und URL von D3
+- SQL ändern in (da OXREVISION hat keinen Standardwert)
+INSERT INTO `d3_cfg_mod` (`OXID`, `OXSHOPID`, `OXMODID`, `OXNAME`, `OXACTIVE`, `OXSERIAL`, `OXINSTALLDATE`, `OXVERSION`, `OXSHOPVERSION`, `OXISMODULELOG`, `OXREQUIREMENTS`, `OXVALUE`, `OXVALUE_1`, `OXVALUE_2`, `OXREVISION`, `OXNEWREVISION`) VALUES
+(MD5(RAND()), 'oxbaseshop', 'd3_geoip', 'GeoIP', 1, '', NOW(), '2.1.2', 'PE4', 0, '', '', '', '', 0, 26);
