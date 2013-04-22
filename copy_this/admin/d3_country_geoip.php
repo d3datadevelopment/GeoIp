@@ -134,7 +134,17 @@ class d3_country_geoip extends oxAdminView
     {
         $aCurrencies = array();
 
-        $sQ = "select DECODE( oxvarvalue, '".$this->getConfig()->getConfigParam( 'sConfigKey' )."') as oxvarvalue from oxconfig where oxshopid = '".$this->oCountry->getFieldData('d3geoipshop')."' AND oxvarname = 'aCurrencies'";
+        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop'))
+        {
+            $sShopId = $this->oCountry->getFieldData('d3geoipshop');
+        }
+        else
+        {
+            $sShopId = $this->getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
+        }
+
+        $sQ = "select DECODE( oxvarvalue, '".$this->getConfig()->getConfigParam( 'sConfigKey' )."') as oxvarvalue from oxconfig where oxshopid = '".$sShopId."' AND oxvarname = 'aCurrencies'";
+
         $sCurs = oxDb::getDb(2)->getOne($sQ);
         foreach (unserialize($sCurs) as $sKey => $sValue)
         {
@@ -149,10 +159,18 @@ class d3_country_geoip extends oxAdminView
 
     public function getLangList()
     {
+        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop'))
+        {
+            $sShopId = $this->oCountry->getFieldData('d3geoipshop');
+        }
+        else
+        {
+            $sShopId = $this->getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
+        }
 
         $aLanguages = array();
-        $aLangParams = $this->getConfig()->getShopConfVar('aLanguageParams', $this->oCountry->getFieldData('d3geoipshop'));
-        $aConfLanguages = $this->getConfig()->getShopConfVar('aLanguages', $this->oCountry->getFieldData('d3geoipshop'));
+        $aLangParams = $this->getConfig()->getShopConfVar('aLanguageParams', $sShopId);
+        $aConfLanguages = $this->getConfig()->getShopConfVar('aLanguages', $sShopId);
 
         if ( is_array( $aConfLanguages ) ) {
             $i = 0;
