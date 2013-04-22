@@ -22,7 +22,6 @@ $iLangNr    = 0;
 $aLang = array(
 
 'charset'                                       => 'ISO-8859-15',
-'d3mxd3modules'                                 => 'D³ Module',
 'd3mxgeoip'                                     => 'GeoIP',
 'd3mxgeoip_settings'                            => 'Einstellungen',
 'd3tbclgeoip_settings_main'                     => 'Grundeinstellungen',
