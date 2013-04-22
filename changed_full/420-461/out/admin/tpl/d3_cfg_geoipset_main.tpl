@@ -270,7 +270,7 @@ td.edittext {
                         </dl>
                     </div>
                 </div>
-                    
+
                 <div class="groupExp">
                     <div class="">
                         <a class="rc" onclick="_groupExp(this); return false;" href="#">
@@ -292,12 +292,28 @@ td.edittext {
                         </dl>
                         <dl>
                             <dt>
+                                [{oxmultilang ident="D3_GEOIP_SET_IP_TESTCOUNTRY"}]
+                                <input type="hidden" name="value[blUseTestCountry]" value="0">
+                                <input class="edittext ext_edittext" type="checkbox" name="value[blUseTestCountry]" value='1' [{if $edit->getValue('blUseTestCountry') == 1}]checked[{/if}]>
+                            </dt>
+                            <dd>
+                                <select name="value[sTestCountryIp]" size="1" class="edittext ext_edittext">
+                                    [{foreach from=$oView->getIPCountryList() item="oCountry"}]
+                                        <option value="[{$oCountry->getFieldData('IP')}]" [{if $edit->getValue('sTestCountryIp') == $oCountry->getFieldData('IP')}] selected[{/if}]>[{$oCountry->getFieldData('oxtitle')}][{if !$oCountry->getFieldData('oxactive')}] [{oxmultilang ident="D3_GEOIP_SET_IP_TESTCOUNTRY_INACTIVE"}][{/if}]</option>
+                                    [{/foreach}]
+                                </select>
+                                [{ oxinputhelp ident="D3_GEOIP_SET_IP_TESTCOUNTRY_DESC" }]
+                            </dd>
+                            <div class="spacer"></div>
+                        </dl>
+                        <dl>
+                            <dt>
                                 [{oxmultilang ident="D3_GEOIP_SET_IP_CHECKIP"}]
                             </dt>
                             <dd>
                                 <input type="text" maxlength="15" size="17" name="value[sCheckIp]" value="[{$edit->getValue('sCheckIp')}]">
                                 [{ oxinputhelp ident="D3_GEOIP_SET_IP_CHECKIP_DESC" }]
-                                
+
                                 [{if $edit->getValue('sCheckIp')}]
                                     [{$oView->getIpCountry($edit->getValue('sCheckIp'))}]
                                 [{/if}]

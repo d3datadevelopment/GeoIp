@@ -80,6 +80,8 @@ class d3GeoIP extends oxI18n
     {
         if ($this->_getModConfig()->getValue('blUseTestIp') && $this->_getModConfig()->getValue('sTestIp'))
             return $this->_getModConfig()->getValue('sTestIp');
+        elseif ($this->_getModConfig()->getValue('blUseTestCountry') && $this->_getModConfig()->getValue('sTestCountryIp'))
+            return $this->_getModConfig()->getValue('sTestCountryIp');
         else
             return $_SERVER['REMOTE_ADDR'];
     }
@@ -119,6 +121,7 @@ class d3GeoIP extends oxI18n
     {
         $oCountry = oxNew('oxcountry');
         $sSelect = "SELECT oxid FROM ".$oCountry->getViewName()." WHERE OXISOALPHA2 = '".$sISOAlpha."' AND OXACTIVE = '1'";
+
         $oCountry->load(oxDb::getDb()->getOne($sSelect));
 
         return $oCountry;
