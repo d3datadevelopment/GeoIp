@@ -21,7 +21,12 @@ class d3GeoIP extends oxI18n
      * @var string
      */
     protected $_sClassName = 'd3geoip';
-    
+
+    /**
+     * ModCfg ID
+     *
+     * @var string
+     */
     private $_sModId = 'd3_geoip';
 
     /**
@@ -35,13 +40,19 @@ class d3GeoIP extends oxI18n
         $this->init('d3geoip');
     }
 
+    /**
+     * get oxcountry object by given IP address (optional)
+     *
+     * @param string $sIP optional
+     * @return object
+     */
     public function getUserLocationCountryObject($sIP = false)
     {
         if (!$this->oCountry)
         {
             if (!$sIP)
                 $sIP = $this->getIP();
-                
+
             $iIPNum = $this->_getNumIp($sIP);
             $sISOAlpha = $this->LoadByIPNum($iIPNum);
 
@@ -53,21 +64,32 @@ class d3GeoIP extends oxI18n
             else
             {
                 $this->_getLog()->setLog('info', __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP', $sIP." => ".$sISOAlpha);
-                $this->oCountry = $this->getCountryObject($sISOAlpha);  
+                $this->oCountry = $this->getCountryObject($sISOAlpha);
             }
         }
 
         return $this->oCountry;
     }
-    
+
+    /**
+     * get IP address from client or set test IP address
+     *
+     * @return string
+     */
     public function getIP()
     {
-        if ($this->_getConfig()->getValue('blUseTestIp') && $this->_getConfig()->getValue('sTestIp'))
-            return $this->_getConfig()->getValue('sTestIp');
+        if ($this->_getModConfig()->getValue('blUseTestIp') && $this->_getModConfig()->getValue('sTestIp'))
+            return $this->_getModConfig()->getValue('sTestIp');
         else
             return $_SERVER['REMOTE_ADDR'];
     }
 
+    /**
+     * get IP number by IP address
+     *
+     * @param string $sIP IP address
+     * @return int IP number
+     */
     protected function _getNumIp($sIP)
     {
         $aIP = explode('.',$sIP);
@@ -75,12 +97,24 @@ class d3GeoIP extends oxI18n
         return $iIP;
     }
 
+    /**
+     * get ISO alpha 2 ID by IP number
+     *
+     * @param int $iIPNum IP number
+     * @return string
+     */
     public function LoadByIPNum($iIPNum)
     {
         $sSelect = "SELECT d3iso FROM ".$this->_sClassName." WHERE d3startipnum <= '$iIPNum' AND d3endipnum >= '$iIPNum'";
         return oxDb::getDb()->getOne($sSelect);
     }
 
+    /**
+     * get oxcountry object by ISO alpha 2 ID
+     *
+     * @param string $sISOAlpha
+     * @return object
+     */
     public function getCountryObject($sISOAlpha)
     {
         $oCountry = oxNew('oxcountry');
@@ -89,14 +123,19 @@ class d3GeoIP extends oxI18n
 
         return $oCountry;
     }
-    
+
+    /**
+     * get oxcountry object for fallback, if set
+     *
+     * @return object
+     */
     public function getCountryFallBackObject()
     {
         $oCountry = oxNew('oxcountry');
-        
-        if ($this->_getConfig()->getValue('blUseFallback') && $this->_getConfig()->getValue('sFallbackCountryId'))
+
+        if ($this->_getModConfig()->getValue('blUseFallback') && $this->_getModConfig()->getValue('sFallbackCountryId'))
         {
-            $oCountry->Load($this->_getConfig()->getValue('sFallbackCountryId'));
+            $oCountry->Load($this->_getModConfig()->getValue('sFallbackCountryId'));
         }
 
         return $oCountry;
@@ -117,16 +156,20 @@ class d3GeoIP extends oxI18n
     }
 */
 
+    /**
+     * check module active state and set user country specific language
+     *
+     */
     public function setCountryLanguage()
     {
         $this->performURLSwitch();
         $this->performShopSwitch();
 
-        if (!$this->_getConfig()->getFieldData('oxactive') || !$this->_getConfig()->getValue('blChangeLang'))
+        if (!$this->_getModConfig()->getFieldData('oxactive') || !$this->_getModConfig()->getValue('blChangeLang'))
             return;
 
         $oCountry = $this->getUserLocationCountryObject();
-            
+
         if (!$this->isAdmin() && oxUtils::getInstance()->isSearchEngine() === false && $this->getSession()->getVar('d3isSetLang') === null && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1)
         {
             $this->_getLog()->setLog('info', __CLASS__, __FUNCTION__, __LINE__, 'set language', $this->getIP().' => '.$oCountry->getFieldData('d3geoiplang'));
@@ -136,9 +179,13 @@ class d3GeoIP extends oxI18n
         }
     }
 
+    /**
+     * check module active state and set user country specific currency
+     *
+     */
     public function setCountryCurrency()
     {
-        if (!$this->_getConfig()->getFieldData('oxactive') || !$this->_getConfig()->getValue('blChangeCurr'))
+        if (!$this->_getModConfig()->getFieldData('oxactive') || !$this->_getModConfig()->getValue('blChangeCurr'))
             return;
 
         $oCountry = $this->getUserLocationCountryObject();
@@ -151,11 +198,15 @@ class d3GeoIP extends oxI18n
         }
     }
 
+    /**
+     * check module active state and perform switching to user country specific shop (EE only)
+     *
+     */
     public function performShopSwitch()
     {
-        if (!$this->_getConfig()->getFieldData('oxactive') || !$this->_getConfig()->getValue('blChangeShop'))
+        if (!$this->_getModConfig()->getFieldData('oxactive') || !$this->_getModConfig()->getValue('blChangeShop'))
             return;
-            
+
         $oCountry = $this->getUserLocationCountryObject();
 
         $iNewShop = $oCountry->getFieldData('d3geoipshop');
@@ -176,30 +227,39 @@ class d3GeoIP extends oxI18n
                 $sLangId = '';
 
             $this->_getLog()->setLog('info', __CLASS__, __FUNCTION__, __LINE__, 'change shop', $this->getIP().' => '.$oNewConf->getShopHomeUrl($sLangId));
-            
+
             header("Location: ".$oNewConf->getShopHomeUrl($sLangId));
             exit();
         }
     }
-    
+
+    /**
+     * check module active state and perform switching to user country specific url
+     *
+     */
     public function performURLSwitch()
     {
-        if (!$this->_getConfig()->getFieldData('oxactive') || !$this->_getConfig()->getValue('blChangeURL'))
+        if (!$this->_getModConfig()->getFieldData('oxactive') || !$this->_getModConfig()->getValue('blChangeURL'))
             return;
-            
+
         $oCountry = $this->getUserLocationCountryObject();
-        
+
         if (!$this->isAdmin() && oxUtils::getInstance()->isSearchEngine() === false && $oCountry->getId() && $oCountry->getFieldData('d3geoipurl') && strlen(trim($oCountry->getFieldData('d3geoipurl'))) > 0)
         {
             $sNewUrl = $oCountry->getFieldData('d3geoipurl');
 
             $this->_getLog()->setLog('info', __CLASS__, __FUNCTION__, __LINE__, 'change url', $this->getIP().' => '.$oCountry->getFieldData('d3geoipurl'));
-            
+
             header("Location: ".$sNewUrl);
             exit();
         }
     }
 
+    /**
+     * get all shop urls
+     *
+     * @return array
+     */
     public function getShopUrls()
     {
         $oShoplist = oxNew( 'oxshoplist' );
@@ -211,17 +271,27 @@ class d3GeoIP extends oxI18n
 
         return $aShopUrls;
     }
-    
-    protected function _getConfig()
+
+    /**
+     * get modcfg instance
+     *
+     * @return object
+     */
+    protected function _getModConfig()
     {
         return d3_cfg_mod::get($this->_sModId);
     }
-    
+
+    /**
+     * get d3log instance
+     *
+     * @return object
+     */
     protected function _getLog()
     {
         if (!$this->oD3Log)
-            $this->oD3Log = $this->_getConfig()->getLogInstance();
-            
+            $this->oD3Log = $this->_getModConfig()->getLogInstance();
+
         return $this->oD3Log;
     }
 }
