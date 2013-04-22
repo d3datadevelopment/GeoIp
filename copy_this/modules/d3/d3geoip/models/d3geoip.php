@@ -15,7 +15,7 @@
  * @link      http://www.oxidmodule.com
  */
 
-class d3GeoIP extends oxI18n
+class d3GeoIP extends oxbase
 {
     protected $_sClassName = 'd3geoip';
     private $_sModId = 'd3_geoip';
@@ -41,6 +41,8 @@ class d3GeoIP extends oxI18n
     {
         if (!$this->oCountry)
         {
+            startProfile(__METHOD__);
+
             if (!$sIP)
             {
                 $sIP = $this->getIP();
@@ -59,6 +61,8 @@ class d3GeoIP extends oxI18n
                 $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP', $sIP." => ".$sISOAlpha);
                 $this->oCountry = $this->getCountryObject($sISOAlpha);
             }
+
+            stopProfile(__METHOD__);
         }
 
         return $this->oCountry;
@@ -71,31 +75,71 @@ class d3GeoIP extends oxI18n
      */
     public function getIP()
     {
+        startProfile(__METHOD__);
+
         if ($this->_getModConfig()->getValue('blUseTestIp') && $this->_getModConfig()->getValue('sTestIp'))
         {
-            return $this->_getModConfig()->getValue('sTestIp');
+            $sIP = $this->_getModConfig()->getValue('sTestIp');
         }
         elseif ($this->_getModConfig()->getValue('blUseTestCountry') && $this->_getModConfig()->getValue('sTestCountryIp'))
         {
-            return $this->_getModConfig()->getValue('sTestCountryIp');
+            $sIP = $this->_getModConfig()->getValue('sTestCountryIp');
         }
         else
         {
-            return $_SERVER['REMOTE_ADDR'];
+            // ToDo: use $_SERVER['X-Forwared-For'] && Client-IP in case of proxy
+            $sIP = $_SERVER['REMOTE_ADDR'];
         }
+
+        stopProfile(__METHOD__);
+
+        return $sIP;
     }
 
     /**
      * get IP number by IP address
-     *
-     * @param string $sIP IP address
-     * @return int IP number
+     * @param $sIP
+     * @return bool
+     * @throws Exception|int
      */
     protected function _getNumIp($sIP)
     {
-        $aIP = explode('.',$sIP);
-        $iIP = ($aIP[0] * 16777216) + ($aIP[1] * 65536) + ($aIP[2] * 256) + ($aIP[3] * 1);
-        return $iIP;
+        // make sure it is an ip
+        if (filter_var($sIP, FILTER_VALIDATE_IP) === FALSE)
+            return FALSE;
+
+        startProfile(__METHOD__);
+
+        $parts = unpack('N*', inet_pton($sIP));
+
+        if (strpos($sIP, '.') !== FALSE)
+        {
+            $parts = array(1=>0, 2=>0, 3=>0, 4=>$parts[1]);
+        }
+
+        foreach ($parts as &$part)
+        {
+            if ($part < 0)
+                $part += 4294967296;
+        }
+
+        if (function_exists('bcadd'))
+        {
+            $dIP = $parts[4];
+            $dIP = bcadd($dIP, bcmul($parts[3], '4294967296'));
+            $dIP = bcadd($dIP, bcmul($parts[2], '18446744073709551616'));
+            $dIP = bcadd($dIP, bcmul($parts[1], '79228162514264337593543950336'));
+        }
+        else
+        {
+            throw new Exception('extension BCMath is required');
+        }
+
+        $aIP = explode('.', $dIP);
+
+        stopProfile(__METHOD__);
+
+        return $aIP[0];
     }
 
     /**
@@ -106,8 +150,14 @@ class d3GeoIP extends oxI18n
      */
     public function LoadByIPNum($iIPNum)
     {
+        startProfile(__METHOD__);
+
         $sSelect = "SELECT d3iso FROM ".$this->_sClassName." WHERE d3startipnum <= '$iIPNum' AND d3endipnum >= '$iIPNum'";
-        return oxDb::getDb()->getOne($sSelect);
+        $sISO = oxDb::getDb()->getOne($sSelect);
+
+        stopProfile(__METHOD__);
+
+        return $sISO;
     }
 
     /**
@@ -118,10 +168,14 @@ class d3GeoIP extends oxI18n
      */
     public function getCountryObject($sISOAlpha)
     {
+        startProfile(__METHOD__);
+
         $oCountry = oxNew('oxcountry');
         $sSelect = "SELECT oxid FROM ".$oCountry->getViewName()." WHERE OXISOALPHA2 = '".$sISOAlpha."' AND OXACTIVE = '1'";
 
         $oCountry->load(oxDb::getDb()->getOne($sSelect));
+
+        stopProfile(__METHOD__);
 
         return $oCountry;
     }
@@ -129,16 +183,20 @@ class d3GeoIP extends oxI18n
     /**
      * get oxcountry object for fallback, if set
      *
-     * @return object
+     * @return oxcountry
      */
     public function getCountryFallBackObject()
     {
+        startProfile(__METHOD__);
+
         $oCountry = oxNew('oxcountry');
 
         if ($this->_getModConfig()->getValue('blUseFallback') && $this->_getModConfig()->getValue('sFallbackCountryId'))
         {
             $oCountry->Load($this->_getModConfig()->getValue('sFallbackCountryId'));
         }
+
+        stopProfile(__METHOD__);
 
         return $oCountry;
     }
@@ -149,11 +207,16 @@ class d3GeoIP extends oxI18n
      */
     public function setCountryLanguage()
     {
+        startProfile(__METHOD__);
+
         $this->performURLSwitch();
         $this->performShopSwitch();
 
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeLang'))
+        {
+            stopProfile(__METHOD__);
             return;
+        }
 
         $oCountry = $this->getUserLocationCountryObject();
 
@@ -164,6 +227,8 @@ class d3GeoIP extends oxI18n
             oxRegistry::getLang()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
             oxRegistry::getSession()->setVariable('d3isSetLang', true);
         }
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -175,6 +240,8 @@ class d3GeoIP extends oxI18n
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeCurr'))
             return;
 
+        startProfile(__METHOD__);
+
         $oCountry = $this->getUserLocationCountryObject();
 
         if (!$this->isAdmin() && oxRegistry::getUtils()->isSearchEngine() === false && !oxRegistry::getSession()->getVariable('d3isSetCurr') && $oCountry->getId() && $oCountry->getFieldData('d3geoipcur') > -1)
@@ -183,6 +250,8 @@ class d3GeoIP extends oxI18n
             oxRegistry::getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
             oxRegistry::getSession()->setVariable('d3isSetCurr', true);
         }
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -194,11 +263,22 @@ class d3GeoIP extends oxI18n
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeShop'))
             return;
 
-        $oCountry = $this->getUserLocationCountryObject();
+        startProfile(__METHOD__);
 
+        $oCountry = $this->getUserLocationCountryObject();
         $iNewShop = $oCountry->getFieldData('d3geoipshop');
 
-        if (!$this->isAdmin() && oxRegistry::getUtils()->isSearchEngine() === false && $oCountry->getId() && $this->getConfig()->isMall() && $iNewShop > -1 && $iNewShop != $this->getConfig()->getShopId())
+        if (oxRegistry::getConfig()->getRequestParameter('d3redirect') != 1 &&
+            !$this->isAdmin() &&
+            oxRegistry::getUtils()->isSearchEngine() === false &&
+            $oCountry->getId() &&
+            $this->getConfig()->isMall() &&
+            $iNewShop > -1 &&
+            (
+                $iNewShop != $this->getConfig()->getShopId() ||
+                strtolower($this->getConfig()->getActiveView()->getClassName()) == 'mallstart'
+            )
+        )
         {
             $oNewConf = new oxConfig();
             $oNewConf->setShopId($iNewShop);
@@ -206,7 +286,9 @@ class d3GeoIP extends oxI18n
 
             $this->getConfig()->onShopChange();
 
-            if (!oxRegistry::getSession()->getVariable('d3isSetLang') && $oCountry->getFieldData('d3geoiplang') > -1)
+            if (!oxRegistry::getSession()->getVariable('d3isSetLang') &&
+                $this->_getModConfig()->getValue('blChangeLang') &&
+                $oCountry->getFieldData('d3geoiplang') > -1)
             {
                 $sLangId = $oCountry->getFieldData('d3geoiplang');
             }
@@ -215,11 +297,22 @@ class d3GeoIP extends oxI18n
                 $sLangId = '';
             }
 
-            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'change shop', $this->getIP().' => '.$oNewConf->getShopHomeUrl($sLangId));
+            /** @var  $oStr d3str */
+            $oStr = oxRegistry::get('d3str');
+            $aParams = array(
+                'd3redirect' => '1',
+                'fnc'        => oxRegistry::getConfig()->getRequestParameter('fnc'),
+                'shp'        => $iNewShop
+            );
+            $sUrl = str_replace('&amp;', '&', $oStr->generateParameterUrl($oNewConf->getShopHomeUrl($sLangId), $aParams));
 
-            header("Location: ".$oNewConf->getShopHomeUrl($sLangId));
+            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'change shop', $this->getIP().' => '.$sUrl);
+
+            header("Location: ".$sUrl);
             exit();
         }
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -233,9 +326,16 @@ class d3GeoIP extends oxI18n
             return;
         }
 
+        startProfile(__METHOD__);
+
         $oCountry = $this->getUserLocationCountryObject();
 
-        if (!$this->isAdmin() && oxRegistry::getUtils()->isSearchEngine() === false && $oCountry->getId() && $oCountry->getFieldData('d3geoipurl') && strlen(trim($oCountry->getFieldData('d3geoipurl'))) > 0)
+        if (!$this->isAdmin() &&
+            oxRegistry::getUtils()->isSearchEngine() === false &&
+            $oCountry->getId() &&
+            $oCountry->getFieldData('d3geoipurl') &&
+            strlen(trim($oCountry->getFieldData('d3geoipurl'))) > 0
+        )
         {
             $sNewUrl = $oCountry->getFieldData('d3geoipurl');
 
@@ -244,6 +344,8 @@ class d3GeoIP extends oxI18n
             header("Location: ".$sNewUrl);
             exit();
         }
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -253,6 +355,8 @@ class d3GeoIP extends oxI18n
      */
     public function getShopUrls()
     {
+        startProfile(__METHOD__);
+
         $oShoplist = oxNew( 'oxshoplist' );
         $oShoplist->getList();
         $aShopUrls = array();
@@ -260,6 +364,8 @@ class d3GeoIP extends oxI18n
         {
             $aShopUrls[$sId] = $this->getConfig()->getShopConfVar( 'sMallShopURL', $sId );
         }
+
+        stopProfile(__METHOD__);
 
         return $aShopUrls;
     }

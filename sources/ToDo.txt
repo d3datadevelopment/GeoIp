@@ -1,7 +1,4 @@
-blForceSessionStart nur bei Anwendung von GeoIP
 statt session auch Fallback auf cookie
 auch nicht aktive Länder konfigurierbar (um auch nicht erlaubte Zugriffe abzufangen)
 IP-Syntaxcheck bei Eingabe im Admin
 MaxMind-CSV-Import
-
-IPV6-Pflege

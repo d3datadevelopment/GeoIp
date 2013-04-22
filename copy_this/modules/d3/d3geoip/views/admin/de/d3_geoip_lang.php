@@ -1,17 +1,17 @@
 <?php
 /**
- * This Software is the property of OXID eSales and is protected
+ * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
  *
- * Any unauthorized use of this software without a valid license key
+ * Any unauthorized use of this software without a valid license
  * is a violation of the license agreement and will be prosecuted by
  * civil and criminal law.
  *
- * @link http://www.oxid-esales.com
- * @package lang
- * @copyright (C) OXID eSales AG 2003-2009
- * @version OXID eShop EE
- * $Id: lang.php 23594 2009-10-26 13:19:30Z alfonsas $
+ * http://www.shopmodule.com
+ *
+ * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
+ * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @link      http://www.oxidmodule.com
  */
 
 $sLangName  = 'Deutsch';
@@ -58,7 +58,7 @@ $aLang = array(
 'D3_GEOIP_METADATA_TITLE'                       => 'D³ GeoIP Vorauswahl',
 'D3_GEOIP_METADATA_DESC'                        => 'Begrüßen Sie Ihre Kunden in seiner Landessprache.',
 
-'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.'Die erforderlichen Daten finden Sie im Installationspaket des Moduls unter "setup+doku/geoip-Data_*.sql" oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts/". '.PHP_EOL.PHP_EOL.'Sie benötigen entweder die Komplettdatei oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
+'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.'Die erforderlichen Daten finden Sie im Installationspaket des Moduls unter "setup+doku/geoip-Data_IPv4_*.sql" ("setup+doku/geoip-Data_IPv6_*.sql" für IPv6-Adressen) oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts/". '.PHP_EOL.PHP_EOL.'Sie benötigen entweder die Komplettdateien oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
 
 );
 

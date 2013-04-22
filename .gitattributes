@@ -1,5 +1,6 @@
 * text=auto !eol
 /Doxyfile -text
+copy_this/.noencode -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset.php -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset_licence.php -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset_list.php -text
@@ -17,18 +18,23 @@ copy_this/modules/d3/d3geoip/views/admin/tpl/d3_cfg_geoipset_main.tpl -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_country_geoip.tpl -text
 setup+doku/Installation.pdf -text
 setup+doku/d3precheck.php -text
-setup+doku/geoip-Data_2011-10-13.sql -text
+setup+doku/geoip-Data_IPv4_2013-04-18.sql -text
+setup+doku/geoip-Data_IPv6_2013-04-18.sql -text
 setup+doku/geoip-Struktur.sql -text
-setup+doku/geoip_data_parts/1.sql -text
-setup+doku/geoip_data_parts/2.sql -text
-setup+doku/geoip_data_parts/3.sql -text
-setup+doku/geoip_data_parts/4.sql -text
-setup+doku/geoip_data_parts/5.sql -text
-setup+doku/geoip_data_parts/6.sql -text
-setup+doku/geoip_data_parts/7.sql -text
-setup+doku/geoip_data_parts/8.sql -text
+setup+doku/geoip_data_parts/IPv4_1.sql -text
+setup+doku/geoip_data_parts/IPv4_2.sql -text
+setup+doku/geoip_data_parts/IPv4_3.sql -text
+setup+doku/geoip_data_parts/IPv4_4.sql -text
+setup+doku/geoip_data_parts/IPv4_5.sql -text
+setup+doku/geoip_data_parts/IPv4_6.sql -text
+setup+doku/geoip_data_parts/IPv4_7.sql -text
+setup+doku/geoip_data_parts/IPv4_8.sql -text
+setup+doku/geoip_data_parts/IPv6_1.sql -text
+setup+doku/geoip_data_parts/IPv6_2.sql -text
 setup+doku/licence.txt -text
-sources/CSVtoSQLconvert_perl.zip -text
+sources/CSVtoSQLconvert_perl/geoip_V6.csv -text
+sources/CSVtoSQLconvert_perl/geoip_v4.csv -text
+sources/CSVtoSQLconvert_perl/test.pl -text
 sources/DevReferences/html/annotated.html -text
 sources/DevReferences/html/bc_s.png -text
 sources/DevReferences/html/classd3__cfg__geoipset.html -text
@@ -103,7 +109,5 @@ sources/Doku/Drucken[!!-~]-[!!-~]MaxMind[!!-~]Forum[!!-~]•[!!-~]View[!!-~]topi
 sources/Doku/Drucken[!!-~]-[!!-~]On[!!-~]efficiently[!!-~]geo-referencing[!!-~]IPs[!!-~]with[!!-~]MaxMind[!!-~]GeoIP[!!-~]and[!!-~]MySQL[!!-~]GIS[!!-~]«[!!-~]Jeremy[!!-~]Cole.pdf -text svneol=unset#unset
 sources/Doku/Drucken[!!-~]-[!!-~]Vincent[!!-~]de[!!-~]Lau_[!!-~]HOW-TO[!!-~]Import[!!-~]the[!!-~]MaxMind[!!-~]GeoIP[!!-~]Free[!!-~]Country[!!-~]CSV[!!-~]file[!!-~]into[!!-~]MySQL[!!-~]and[!!-~]save[!!-~]diskspace.pdf -text svneol=unset#unset
 sources/GeoIP-Installation.docx -text
-sources/GeoIPCountryCSV.zip -text
-sources/GeoIPv6.csv/GeoIPv6-20120304.csv -text
 sources/IPNum-Berechnung.xls -text
 sources/ToDo.txt -text

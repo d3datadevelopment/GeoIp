@@ -221,7 +221,7 @@ td.edittext {
                                 <input class="edittext ext_edittext" type="checkbox" name="value[blUseTestIp]" value='1' [{if $edit->getValue('blUseTestIp') == 1}]checked[{/if}]>
                             </dt>
                             <dd>
-                                <input type="text" maxlength="15" size="17" name="value[sTestIp]" value="[{$edit->getValue('sTestIp')}]">
+                                <input type="text" maxlength="39" size="17" name="value[sTestIp]" value="[{$edit->getValue('sTestIp')}]">
                                 [{ oxinputhelp ident="D3_GEOIP_SET_IP_TESTIP_DESC" }]
                             </dd>
                             <div class="spacer"></div>
@@ -247,7 +247,7 @@ td.edittext {
                                 [{oxmultilang ident="D3_GEOIP_SET_IP_CHECKIP"}]
                             </dt>
                             <dd>
-                                <input type="text" maxlength="15" size="17" name="value[sCheckIp]" value="[{$edit->getValue('sCheckIp')}]">
+                                <input type="text" maxlength="39" size="17" name="value[sCheckIp]" value="[{$edit->getValue('sCheckIp')}]">
                                 [{ oxinputhelp ident="D3_GEOIP_SET_IP_CHECKIP_DESC" }]
 
                                 [{if $edit->getValue('sCheckIp')}]

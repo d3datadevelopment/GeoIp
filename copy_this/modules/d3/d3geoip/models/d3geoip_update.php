@@ -36,8 +36,8 @@ nc9';
               'do'    => 'updateGeoIpItems'),
         array('check' => 'checkModCfgItemExist',
               'do'    => 'updateModCfgItemExist'),
-        array('check' => 'checkFields',
-              'do'    => 'fixFields'),
+        array('check' => 'checkGeoIpFields',
+              'do'    => 'fixGeoIpFields'),
         array('check' => 'checkIndizes',
               'do'    => 'fixIndizes'),
         array('check' => 'checkModCfgSameRevision',
@@ -91,7 +91,7 @@ nc9';
         'D3STARTIP'        => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3STARTIP',
-            'sType'       => 'CHAR(15)',
+            'sType'       => 'VARCHAR(39)',
             'blNull'      => FALSE,
             'sDefault'    => FALSE,
             'sComment'    => '',
@@ -101,7 +101,7 @@ nc9';
         'D3ENDIP'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ENDIP',
-            'sType'       => 'CHAR(15)',
+            'sType'       => 'VARCHAR(39)',
             'blNull'      => FALSE,
             'sDefault'    => FALSE,
             'sComment'    => '',
@@ -111,7 +111,7 @@ nc9';
         'D3STARTIPNUM'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3STARTIPNUM',
-            'sType'       => 'INT(10) unsigned',
+            'sType'       => 'DECIMAL(38,0)',
             'blNull'      => FALSE,
             'sDefault'    => FALSE,
             'sComment'    => '',
@@ -121,7 +121,7 @@ nc9';
         'D3ENDIPNUM'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ENDIPNUM',
-            'sType'       => 'INT(10) unsigned',
+            'sType'       => 'DECIMAL(38,0)',
             'blNull'      => FALSE,
             'sDefault'    => FALSE,
             'sComment'    => '',
@@ -260,111 +260,141 @@ nc9';
                     'oxmodid'       => $this->sModKey,
                     'oxshopid'      => $oShop->getId(),
                 );
-                $aInsertFields = array(
-                    array (
-                        'fieldname'     => 'OXID',
-                        'content'       => "md5('" . $this->sModKey . " " . $oShop->getId() . " de')",
-                        'force_update'  => TRUE,
-                        'use_quote'     => FALSE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXSHOPID',
-                        'content'       => $oShop->getId(),
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXMODID',
-                        'content'       => $this->sModKey,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXNAME',
-                        'content'       => $this->sModName,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXACTIVE',
-                        'content'       => "0",
-                        'force_update'  => FALSE,
-                        'use_quote'     => FALSE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXBASECONFIG',
-                        'content'       => $this->sBaseConf,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXSERIAL',
-                        'content'       => "",
-                        'force_update'  => FALSE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXINSTALLDATE',
-                        'content'       => "NOW()",
-                        'force_update'  => TRUE,
-                        'use_quote'     => FALSE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXVERSION',
-                        'content'       => $this->sModVersion,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXSHOPVERSION',
-                        'content'       => oxRegistry::getConfig()->getEdition(),
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array (
-                        'fieldname'     => 'OXREQUIREMENTS',
-                        'content'       => $this->sRequirements,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array(
-                        'fieldname'     => 'OXVALUE',
-                        'content'       => $this->sBaseValue,
-                        'force_update'  => FALSE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    ),
-                    array(
-                        'fieldname'     => 'OXNEWREVISION',
-                        'content'       => $this->sModRevision,
-                        'force_update'  => TRUE,
-                        'use_quote'     => TRUE,
-                        'use_multilang' => FALSE,
-                    )
-                );
-                $aRet          = $this->_updateTableItem('d3_cfg_mod', $aInsertFields, $aWhere);
-                $blRet         = $aRet['blRet'];
 
-                $this->_setActionLog('SQL', $aRet['sql'], __METHOD__);
-                $this->_setUpdateBreak(FALSE);
-
-                if ($this->getStepByStepMode())
+                if ($this->_checkTableItemNotExist('d3_cfg_mod', $aWhere))
                 {
-                    break;
+                    $aInsertFields = array(
+                        array (
+                            'fieldname'     => 'OXID',
+                            'content'       => "md5('" . $this->sModKey . " " . $oShop->getId() . " de')",
+                            'force_update'  => TRUE,
+                            'use_quote'     => FALSE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXSHOPID',
+                            'content'       => $oShop->getId(),
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXMODID',
+                            'content'       => $this->sModKey,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXNAME',
+                            'content'       => $this->sModName,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXACTIVE',
+                            'content'       => "0",
+                            'force_update'  => FALSE,
+                            'use_quote'     => FALSE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXBASECONFIG',
+                            'content'       => $this->sBaseConf,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXSERIAL',
+                            'content'       => "",
+                            'force_update'  => FALSE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXINSTALLDATE',
+                            'content'       => "NOW()",
+                            'force_update'  => TRUE,
+                            'use_quote'     => FALSE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXVERSION',
+                            'content'       => $this->sModVersion,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXSHOPVERSION',
+                            'content'       => oxRegistry::getConfig()->getEdition(),
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array (
+                            'fieldname'     => 'OXREQUIREMENTS',
+                            'content'       => $this->sRequirements,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array(
+                            'fieldname'     => 'OXVALUE',
+                            'content'       => $this->sBaseValue,
+                            'force_update'  => FALSE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        ),
+                        array(
+                            'fieldname'     => 'OXNEWREVISION',
+                            'content'       => $this->sModRevision,
+                            'force_update'  => TRUE,
+                            'use_quote'     => TRUE,
+                            'use_multilang' => FALSE,
+                        )
+                    );
+                    $aRet          = $this->_updateTableItem('d3_cfg_mod', $aInsertFields, $aWhere);
+                    $blRet         = $aRet['blRet'];
+
+                    $this->_setActionLog('SQL', $aRet['sql'], __METHOD__);
+                    $this->_setUpdateBreak(FALSE);
+
+                    if ($this->getStepByStepMode())
+                    {
+                        break;
+                    }
                 }
             }
         }
         return $blRet;
+    }
+
+    /**
+     * change default value for shop id in EE
+     * @return bool
+     */
+    public function checkGeoIpFields()
+    {
+        /** @var $oShop oxshop */
+        $oShop = $this->_getShopList()->current();
+        $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
+
+        return $this->checkFields();
+    }
+
+    /**
+     * change default value for shop id in EE
+     * @return bool
+     */
+    public function fixGeoIpFields()
+    {
+        /** @var $oShop oxshop */
+        $oShop = $this->_getShopList()->current();
+        $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
+
+        return $this->fixFields();
     }
 }

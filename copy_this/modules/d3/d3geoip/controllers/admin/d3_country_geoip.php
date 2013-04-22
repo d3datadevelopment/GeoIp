@@ -191,12 +191,15 @@ class d3_country_geoip extends oxAdminView
 
         $sCurs = oxDb::getDb(oxDb::FETCH_MODE_ASSOC)->getOne($sQ);
 
-        foreach (unserialize($sCurs) as $sKey => $sValue)
+        if ($sCurs)
         {
-            $aFields = explode('@', $sValue);
-            $aCurrencies[$sKey]->id = $sKey;
-            $aCurrencies[$sKey]->name  = $aFields[0];
-            $aCurrencies[$sKey]->sign = $aFields[4];
+            foreach (unserialize($sCurs) as $sKey => $sValue)
+            {
+                $aFields = explode('@', $sValue);
+                $aCurrencies[$sKey]->id = $sKey;
+                $aCurrencies[$sKey]->name  = $aFields[0];
+                $aCurrencies[$sKey]->sign = $aFields[4];
+            }
         }
 
         return $aCurrencies;

@@ -1,5 +1,8 @@
 GeoIP Country light
 
+This product includes GeoLite data created by MaxMind, available from  
+<a href="http://www.maxmind.com">http://www.maxmind.com</a>.
+
 GeoIp-Data based on GeoIp Country Light by Maxmind (July 2009).
 These database will be published under GPL3 by Maxmind. Please see www.maxmind.com for updates.
 
