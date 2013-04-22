@@ -38,6 +38,8 @@ nc9';
               'do'    => 'updateModCfgItemExist'),
         array('check' => 'checkFields',
               'do'    => 'fixFields'),
+        array('check' => 'checkIndizes',
+              'do'    => 'fixIndizes'),
         array('check' => 'checkModCfgSameRevision',
               'do'    => 'updateModCfgSameRevision'),
     );
@@ -149,6 +151,23 @@ nc9';
     );
 
     public $aIndizes = array(
+        'IPNUM' => array(
+            'sTableName' => 'd3geoip',
+            'sType'      => 'INDEX',
+            'sName'      => 'IPNUM',
+            'aFields'    => array(
+                'D3STARTIPNUM' => 'D3STARTIPNUM',
+                'D3ENDIPNUM' => 'D3ENDIPNUM',
+            ),
+        ),
+        'D3ISO' => array(
+            'sTableName' => 'd3geoip',
+            'sType'      => 'INDEX',
+            'sName'      => 'D3ISO',
+            'aFields'    => array(
+                'D3ISO' => 'D3ISO',
+            ),
+        ),
     );
 
     /**

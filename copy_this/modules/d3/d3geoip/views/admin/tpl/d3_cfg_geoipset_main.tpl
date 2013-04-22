@@ -1,7 +1,5 @@
 [{include file="headitem.tpl" title="GENERAL_ADMIN_TITLE"|oxmultilangassign}]
 
-<link rel="stylesheet" type="text/css" href="[{$oViewConf->getResourceUrl() }]d3_mod_cfg.css">
-
 <script type="text/javascript">
 <!--
 [{ if $updatelist == 1}]
@@ -137,69 +135,7 @@ td.edittext {
         <tr>
             <td valign="top" class="edittext">
 
-                 <table style="width: 100%">
-                    <tr>
-                        <td style="width:50%; border-right: 1px solid #999;">
-                            <table cellspacing="0" cellpadding="0" border="0" width="100%">
-                                  <tr>
-                                    <td class="edittext ext_edittext">
-                                          [{oxmultilang ident="D3_CFG_MOD_GENERAL_MODULEACTIVE"}]
-                                    </td>
-                                    <td class="edittext ext_edittext">
-                                        <input type="hidden" name="editval[d3_cfg_mod__oxactive]" value='0'>
-                                        <input class="edittext ext_edittext" type="checkbox" name="editval[d3_cfg_mod__oxactive]" value='1' [{if $edit->d3_cfg_mod__oxactive->value == 1}]checked[{/if}]>
-                                        [{oxinputhelp ident="D3_CFG_MOD_GENERAL_MODULEACTIVE_DESC"}]
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="edittext ext_edittext">
-                                    </td>
-                                    <td class="edittext ext_edittext">
-                                    </td>
-                                  </tr>
-                                <tr>
-                                    <td class="edittext ext_edittext">
-                                          [{if $edit->getValue('blDebugmodeGlobal') == 1}]<span style="font-weight: bold; color: #CD0210;">[{/if}][{oxmultilang ident="D3_CFG_MOD_GENERAL_DEBUGACTIVE"}][{if $edit->getValue('blDebugmodeGlobal') == 1}]</span>[{/if}]&nbsp;
-                                    </td>
-                                    <td class="edittext ext_edittext">
-                                        <input type="hidden" name="value[blDebugmodeGlobal]" value="0">
-                                        <input class="edittext ext_edittext" type="checkbox" name="value[blDebugmodeGlobal]" value='1' [{if $edit->getValue('blDebugmodeGlobal') == 1}]checked[{/if}]>
-                                        [{oxinputhelp ident="D3_GEOIP_SET_DEBUG_DESC"}]
-                                    </td>
-                                  </tr>
-                              </table>
-                        </td>
-                        <td>
-                            [{assign var="blD3HasLog" value=$oView->checkD3Log() }]
-                            <table cellspacing="0" cellpadding="0" border="0">
-                                <tr>
-                                    <td class="edittext ext_edittext" style="width: 100%;">
-                                        [{if $blD3HasLog}]
-                                            [{oxmultilang ident="D3_CFG_MOD_GENERAL_MODULELOGGING"}]
-                                        [{/if}]
-                                    </td>
-                                    <td class="edittext ext_edittext" align="left">
-                                        [{if $blD3HasLog}]
-                                            <select name="editval[d3_cfg_mod__oxismodulelog]" class="edittext">
-                                                <option value="0" [{if $edit->d3_cfg_mod__oxismodulelog->value == 0}]selected[{/if}]>[{oxmultilang ident="D3_CFG_MOD_GENERAL_MODULELOGGING_NONE"}]</option>
-                                                <option value="1" [{if $edit->d3_cfg_mod__oxismodulelog->value == 1}]selected[{/if}]>[{oxmultilang ident="D3_CFG_MOD_GENERAL_MODULELOGGING_ALL"}]</option>
-                                                <option value="2" [{if $edit->d3_cfg_mod__oxismodulelog->value == 2}]selected[{/if}]>[{oxmultilang ident="D3_CFG_MOD_GENERAL_MODULELOGGING_ERRORS"}]</option>
-                                            </select>
-                                        [{/if}]
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="edittext ext_edittext" style="width: 100%;">
-                                          &nbsp;
-                                    </td>
-                                    <td class="edittext ext_edittext" align="left">
-                                          &nbsp;
-                                    </td>
-                                  </tr>
-                              </table>
-                        </td>
-                    </tr>
-                </table>
+                [{include file="d3_cfg_mod_active.tpl"}]
 
                 <div class="groupExp">
                     <div class="">
@@ -339,5 +275,14 @@ td.edittext {
     </table>
 </form>
 
+[{include file="d3_cfg_mod_inc.tpl"}]
 
-[{include file="bottomitem.tpl"}]
+<script type="text/javascript">
+    if (parent.parent) {
+        parent.parent.sShopTitle = "[{$actshopobj->oxshops__oxname->getRawValue()|oxaddslashes}]";
+        parent.parent.sMenuItem = "[{oxmultilang ident="d3mxgeoip"}]";
+        parent.parent.sMenuSubItem = "[{oxmultilang ident="d3mxgeoip_settings"}]";
+        parent.parent.sWorkArea = "[{$_act}]";
+        parent.parent.setTitle();
+    }
+</script>

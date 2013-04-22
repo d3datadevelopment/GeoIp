@@ -15,11 +15,8 @@ copy_this/modules/d3/d3geoip/picture.png -text
 copy_this/modules/d3/d3geoip/views/admin/de/d3_geoip_lang.php -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_cfg_geoipset_main.tpl -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_country_geoip.tpl -text
-setup+doku/EE/install.sql -text
-setup+doku/EE/update.sql -text
 setup+doku/Installation.pdf -text
-setup+doku/PE/install.sql -text
-setup+doku/PE/update.sql -text
+setup+doku/d3precheck.php -text
 setup+doku/geoip-Data_2011-10-13.sql -text
 setup+doku/geoip-Struktur.sql -text
 setup+doku/geoip_data_parts/1.sql -text
