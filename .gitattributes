@@ -6,6 +6,7 @@ copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset_licence.php -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset_list.php -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_cfg_geoipset_main.php -text
 copy_this/modules/d3/d3geoip/controllers/admin/d3_country_geoip.php -text
+copy_this/modules/d3/d3geoip/d3_geoip_stub.php -text
 copy_this/modules/d3/d3geoip/menu.xml -text
 copy_this/modules/d3/d3geoip/metadata.php -text
 copy_this/modules/d3/d3geoip/models/d3geoip.php -text
