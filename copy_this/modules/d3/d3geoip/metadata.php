@@ -27,10 +27,14 @@ $aModule = array(
         'd3_cfg_geoipset'   => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset.php',
         'd3_cfg_geoipset_list'   => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset_list.php',
         'd3_cfg_geoipset_main'   => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset_main.php',
+        'd3_cfg_geoipset_licence'   => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset_licence.php',
+        'd3_country_geoip'   => 'd3/d3geoip/controllers/admin/d3_country_geoip.php',
         'd3geoip'   => 'd3/d3geoip/models/d3geoip.php',
+        'd3geoip_update'   => 'd3/d3geoip/models/d3geoip_update.php',
     ),
     'templates'   => array(
         'd3_cfg_geoipset_main.tpl' => 'd3/d3geoip/views/admin/tpl/d3_cfg_geoipset_main.tpl',
+        'd3_country_geoip.tpl' => 'd3/d3geoip/views/admin/tpl/d3_country_geoip.tpl',
     ),
     'events'      => array(
         'onActivate' => 'd3install::checkUpdateStart',

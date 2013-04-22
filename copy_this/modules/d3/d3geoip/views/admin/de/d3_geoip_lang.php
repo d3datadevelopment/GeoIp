@@ -58,6 +58,8 @@ $aLang = array(
 'D3_GEOIP_METADATA_TITLE'                       => 'D³ GeoIP Vorauswahl',
 'D3_GEOIP_METADATA_DESC'                        => 'Begrüßen Sie Ihre Kunden in seiner Landessprache.',
 
+'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.'Die erforderlichen Daten finden Sie im Installationspaket des Moduls unter "setup+doku/geoip-Data_*.sql" oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts/". '.PHP_EOL.PHP_EOL.'Sie benötigen entweder die Komplettdatei oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
+
 );
 
 /*
