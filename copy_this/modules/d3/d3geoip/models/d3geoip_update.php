@@ -259,10 +259,14 @@ mM9';
                 $aWhere = array(
                     'oxmodid'       => $this->sModKey,
                     'oxshopid'      => $oShop->getId(),
+                    'oxnewrevision' => $this->sModRevision,
                 );
 
                 if ($this->_checkTableItemNotExist('d3_cfg_mod', $aWhere))
                 {
+                    // update don't use this property
+                    unset($aWhere['oxnewrevision']);
+
                     $aInsertFields = array(
                         array (
                             'fieldname'     => 'OXID',
