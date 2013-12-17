@@ -53,12 +53,12 @@ class d3GeoIP extends oxbase
 
             if (!$sISOAlpha)
             {
-                $this->_getLog()->log('error', __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP failed', $sIP);
+                $this->_getLog()->log(d3log::ERROR, __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP failed', $sIP);
                 $this->oCountry = $this->getCountryFallBackObject();
             }
             else
             {
-                $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP', $sIP." => ".$sISOAlpha);
+                $this->_getLog()->log(d3log::INFO, __CLASS__, __FUNCTION__, __LINE__, 'get ISO by IP', $sIP." => ".$sISOAlpha);
                 $this->oCountry = $this->getCountryObject($sISOAlpha);
             }
 
@@ -222,7 +222,7 @@ class d3GeoIP extends oxbase
 
         if (!$this->isAdmin() && oxRegistry::getUtils()->isSearchEngine() === false && oxRegistry::getSession()->getVariable('d3isSetLang') === null && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1)
         {
-            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'set language', $this->getIP().' => '.$oCountry->getFieldData('d3geoiplang'));
+            $this->_getLog()->log(d3log::INFO, __CLASS__, __FUNCTION__, __LINE__, 'set language', $this->getIP().' => '.$oCountry->getFieldData('d3geoiplang'));
             oxRegistry::getLang()->setTplLanguage((int) $oCountry->getFieldData('d3geoiplang'));
             oxRegistry::getLang()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
             oxRegistry::getSession()->setVariable('d3isSetLang', true);
@@ -246,7 +246,7 @@ class d3GeoIP extends oxbase
 
         if (!$this->isAdmin() && oxRegistry::getUtils()->isSearchEngine() === false && !oxRegistry::getSession()->getVariable('d3isSetCurr') && $oCountry->getId() && $oCountry->getFieldData('d3geoipcur') > -1)
         {
-            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'set currency', $this->getIP().' => '.$oCountry->getFieldData('d3geoipcur'));
+            $this->_getLog()->log(d3log::INFO, __CLASS__, __FUNCTION__, __LINE__, 'set currency', $this->getIP().' => '.$oCountry->getFieldData('d3geoipcur'));
             oxRegistry::getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
             oxRegistry::getSession()->setVariable('d3isSetCurr', true);
         }
@@ -306,7 +306,7 @@ class d3GeoIP extends oxbase
             );
             $sUrl = str_replace('&amp;', '&', $oStr->generateParameterUrl($oNewConf->getShopHomeUrl($sLangId), $aParams));
 
-            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'change shop', $this->getIP().' => '.$sUrl);
+            $this->_getLog()->log(d3log::INFO, __CLASS__, __FUNCTION__, __LINE__, 'change shop', $this->getIP().' => '.$sUrl);
 
             header("Location: ".$sUrl);
             exit();
@@ -339,7 +339,7 @@ class d3GeoIP extends oxbase
         {
             $sNewUrl = $oCountry->getFieldData('d3geoipurl');
 
-            $this->_getLog()->log('info', __CLASS__, __FUNCTION__, __LINE__, 'change url', $this->getIP().' => '.$oCountry->getFieldData('d3geoipurl'));
+            $this->_getLog()->log(d3log::INFO, __CLASS__, __FUNCTION__, __LINE__, 'change url', $this->getIP().' => '.$oCountry->getFieldData('d3geoipurl'));
 
             header("Location: ".$sNewUrl);
             exit();
