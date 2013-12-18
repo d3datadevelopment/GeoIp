@@ -18,6 +18,7 @@ copy_this/modules/d3/d3geoip/views/admin/de/d3_geoip_lang.php -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_cfg_geoipset_main.tpl -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_country_geoip.tpl -text
 setup+doku/Installation.pdf -text
+setup+doku/changelog.txt -text
 setup+doku/d3precheck.php -text
 setup+doku/geoip-Data_IPv4_2013-04-18.sql -text
 setup+doku/geoip-Data_IPv6_2013-04-18.sql -text

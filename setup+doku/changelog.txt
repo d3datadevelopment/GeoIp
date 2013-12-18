@@ -1,0 +1,4 @@
+=> 3.0.0.1
+- Datenbankabfrage für IPv6-Zuordnung korrigiert
+- alte Logtypes ersetzt
+- automatische Installation korrigiert

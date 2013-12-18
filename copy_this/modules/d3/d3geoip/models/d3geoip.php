@@ -152,7 +152,7 @@ class d3GeoIP extends oxbase
     {
         startProfile(__METHOD__);
 
-        $sSelect = "SELECT d3iso FROM ".$this->_sClassName." WHERE d3startipnum <= '$iIPNum' AND d3endipnum >= '$iIPNum'";
+        $sSelect = "SELECT d3iso FROM ".$this->_sClassName." WHERE $iIPNum BETWEEN d3startipnum AND d3endipnum";
         $sISO = oxDb::getDb()->getOne($sSelect);
 
         stopProfile(__METHOD__);
