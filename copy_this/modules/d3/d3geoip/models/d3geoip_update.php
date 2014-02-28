@@ -18,14 +18,14 @@ class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '3.0.0.1';
-    public $sModRevision = '48';
-    public $sBaseConf = '4C7a1dCMWRRcFB1TUdmeitQYmxZcmpZem5IRERUVjdlWmo5R1J3T3E0dTRJZy9NUFFpUkhWVTdZTk95Y
-2d4ZStmTXpud2tteld3NlFWUEVTUDY4MDhBYVhWUlpRUnZ4RmtwS3FNM2VDeG9IL3JnMkJRWDFmVEM4U
-mdCZUd1aGp4WkFPVk1NRjJyR0lLNUF1ZmEwb0J3YTUwdDhjTjRraG9DQit4NjBNRWd2KzdzZjZEQldhc
-1dsSUtGK240enBoTzJWb2VpSlg1Yzh5VlhNenc4S1JHSDVoOWJRbEZvYkVCeDhvcnU2NHpZUVdodnNXc
-TNjT2tVQ01nVkRxMnZoQXVTL1hrU3ZIRFBWWUdoWWlLMzRFbHhtd0lFbWN5ejA0RHZQRnhwbU5MbHhWM
-E09';
+    public $sModVersion = '3.0.0.2';
+    public $sModRevision = '52';
+    public $sBaseConf = 'DSdWUJnZzd3RTd4aStQNjFBVnBkK3NFUmwzY2tiNHllWmFjSUZZOS9USTAzbHpHb241YWZTNThRWnpCV
+XBnQ2J0STVReGNTQmVJQ0h3aXVYWVBKcWFuVzM2WVNwdld0cXZ3bEYzTWJRMnJTN2ZYMGFNMkFxT2VQe
+CsxNzVVaytabkRBbCtJWnE1Y3lKZWdmaC9XNDhkZzhhQXhHc2FaZHlyejlSMFE1ZUJjNzA1M1dzSEJPQ
+0NBNGZJbEpZNFVuMG1STEtQRkx1WDZZZzRndXF2OW1oUGdGb2tJZW1lQ09waE5FK29PYmpML2pRVkNaS
+EdaS3RXUW5NZzJhUUF5ZlNIZ1h3MUo3QVpIeFUwL0lmajRTbWw2cmNsckpJVnFYQjFKWTd3RXUrMlhHK
+zQ9';
     public $sRequirements = '';
     public $sBaseValue = '';
 
