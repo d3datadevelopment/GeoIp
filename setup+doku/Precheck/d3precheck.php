@@ -177,7 +177,7 @@ date_default_timezone_set('Europe/Berlin');
  */
 class requCheck
 {
-    public $sVersion = '4.0';
+    public $sVersion = '4.1';
 
     protected $_db = false;
 
@@ -223,6 +223,9 @@ class requCheck
     public function startCheck()
     {
         $this->oLayout->getHTMLHeader();
+
+        $oCheckTransformation = new requTransformation($this);
+        $this->oConfig->aCheck = $oCheckTransformation->transformCheckList($this->oConfig->aCheck);
 
         $this->_runThroughChecks($this->oConfig->aCheck);
 
@@ -331,10 +334,10 @@ class requCheck
         );
         $sUrlAdd  = str_replace($sBaseDir, '', $sScriptPath);
         $sBaseUrl = 'http://' . $_SERVER['HTTP_HOST'] . str_replace(
-                basename($_SERVER['SCRIPT_NAME']),
-                '',
-                $_SERVER['SCRIPT_NAME']
-            );
+            basename($_SERVER['SCRIPT_NAME']),
+            '',
+            $_SERVER['SCRIPT_NAME']
+        );
 
         $sUrl = $sBaseUrl . $sUrlAdd . '?fnc=' . $sMethodName . '&params=' . urlencode(serialize($aArguments));
 
@@ -413,7 +416,7 @@ class requCheck
     /**
      * @return bool|resource
      */
-    protected function _getDb()
+    public function getDb()
     {
         if (!$this->_db) {
             if (file_exists('config.inc.php')) {
@@ -473,7 +476,7 @@ class requCheck
         $aIgnoreDirItems = array('.', '..');
 
         /** @var SplFileInfo $oFileInfo */
-        foreach (new RecursiveDirectoryIterator($sFolder) AS $oFileInfo) {
+        foreach (new RecursiveDirectoryIterator($sFolder) as $oFileInfo) {
             if (!in_array($oFileInfo->getFileName(), $aIgnoreDirItems) && $oFileInfo->isDir()) {
                 $this->_checkDelFilesInDir($oFileInfo->getRealPath());
             } elseif ($oFileInfo->isFile()) {
@@ -499,7 +502,7 @@ class requCheck
     public function displayCheck($sCheckType, &$aConfiguration)
     {
         $sGenCheckType = preg_replace("@(\_[0-9]$)@", "", $sCheckType);
-        $oTests = new requTests($this, $this->oConfig, $this->_getDb(), $this->oRemote);
+        $oTests = new requTests($this, $this->oConfig, $this->getDb(), $this->oRemote);
 
         if (method_exists($oTests, $sGenCheckType)) {
             $aResult = $oTests->{$sGenCheckType}($aConfiguration);
@@ -585,13 +588,11 @@ EOT;
         $sTranslDependent   = $this->translate('dependentoffurther');
 
         if ($this->oBase->blGlobalResult) {
-            echo '<p class="box_ok"><b>' . $this->translate('globalSuccess') . '</b>' . $this->translate(
-                    'deleteFile1'
-                ) . $sScriptName . $this->translate('deleteFile2') . '</p>';
+            echo '<p class="box_ok"><b>' . $this->translate('globalSuccess') . '</b>' .
+                $this->translate('deleteFile1') . $sScriptName . $this->translate('deleteFile2') . '</p>';
         } else {
-            echo '<p class="box_warning"><b>' . $this->translate('globalNotSuccess') . '</b>' . $this->translate(
-                    'deleteFile1'
-                ) . $sScriptName . $this->translate('deleteFile2') . '</p>';
+            echo '<p class="box_warning"><b>' . $this->translate('globalNotSuccess') . '</b>' .
+                $this->translate('deleteFile1') . $sScriptName . $this->translate('deleteFile2') . '</p>';
         }
 
         echo <<< EOT
@@ -617,12 +618,9 @@ EOT;
      */
     public function getNoSuccessItem($aResult, $sElementId, $sCheckType, $aConfiguration)
     {
-        echo "<div class='squ_bullet' style='background-color: red;' title='" . $this->translate(
-                'RequNotSucc'
-            ) . "'></div>" . $this->_addToggleScript($aResult, $sElementId) . $this->translate(
-                $sCheckType,
-                $aConfiguration
-            ) . "<br>" . PHP_EOL;
+        echo "<div class='squ_bullet' style='background-color: red;' title='" . $this->translate('RequNotSucc') .
+            "'></div>" . $this->_addToggleScript($aResult, $sElementId) .
+            $this->translate($sCheckType, $aConfiguration) . "<br>" . PHP_EOL;
 
         $this->getSubDirItems($aResult, $sElementId);
     }
@@ -638,10 +636,7 @@ EOT;
         echo "<div class='squ_bullet' style='background-color: green;' title='" .
             $this->translate('RequSucc') . "'></div>" .
             $this->_addToggleScript($aResult, $sElementId) .
-            $this->translate(
-                $sCheckType,
-                $aConfiguration
-            ) . "<br>" . PHP_EOL;
+            $this->translate($sCheckType, $aConfiguration) . "<br>" . PHP_EOL;
 
         $this->getSubDirItems($aResult, $sElementId);
     }
@@ -654,9 +649,7 @@ EOT;
     {
         echo "<div class='squ_bullet' style='background-color: orange;' title='" .
             $this->translate('RequNotCheckable') . "'></div>" .
-            $this->translate($sCheckType, $aConfiguration) . " (" . $this->translate(
-                'RequNotCheckable'
-            ) . ")<br>";
+            $this->translate($sCheckType, $aConfiguration) . " (" . $this->translate('RequNotCheckable') . ")<br>";
     }
 
     /**
@@ -669,13 +662,11 @@ EOT;
             echo "<div style='margin-left: 20px; display: none;' id='" . $sElementId . "'>";
             foreach ($aResult as $sPath => $blResult) {
                 if (!$blResult) {
-                    echo "<div class='squ_bullet' style='background-color: red;' title='" . $this->translate(
-                            'RequNotSucc'
-                        ) . "'></div>" . $sPath . "<br>";
+                    echo "<div class='squ_bullet' style='background-color: red;' title='" .
+                        $this->translate('RequNotSucc') . "'></div>" . $sPath . "<br>";
                 } else {
-                    echo "<div class='squ_bullet' style='background-color: green;' title='" . $this->translate(
-                            'RequSucc'
-                        ) . "'></div>" . $sPath . "<br>";
+                    echo "<div class='squ_bullet' style='background-color: green;' title='" .
+                        $this->translate('RequSucc') . "'></div>" . $sPath . "<br>";
                 }
             }
             echo "</div>" . PHP_EOL;
@@ -782,7 +773,8 @@ class requTranslations
         return array(
             'de' => array(
                 'RequCheck'              => 'Mindestanforderungsprüfung',
-                'ExecNotice'             => 'Führen Sie diese Prüfung immer aus dem Stammverzeichnis Ihres Shops aus. Nur dann können die Prüfungen erfolgreich durchgeführt werden.',
+                'ExecNotice'             => 'Führen Sie diese Prüfung immer aus dem Stammverzeichnis Ihres Shops aus. '.
+                    'Nur dann können die Prüfungen erfolgreich durchgeführt werden.',
                 'RequSucc'               => 'Bedingung erfüllt',
                 'RequNotSucc'            => 'Bedingung nicht erfüllt',
                 'RequNotCheckable'       => 'Bedingung nicht prüfbar',
@@ -796,17 +788,22 @@ class requTranslations
                 'hasMaxShopVersion'      => 'maximal Shop Version %s',
                 'hasMinModCfgVersion'    => 'ModCfg-Eintrag "%s" (%s) mit mindestens Version %s',
                 'hasMaxModCfgVersion'    => 'ModCfg-Eintrag "%s" (%s) mit maximal Version %s',
-                'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Modul-Connector</a> installiert',
+                'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Modul-'.
+                    'Connector</a> installiert',
                 'isShopEdition'          => 'ist Shopedition %s',
-                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) oder Zend Guard Loader (PHP 5.3, 5.4) installiert',
+                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) oder Zend Guard Loader (PHP 5.3, 5.4) '.
+                    'installiert',
                 'hasIonCubeLoader'       => 'ionCube loader installiert',
                 'globalSuccess'          => 'Die Prüfung war erfolgreich. Sie können das Modul installieren.*<br><br>',
-                'globalNotSuccess'       => 'Die Prüfung war nicht erfolgreich. Bitte kontrollieren Sie die rot markierten Bedingungen.<br><br>',
-                'deleteFile1'            => 'Löschen Sie diese Datei nach der Verwendung bitte unbedingt wieder von Ihrem Server! Klicken Sie <a href="',
+                'globalNotSuccess'       => 'Die Prüfung war nicht erfolgreich. Bitte kontrollieren Sie die rot '.
+                    'markierten Bedingungen.<br><br>',
+                'deleteFile1'            => 'Löschen Sie diese Datei nach der Verwendung bitte unbedingt wieder von '.
+                    'Ihrem Server! Klicken Sie <a href="',
                 'deleteFile2'            => '?fnc=deleteme">hier</a>, um diese Datei zu löschen.',
                 'showPhpInfo'            => 'PHPinfo anzeigen',
                 'dependentoffurther'     => '* abhängig von ungeprüften Voraussetzungen',
-                'oneandonedescription'   => '** geprüft wurde das Ausführungsverzeichnis, providerabhängig müssen Unterverzeichnisse separat geprüft werden (z.B. bei 1&1)',
+                'oneandonedescription'   => '** geprüft wurde das Ausführungsverzeichnis, providerabhängig müssen '.
+                    'Unterverzeichnisse separat geprüft werden (z.B. bei 1&1)',
                 'or'                     => ' oder ',
                 'toggleswitch'           => 'Klick für Details zur Prüfung',
                 'unableDeleteFile'       => 'Datei konnte nicht gelöscht werden. Bitte löschen Sie diese manuell.',
@@ -814,7 +811,8 @@ class requTranslations
             ),
             'en' => array(
                 'RequCheck'              => 'Requirement check',
-                'ExecNotice'             => 'Execute this check script in the root directory of your shop. In this case only checks can executed succesfully.',
+                'ExecNotice'             => 'Execute this check script in the root directory of your shop. In this '.
+                    'case only checks can executed succesfully.',
                 'RequSucc'               => 'condition is fulfilled',
                 'RequNotSucc'            => 'condition isn\'t fulfilled',
                 'RequNotCheckable'       => 'condition isn\'t checkable',
@@ -828,17 +826,21 @@ class requTranslations
                 'hasMaxShopVersion'      => 'not more than shop version %s',
                 'hasMinModCfgVersion'    => 'ModCfg item "%s" (%s) has at least version %s',
                 'hasMaxModCfgVersion'    => 'ModCfg item "%s" (%s) has not more than version %s',
-                'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Module Connector</a> installed',
+                'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Module '.
+                    'Connector</a> installed',
                 'isShopEdition'          => 'shop edition is %s',
                 'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) or Zend Guard Loader (PHP 5.3, 5.4) installed',
                 'hasIonCubeLoader'       => 'ionCube loader installed',
-                'globalSuccess'          => 'The test was successful. Your server is ready for installing the module.*<br><br>',
-                'globalNotSuccess'       => 'The test wasn\'t successfull. Please check the red marked conditions.<br><br>',
+                'globalSuccess'          => 'The test was successful. Your server is ready for installing the '.
+                    'module.*<br><br>',
+                'globalNotSuccess'       => 'The test wasn\'t successfull. Please check the red marked '.
+                    'conditions.<br><br>',
                 'deleteFile1'            => 'Please delete this file after use on your server! Click <a href="',
                 'deleteFile2'            => '?fnc=deleteme">here</a>, to delete this file.',
                 'showPhpInfo'            => 'show PHPinfo',
                 'dependentoffurther'     => '* dependent of further unchecked conditions',
-                'oneandonedescription'   => '** this check use execution directory only, provider dependend subdirectories have to check separately (e.g. at 1&1)',
+                'oneandonedescription'   => '** this check use execution directory only, provider dependend '.
+                    'subdirectories have to check separately (e.g. at 1&1)',
                 'or'                     => ' or ',
                 'toggleswitch'           => 'click for details',
                 'unableDeleteFile'       => 'Unable to delete file. Please delete it manually.',
@@ -874,8 +876,7 @@ class requRemote
         /** @var stdClass $oModuleData */
         $oModuleData = $this->_getRemoteServerData($sUrl);
 
-        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release))
-        {
+        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release)) {
             return explode(',', $oModuleData->moduleversion->compatible_release->shopedition);
         }
 
@@ -899,8 +900,7 @@ class requRemote
         /** @var stdClass $oModuleData */
         $oModuleData = $this->_getRemoteServerData($sUrl);
 
-        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release))
-        {
+        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release)) {
             return $this->shortenVersion($oModuleData->moduleversion->compatible_release->fromshopversion);
         }
 
@@ -924,8 +924,7 @@ class requRemote
         /** @var stdClass $oModuleData */
         $oModuleData = $this->_getRemoteServerData($sUrl);
 
-        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release))
-        {
+        if ($oModuleData->status == 'OK' && isset($oModuleData->moduleversion->compatible_release)) {
             return $this->shortenVersion($oModuleData->moduleversion->compatible_release->toshopversion);
         }
 
@@ -970,8 +969,8 @@ class requRemote
 
         if (extension_loaded('curl') &&
             function_exists('curl_init') && function_exists('curl_exec') &&
-            $ch = curl_init())
-        {
+            $ch = curl_init()
+        ) {
             $sCurl_URL = preg_replace('@^((http|https)://)@', '', $sFilePath);
             curl_setopt($ch, CURLOPT_URL, $sCurl_URL);
             if ($_SERVER['HTTP_USER_AGENT']) {
@@ -1097,11 +1096,8 @@ class requTests
     {
         $aResult[$this->getBasePath()] = false;
 
-        if ((version_compare(phpversion(), $aConfiguration['aParams']['from'], '>=')) && (version_compare(
-                phpversion(),
-                $aConfiguration['aParams']['to'],
-                '<'
-            ))
+        if ((version_compare(phpversion(), $aConfiguration['aParams']['from'], '>=')) &&
+            (version_compare(phpversion(), $aConfiguration['aParams']['to'], '<'))
         ) {
             $aResult[$this->getBasePath()] = true;
         }
@@ -1163,10 +1159,15 @@ class requTests
             $oEditionResult = $this->_getShopEdition();
             $sEdition       = strtoupper($oEditionResult->oxedition);
 
-            $mMinRemoteVersion = $this->oRemote->getMinShopVersion($this->oConfig->sModId, $this->oConfig->sModVersion, $sEdition);
+            $mMinRemoteVersion = $this->oRemote->getMinShopVersion(
+                $this->oConfig->sModId,
+                $this->oConfig->sModVersion,
+                $sEdition
+            );
+
             if ($mMinRemoteVersion) {
                 $aConfiguration['aParams'] = array('version' => $mMinRemoteVersion);
-            } else  {
+            } else {
                 $aConfiguration['aParams'] = array('version' => $aConfiguration['aParams'][$sEdition]);
             }
 
@@ -1194,10 +1195,15 @@ class requTests
             $oEditionResult = $this->_getShopEdition();
             $sEdition       = strtoupper($oEditionResult->oxedition);
 
-            $mMaxRemoteVersion = $this->oRemote->getMaxShopVersion($this->oConfig->sModId, $this->oConfig->sModVersion, $sEdition);
+            $mMaxRemoteVersion = $this->oRemote->getMaxShopVersion(
+                $this->oConfig->sModId,
+                $this->oConfig->sModVersion,
+                $sEdition
+            );
+
             if ($mMaxRemoteVersion) {
                 $aConfiguration['aParams'] = array('version' => $mMaxRemoteVersion);
-            } else  {
+            } else {
                 $aConfiguration['aParams'] = array('version' => $aConfiguration['aParams'][$sEdition]);
             }
 
@@ -1219,7 +1225,12 @@ class requTests
         if ($this->getDb()) {
             $oResult = $this->_getShopEdition();
 
-            $mRemoteShopEditions = $this->oRemote->getShopEdition($this->oConfig->sModId, $this->oConfig->sModVersion, $oResult->oxedition);
+            $mRemoteShopEditions = $this->oRemote->getShopEdition(
+                $this->oConfig->sModId,
+                $this->oConfig->sModVersion,
+                $oResult->oxedition
+            );
+
             if (is_array($mRemoteShopEditions)) {
                 $aConfiguration['aParams'][0] = $mRemoteShopEditions;
             }
@@ -1279,11 +1290,13 @@ class requTests
     public function hasMinModCfgVersion(&$aConfiguration)
     {
         if ($this->getDb()) {
-            $sSelect = "SELECT IF (INET_ATON(oxversion) >= INET_ATON('" . $aConfiguration['aParams']['version'] . "'), 1, 0) AS result
-                        FROM d3_cfg_mod WHERE
-                        oxmodid = '" . $aConfiguration['aParams']['id'] . "' AND
-                        oxversion != 'basic'
-                        ORDER BY oxversion ASC LIMIT 1";
+            $sSelect = "SELECT IF ".
+                "(INET_ATON(oxversion) >= INET_ATON('" . $aConfiguration['aParams']['version'] . "'), 1, 0) AS result ".
+                "FROM d3_cfg_mod ".
+                "WHERE
+                    oxmodid = '" . $aConfiguration['aParams']['id'] . "' AND
+                    oxversion != 'basic'
+                    ORDER BY oxversion ASC LIMIT 1";
 
             $rResult = mysql_query($sSelect, $this->getDb());
             $aResult = mysql_fetch_assoc($rResult);
@@ -1309,11 +1322,11 @@ class requTests
     {
         if ($this->getDb()) {
             $sSelect = "SELECT
-                        IF (INET_ATON(oxversion) <= INET_ATON('" . $aConfiguration['aParams']['version'] . "'), 1, 0) AS result
-                        FROM d3_cfg_mod WHERE
-                        oxmodid = '" . $aConfiguration['aParams']['id'] . "' AND
-                        oxversion != 'basic'
-                        ORDER BY oxversion ASC LIMIT 1";
+                IF (INET_ATON(oxversion) <= INET_ATON('" . $aConfiguration['aParams']['version'] . "'), 1, 0) AS result
+                FROM d3_cfg_mod WHERE
+                oxmodid = '" . $aConfiguration['aParams']['id'] . "' AND
+                oxversion != 'basic'
+                ORDER BY oxversion ASC LIMIT 1";
 
             $rResult = mysql_query($sSelect, $this->getDb());
             $aResult = mysql_fetch_assoc($rResult);
@@ -1337,9 +1350,7 @@ class requTests
     {
         $aResult = array($this->getBasePath() => false);
 
-        if (
-            (
-                version_compare(phpversion(), '5.2.0', '>=') &&
+        if ((version_compare(phpversion(), '5.2.0', '>=') &&
                 version_compare(phpversion(), '5.2.900', '<') &&
                 function_exists('zend_optimizer_version')
             ) || (
@@ -1347,7 +1358,7 @@ class requTests
                 version_compare(phpversion(), '5.4.900', '<') &&
                 function_exists('zend_loader_version')
             )
-        ){
+        ) {
             $aResult[$this->getBasePath()] = true;
         }
 
@@ -1370,6 +1381,77 @@ class requTests
         $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
 
         return $aResult;
+    }
+}
+
+/**
+ * Class requTransformation
+ */
+class requTransformation
+{
+    public $oCheck;
+
+    /**
+     * @param requCheck $oCheck
+     */
+    public function __construct(requCheck $oCheck)
+    {
+        $this->oCheck = $oCheck;
+    }
+
+    /**
+     * @param $aCheckList
+     */
+    public function transformCheckList($aCheckList)
+    {
+        $this->_removeDeprecatedLibs($aCheckList['hasMinModCfgVersion']);
+        $this->_removeDeprecatedLibs($aCheckList['hasMaxModCfgVersion']);
+
+        return $aCheckList;
+    }
+
+    /**
+     * @param array $aCheck
+     */
+    protected function _removeDeprecatedLibs(&$aCheck)
+    {
+        $blDelOldLibs = false;
+        $sCheckVersion = 0;
+
+        if (is_array($aCheck)) {
+            $sSelect = "SELECT oxversion as result ".
+                "FROM d3_cfg_mod ".
+                "WHERE oxmodid = 'd3modcfg_lib' LIMIT 1";
+            $rResult = mysql_query($sSelect, $this->oCheck->getDb());
+            if (is_resource($rResult)) {
+                $oResult = mysql_fetch_object($rResult);
+                if ($oResult->result) {
+                    $sCheckVersion = $oResult->result;
+                }
+            }
+
+            foreach ($aCheck as $aModCfgCheck) {
+                if (isset($aModCfgCheck['aParams']['id']) &&
+                    strtolower($aModCfgCheck['aParams']['id']) == 'd3modcfg_lib' &&
+                    version_compare($sCheckVersion, '4.0.0.0', '>=')
+                ) {
+                    $blDelOldLibs = true;
+                }
+            }
+
+            reset($aCheck);
+
+            if ($blDelOldLibs) {
+                $aOldLibs = array('d3install_lib', 'd3log_lib', 'd3clrtmp_lib');
+                foreach ($aCheck as $sKey => $aModCfgCheck) {
+                    if (isset($aModCfgCheck['aParams']['id']) &&
+                        in_array(strtolower($aModCfgCheck['aParams']['id']), $aOldLibs)
+                    ) {
+                        unset($aCheck[$sKey]);
+                    }
+                }
+            }
+        }
     }
 }
 
