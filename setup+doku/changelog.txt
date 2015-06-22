@@ -1,3 +1,7 @@
+=> 3.0.0.2
+- auf Kompatibilität mit Shopversion 4.8.3 geprüft
+- Modulstruktur aktualisiert
+
 => 3.0.0.1
 - Datenbankabfrage für IPv6-Zuordnung korrigiert
 - alte Logtypes ersetzt
