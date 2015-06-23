@@ -23,10 +23,8 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
      */
     public function init()
     {
-        if (d3_cfg_mod::get($this->_sModId)->isActive())
-        {
-            if (d3_cfg_mod::get($this->_sModId)->hasDebugMode())
-            {
+        if (d3_cfg_mod::get($this->_sModId)->isActive()) {
+            if (d3_cfg_mod::get($this->_sModId)->hasDebugMode()) {
                 /** @var $oGeoIp d3geoip */
                 $oGeoIp = oxNew('d3geoip');
                 echo $oGeoIp->getIP();
@@ -39,5 +37,4 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
 
         return parent::init();
     }
-
 }

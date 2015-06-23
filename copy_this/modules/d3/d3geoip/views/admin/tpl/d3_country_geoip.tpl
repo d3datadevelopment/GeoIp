@@ -2,40 +2,40 @@
 
 <script type="text/javascript">
 <!--
-window.onload = function ()
-{
-    [{ if $updatelist == 1}]
-        top.oxid.admin.updateList('[{ $oxid }]');
-    [{ /if}]
-    var oField = top.oxid.admin.getLockTarget();
-    oField.onchange = oField.onkeyup = oField.onmouseout = top.oxid.admin.unlockSave;
-}
+    window.onload = function ()
+    {
+        [{if $updatelist == 1}]
+            top.oxid.admin.updateList('[{$oxid}]');
+        [{/if}]
+        var oField = top.oxid.admin.getLockTarget();
+        oField.onchange = oField.onkeyup = oField.onmouseout = top.oxid.admin.unlockSave;
+    }
 //-->
 </script>
 
-[{ if $readonly }]
+[{if $readonly}]
     [{assign var="readonly" value="readonly disabled"}]
 [{else}]
     [{assign var="readonly" value=""}]
 [{/if}]
 
-<form name="transfer" id="transfer" action="[{ $oViewConf->getSelfLink() }]" method="post">
-    [{ $oViewConf->getHiddenSid() }]
-    <input type="hidden" name="oxid" value="[{ $oxid }]">
-    <input type="hidden" name="oxidCopy" value="[{ $oxid }]">
+<form name="transfer" id="transfer" action="[{$oViewConf->getSelfLink()}]" method="post">
+    [{$oViewConf->getHiddenSid()}]
+    <input type="hidden" name="oxid" value="[{$oxid}]">
+    <input type="hidden" name="oxidCopy" value="[{$oxid}]">
     <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
-    <input type="hidden" name="language" value="[{ $actlang }]">
+    <input type="hidden" name="language" value="[{$actlang}]">
 </form>
 
-<form name="myedit" id="myedit" action="[{ $oViewConf->getSelfLink() }]" method="post">
-    [{ $oViewConf->getHiddenSid() }]
+<form name="myedit" id="myedit" action="[{$oViewConf->getSelfLink()}]" method="post">
+    [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
     <input type="hidden" name="fnc" value="">
-    <input type="hidden" name="oxid" value="[{ $oxid }]">
-    <input type="hidden" name="voxid" value="[{ $oxid }]">
-    <input type="hidden" name="oxparentid" value="[{ $oxparentid }]">
-    <input type="hidden" name="editval[oxcountry__oxid]" value="[{ $oxid }]">
-    <input type="hidden" name="language" value="[{ $actlang }]">
+    <input type="hidden" name="oxid" value="[{$oxid}]">
+    <input type="hidden" name="voxid" value="[{$oxid}]">
+    <input type="hidden" name="oxparentid" value="[{$oxparentid}]">
+    <input type="hidden" name="editval[oxcountry__oxid]" value="[{$oxid}]">
+    <input type="hidden" name="language" value="[{$actlang}]">
 
     <table cellspacing="0" cellpadding="0" border="0" width="98%">
         <tr>
@@ -85,7 +85,7 @@ window.onload = function ()
                         <td class="edittext"><br><br>
                         </td>
                         <td class="edittext"><br><br>
-                        <input type="submit" class="edittext" id="oLockButton" name="saveArticle" value="[{ oxmultilang ident="GENERAL_SAVE" }]" onClick="Javascript:document.myedit.fnc.value='save'"" [{ $readonly }] [{ if !$edit->oxcountry__oxtitle->value && !$oxparentid }]disabled[{/if}]><br>
+                        <input type="submit" class="edittext" id="oLockButton" name="saveArticle" value="[{oxmultilang ident="GENERAL_SAVE"}]" onClick="Javascript:document.myedit.fnc.value='save'"" [{$readonly}] [{if !$edit->oxcountry__oxtitle->value && !$oxparentid}]disabled[{/if}]><br>
                         </td>
                     </tr>
                 </table>
