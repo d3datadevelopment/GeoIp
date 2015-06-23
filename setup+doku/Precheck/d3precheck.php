@@ -86,9 +86,9 @@ class requConfig
         // benötigt PHP-Extension (kaskadierbar (siehe "Desc1"))
         'hasExtension'           => array(
             array(
-                'blExec'  => 0,
+                'blExec'  => 1,
                 'aParams' => array(
-                    'type' => 'curl',
+                    'type' => 'bcmath',
                 ),
             ),
             array(

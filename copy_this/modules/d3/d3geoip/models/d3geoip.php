@@ -48,8 +48,13 @@ class d3GeoIP extends oxbase
                 $sIP = $this->getIP();
             }
 
-            $iIPNum = $this->_getNumIp($sIP);
-            $sISOAlpha = $this->LoadByIPNum($iIPNum);
+            $iIPNum = $this->_getNumIp(
+                oxRegistry::getConfig()->checkParamSpecialChars(
+                    str_replace(' ', '', $sIP)
+                )
+            );
+
+            $sISOAlpha = $this->loadByIPNum($iIPNum);
 
             if (!$sISOAlpha)
             {
@@ -93,7 +98,7 @@ class d3GeoIP extends oxbase
 
         stopProfile(__METHOD__);
 
-        return $sIP;
+        return oxRegistry::getConfig()->checkParamSpecialChars(str_replace(' ', '', $sIP));
     }
 
     /**
