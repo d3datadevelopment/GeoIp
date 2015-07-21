@@ -100,8 +100,25 @@ class d3GeoIP extends oxbase
         ) {
             $sIP = $this->_getModConfig()->getValue('sTestCountryIp');
         } else {
-            // ToDo: use $_SERVER['X-Forwared-For'] && Client-IP in case of proxy
-            $sIP = $_SERVER['REMOTE_ADDR'];
+            if(isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+                $sIP = $_SERVER['HTTP_CF_CONNECTING_IP'];
+            } else if (isset($_SERVER['HTTP_X_REAL_IP'])) {
+                $sIP = $_SERVER['HTTP_X_REAL_IP'];
+            } else if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+                $sIP = $_SERVER['HTTP_CLIENT_IP'];
+            } else if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $sIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            } else if(isset($_SERVER['HTTP_X_FORWARDED'])) {
+                $sIP = $_SERVER['HTTP_X_FORWARDED'];
+            } else if(isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+                $sIP = $_SERVER['HTTP_FORWARDED_FOR'];
+            } else if(isset($_SERVER['HTTP_FORWARDED'])) {
+                $sIP = $_SERVER['HTTP_FORWARDED'];
+            } else if(isset($_SERVER['REMOTE_ADDR'])) {
+                $sIP = $_SERVER['REMOTE_ADDR'];
+            } else {
+                $sIP = 'UNKNOWN';
+            }
         }
 
         stopProfile(__METHOD__);
@@ -412,7 +429,7 @@ class d3GeoIP extends oxbase
         $oShoplist->getList();
         $aShopUrls = array();
 
-        foreach (array_keys($oShoplist) as $sId) {
+        foreach ($oShoplist->arrayKeys() as $sId) {
             $aShopUrls[$sId] = $this->getConfig()->getShopConfVar('sMallShopURL', $sId);
         }
 

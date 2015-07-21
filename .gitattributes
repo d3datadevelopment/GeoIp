@@ -10,10 +10,10 @@ copy_this/modules/d3/d3geoip/controllers/admin/d3_country_geoip.php -text
 copy_this/modules/d3/d3geoip/menu.xml -text
 copy_this/modules/d3/d3geoip/metadata.php -text
 copy_this/modules/d3/d3geoip/models/d3geoip.php -text
-copy_this/modules/d3/d3geoip/models/d3geoip_update.php -text
 copy_this/modules/d3/d3geoip/modules/components/d3_oxcmp_cur_geoip.php -text
 copy_this/modules/d3/d3geoip/modules/components/d3_oxcmp_lang_geoip.php -text
 copy_this/modules/d3/d3geoip/picture.png -text
+copy_this/modules/d3/d3geoip/setup/d3geoip_update.php -text
 copy_this/modules/d3/d3geoip/views/admin/de/d3_geoip_lang.php -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_cfg_geoipset_main.tpl -text
 copy_this/modules/d3/d3geoip/views/admin/tpl/d3_country_geoip.tpl -text

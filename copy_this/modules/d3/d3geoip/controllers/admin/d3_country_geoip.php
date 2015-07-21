@@ -160,8 +160,6 @@ class d3_country_geoip extends oxAdminView
      */
     public function getCurList()
     {
-        $aCurrencies = array();
-
         if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop')) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
         } else {
@@ -173,8 +171,20 @@ class d3_country_geoip extends oxAdminView
 
         $sCurs = oxDb::getDb(oxDb::FETCH_MODE_ASSOC)->getOne($sQ);
 
-        if ($sCurs) {
-            foreach (unserialize($sCurs) as $sKey => $sValue) {
+        return $this->d3ExtractCurList($sCurs);
+    }
+
+    /**
+     * @param $sCurrencies
+     *
+     * @return array
+     */
+    public function d3ExtractCurList($sCurrencies)
+    {
+        $aCurrencies = array();
+
+        if ($sCurrencies) {
+            foreach (unserialize($sCurrencies) as $sKey => $sValue) {
                 $aFields = explode('@', $sValue);
                 $aCurrencies[$sKey]->id = $sKey;
                 $aCurrencies[$sKey]->name  = $aFields[0];

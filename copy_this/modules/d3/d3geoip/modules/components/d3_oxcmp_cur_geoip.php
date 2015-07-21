@@ -35,6 +35,6 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
             $oLocation->setCountryCurrency();
         }
 
-        return parent::init();
+        parent::init();
     }
 }

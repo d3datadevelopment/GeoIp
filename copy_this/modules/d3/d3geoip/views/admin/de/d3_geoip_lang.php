@@ -28,13 +28,16 @@ $aLang = array(
 
     'D3_GEOIP_TRANSL'                               => 'GeoIP-Kundenumleitungen',
 
-    'D3_GEOIP_SET_DEBUG_DESC'                       => 'Mit aktiviertem Debug-Modus wird im Frontend die aktuelle IP-Adresse des Shopbesuchers gezeigt. Beachten Sie, dass Umleitungen, die auf Weiterleitungen basieren, dann nicht ausgeführt werden können.',
+    'D3_GEOIP_SET_DEBUG_DESC'                       => 'Mit aktiviertem Debug-Modus wird im Frontend die aktuelle '.
+        'IP-Adresse des Shopbesuchers gezeigt. Beachten Sie, dass Umleitungen, die auf Weiterleitungen basieren, dann '.
+        'nicht ausgeführt werden können.',
     'D3_GEOIP_SET_OPTIONS'                          => 'Optionen',
     'D3_GEOIP_SET_OPTIONS_CHANGESHOP'               => 'Mandant wechseln, wenn eingestellt (nur EE)',
     'D3_GEOIP_SET_OPTIONS_CHANGECURR'               => 'Währung wechseln, wenn eingestellt',
     'D3_GEOIP_SET_OPTIONS_CHANGELANG'               => 'Sprache wechseln, wenn eingestellt',
     'D3_GEOIP_SET_OPTIONS_CHANGEURL'                => 'URL wechseln, wenn eingestellt',
-    'D3_GEOIP_SET_OPTIONS_NOCOUNTRY'                => 'Shop verwendet die Einstellung dieses Landes, wenn IP nicht zuzuordnen ist',
+    'D3_GEOIP_SET_OPTIONS_NOCOUNTRY'                => 'Shop verwendet die Einstellung dieses Landes, wenn IP nicht '.
+        'zuzuordnen ist',
     'D3_GEOIP_SET_IP'                               => 'IP-Einstellungen',
     'D3_GEOIP_SET_IP_TESTIP'                        => 'statt Kunden-IP immer diese IP-Adresse verwenden',
     'D3_GEOIP_SET_IP_TESTCOUNTRY'                   => 'statt Kunden-IP immer eine IP-Adresse dieses Landes verwenden',
@@ -52,14 +55,19 @@ $aLang = array(
     'D3_GEOIP_OR'                                   => 'oder',
     'D3_GEOIP_DISABLED'                             => '(deaktiviert)',
     'D3_GEOIP_SELURL'                               => 'zu wechselnde URL',
-    'D3_GEOIP_SELURL_DESC'                          => 'Sobald im URL-Feld eine Eingabe vorhanden ist, wird bei passenden Kunden versucht, zur hinterlegten URL zu wechseln. Möchten Sie den Mandanten, die Währung und / oder die Sprache einstellen, entfernen Sie die URL.<br><br>Aktivieren / deaktivieren Sie den URL-Wechsel zusätzlich in den Modul-Grundeinstellungen.',
+    'D3_GEOIP_SELURL_DESC'                          => 'Sobald im URL-Feld eine Eingabe vorhanden ist, wird bei '.
+        'passenden Kunden versucht, zur hinterlegten URL zu wechseln. Möchten Sie den Mandanten, die Währung und / '.
+        'oder die Sprache einstellen, entfernen Sie die URL.<br><br>Aktivieren / deaktivieren Sie den URL-Wechsel '.
+        'zusätzlich in den Modul-Grundeinstellungen.',
 
     'D3_GEOIP_METADATA_TITLE'                       => 'D³ GeoIP Vorauswahl',
     'D3_GEOIP_METADATA_DESC'                        => 'Begrüßen Sie Ihre Kunden in seiner Landessprache.',
 
-    'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.'Die erforderlichen Daten finden Sie im Installationspaket des Moduls unter "setup+doku/geoip-Data_IPv4_*.sql" ("setup+doku/geoip-Data_IPv6_*.sql" für IPv6-Adressen) oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts/". '.PHP_EOL.PHP_EOL.'Sie benötigen entweder die Komplettdateien oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
+    'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die '.
+        'automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.
+        'Die erforderlichen Daten finden Sie im Installationspaket des Moduls unter '.
+        '"setup+doku/geoip-Data_IPv4_*.sql" ("setup+doku/geoip-Data_IPv6_*.sql" für IPv6-Adressen) oder als '.
+        'handlichere SQL-Dateien unter "setup+doku/geoip_data_parts/". '.PHP_EOL.PHP_EOL.
+        'Sie benötigen entweder die Komplettdateien oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) '.
+        'bitte in Ihrer Datenbank aus.',
 );
-
-/*
-[{ oxmultilang ident='ACTIONS_MAIN_YOUWANTTODELETE' }]
-*/

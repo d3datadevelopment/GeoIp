@@ -59,33 +59,6 @@ function showFormatSettings(sElemId, visible, blUseOldElem)
 
 <style type="text/css">
 <!--
-.questbox{
-    background-color: #07f;
-    color: white;
-    float: right;
-    position: relative;
-    display: block;
-    padding: 1px 4px;
-    font-weight: bold;
-    z-index: 98;
-    cursor: help;
-    font-family: Verdana,Arial,Helvetica,sans-serif;
-    font-size: 10px;
-    line-height: 12px;
-}
-
-.helptextbox{
-    background-color: white;
-    color: black;
-    border: 1px solid black;
-    position: absolute;
-    overflow: hidden;
-    padding: 5px;
-    margin-top: 15px;
-    width: 300px;
-    z-index: 99;
-}
-
 fieldset{
     border: 1px inset black;
     background-color: #F0F0F0;
@@ -146,56 +119,56 @@ td.edittext {
                         </a>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGESHOP"}]
+                                <label for="blChangeShop">[{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGESHOP"}]</label>
                             </dt>
                             <dd>
                                 <input type="hidden" name="value[blChangeShop]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blChangeShop]" value='1' [{if $edit->getValue('blChangeShop') == 1}]checked[{/if}]>
+                                <input id="blChangeShop" class="edittext ext_edittext" type="checkbox" name="value[blChangeShop]" value='1' [{if $edit->getValue('blChangeShop') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGESHOP_DESC"}]
                             </dd>
                             <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGECURR"}]
+                                <label for="blChangeCurr">[{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGECURR"}]</label>
                             </dt>
                             <dd>
                                 <input type="hidden" name="value[blChangeCurr]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blChangeCurr]" value='1' [{if $edit->getValue('blChangeCurr') == 1}]checked[{/if}]>
+                                <input id="blChangeCurr" class="edittext ext_edittext" type="checkbox" name="value[blChangeCurr]" value='1' [{if $edit->getValue('blChangeCurr') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGECURR_DESC"}]
                             </dd>
                             <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGELANG"}]
+                                <label for="blChangeLang">[{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGELANG"}]</label>
                             </dt>
                             <dd>
                                 <input type="hidden" name="value[blChangeLang]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blChangeLang]" value='1' [{if $edit->getValue('blChangeLang') == 1}]checked[{/if}]>
+                                <input id="blChangeLang" class="edittext ext_edittext" type="checkbox" name="value[blChangeLang]" value='1' [{if $edit->getValue('blChangeLang') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGELANG_DESC"}]
                             </dd>
                             <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGEURL"}]
+                                <label for="blChangeURL">[{oxmultilang ident="D3_GEOIP_SET_OPTIONS_CHANGEURL"}]</label>
                             </dt>
                             <dd>
                                 <input type="hidden" name="value[blChangeURL]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blChangeURL]" value='1' [{if $edit->getValue('blChangeURL') == 1}]checked[{/if}]>
+                                <input id="blChangeURL" class="edittext ext_edittext" type="checkbox" name="value[blChangeURL]" value='1' [{if $edit->getValue('blChangeURL') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGEURL_DESC"}]
                             </dd>
                             <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_OPTIONS_NOCOUNTRY"}]
+                                <label for="blUseFallback">[{oxmultilang ident="D3_GEOIP_SET_OPTIONS_NOCOUNTRY"}]</label>
                                 <input type="hidden" name="value[blUseFallback]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blUseFallback]" value='1' [{if $edit->getValue('blUseFallback') == 1}]checked[{/if}]>
+                                <input id="blUseFallback" class="edittext ext_edittext" type="checkbox" name="value[blUseFallback]" value='1' [{if $edit->getValue('blUseFallback') == 1}]checked[{/if}]>
                             </dt>
                             <dd>
-                                <select size="5" name="value[sFallbackCountryId]">
+                                <select id="sFallbackCountryId" size="5" name="value[sFallbackCountryId]">
                                     [{foreach from=$oView->getCountryList() item="oCountry"}]
                                         <option value="[{$oCountry->getId()}]" [{if $edit->getValue('sFallbackCountryId') == $oCountry->getId()}] selected[{/if}]>[{$oCountry->oxcountry__oxtitle->value}]</option>
                                     [{/foreach}]
@@ -216,24 +189,24 @@ td.edittext {
                         </a>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_IP_TESTIP"}]
+                                <label for="blUseTestIp">[{oxmultilang ident="D3_GEOIP_SET_IP_TESTIP"}]</label>
                                 <input type="hidden" name="value[blUseTestIp]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blUseTestIp]" value='1' [{if $edit->getValue('blUseTestIp') == 1}]checked[{/if}]>
+                                <input id="blUseTestIp" class="edittext ext_edittext" type="checkbox" name="value[blUseTestIp]" value='1' [{if $edit->getValue('blUseTestIp') == 1}]checked[{/if}]>
                             </dt>
                             <dd>
-                                <input type="text" maxlength="39" size="17" name="value[sTestIp]" value="[{$edit->getValue('sTestIp')}]">
+                                <input id="sTestIp" type="text" maxlength="39" size="17" name="value[sTestIp]" value="[{$edit->getValue('sTestIp')}]">
                                 [{oxinputhelp ident="D3_GEOIP_SET_IP_TESTIP_DESC"}]
                             </dd>
                             <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_IP_TESTCOUNTRY"}]
+                                <label for="blUseTestCountry">[{oxmultilang ident="D3_GEOIP_SET_IP_TESTCOUNTRY"}]</label>
                                 <input type="hidden" name="value[blUseTestCountry]" value="0">
-                                <input class="edittext ext_edittext" type="checkbox" name="value[blUseTestCountry]" value='1' [{if $edit->getValue('blUseTestCountry') == 1}]checked[{/if}]>
+                                <input id="blUseTestCountry" class="edittext ext_edittext" type="checkbox" name="value[blUseTestCountry]" value='1' [{if $edit->getValue('blUseTestCountry') == 1}]checked[{/if}]>
                             </dt>
                             <dd>
-                                <select name="value[sTestCountryIp]" size="1" class="edittext ext_edittext">
+                                <select id="sTestCountryIp" name="value[sTestCountryIp]" size="1" class="edittext ext_edittext">
                                     [{foreach from=$oView->getIPCountryList() item="oCountry"}]
                                         <option value="[{$oCountry->getFieldData('IP')}]" [{if $edit->getValue('sTestCountryIp') == $oCountry->getFieldData('IP')}] selected[{/if}]>[{$oCountry->getFieldData('oxtitle')}][{if !$oCountry->getFieldData('oxactive')}] [{oxmultilang ident="D3_GEOIP_SET_IP_TESTCOUNTRY_INACTIVE"}][{/if}]</option>
                                     [{/foreach}]
@@ -244,10 +217,10 @@ td.edittext {
                         </dl>
                         <dl>
                             <dt>
-                                [{oxmultilang ident="D3_GEOIP_SET_IP_CHECKIP"}]
+                                <label for="sCheckIp">[{oxmultilang ident="D3_GEOIP_SET_IP_CHECKIP"}]</label>
                             </dt>
                             <dd>
-                                <input type="text" maxlength="39" size="17" name="value[sCheckIp]" value="[{$edit->getValue('sCheckIp')}]">
+                                <input id="sCheckIp" type="text" maxlength="39" size="17" name="value[sCheckIp]" value="[{$edit->getValue('sCheckIp')}]">
                                 [{oxinputhelp ident="D3_GEOIP_SET_IP_CHECKIP_DESC"}]
 
                                 [{if $edit->getValue('sCheckIp')}]
@@ -264,7 +237,7 @@ td.edittext {
                         <td class="edittext ext_edittext" align="left">
                             <span class="d3modcfg_btn icon status_ok">
                                 <input type="submit" name="save" value="[{oxmultilang ident="D3_GENERAL_GEOIP_SAVE"}]">
-                                <div></div>
+                                <span></span>
                             </span>
                         </td>
                     </tr>
