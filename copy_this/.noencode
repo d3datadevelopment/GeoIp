@@ -1,1 +1,1 @@
-copyAsIsFiles = modules/d3/d3geoip/controllers, modules/d3/d3geoip/models/d3geoip_update.php, modules/d3/d3geoip/modules/components, modules/d3/d3geoip/views, modules/d3/d3geoip/d3_geoip_stub.php, modules/d3/d3geoip/metadata.php
+copyAsIsFiles = modules/d3/d3geoip/components, modules/d3/d3geoip/controllers, modules/d3/d3geoip/models/d3geoip_update.php, modules/d3/d3geoip/views, modules/d3/d3geoip/IntelliSenseHelper.php, modules/d3/d3geoip/metadata.php

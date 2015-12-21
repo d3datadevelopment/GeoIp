@@ -42,6 +42,8 @@ zQ9';
               'do'    => 'fixIndizes'),
         array('check' => 'hasUnregisteredFiles',
               'do'    => 'showUnregisteredFiles'),
+        array('check' => 'checkRegisteredComponent',
+              'do'    => 'registerComponent'),
         array('check' => 'checkModCfgSameRevision',
               'do'    => 'updateModCfgSameRevision'),
     );
@@ -404,5 +406,53 @@ zQ9';
     public function showUnregisteredFiles()
     {
         return $this->_showUnregisteredFiles('d3geoip', array('d3FileRegister'));
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkRegisteredComponent()
+    {
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+        /** @var $oShop oxshop */
+        foreach ($this->getShopListByActiveModule('d3geoip') as $oShop) {
+            /** @var array $aUserComponents */
+            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+
+            if (false == $aUserComponents
+                || false == $aUserComponents['d3cmp_geoip']
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function registerComponent()
+    {
+        $blRet = true;
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+
+        /** @var $oShop oxshop */
+        foreach ($this->getShopList() as $oShop) {
+            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+            if (false == $aUserComponents) {
+                $aUserComponents = array();
+            }
+
+            if (false == $aUserComponents['d3cmp_geoip']) {
+                $blDontUseCache = 1;
+                $aUserComponents['d3cmp_geoip'] = $blDontUseCache;
+                $this->fixOxconfigVariable($sVarName, $oShop->getId(), '', $aUserComponents, 'arr');
+            }
+        }
+
+        return $blRet;
     }
 }

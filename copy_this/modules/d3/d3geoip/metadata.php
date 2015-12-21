@@ -19,11 +19,9 @@ $aModule = array(
     'author'       => 'D&sup3; Data Development (Inh.: Thomas Dartsch)',
     'email'        => 'support@shopmodule.com',
     'url'          => 'http://www.oxidmodule.com/',
-    'extend'      => array(
-        'oxcmp_cur'  => 'd3/d3geoip/modules/components/d3_oxcmp_cur_geoip',
-        'oxcmp_lang' => 'd3/d3geoip/modules/components/d3_oxcmp_lang_geoip',
-    ),
+    'extend'      => array(),
     'files'       => array(
+        'd3cmp_geoip'               => 'd3/d3geoip/components/d3cmp_geoip.php',
         'd3_cfg_geoipset'           => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset.php',
         'd3_cfg_geoipset_list'      => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset_list.php',
         'd3_cfg_geoipset_main'      => 'd3/d3geoip/controllers/admin/d3_cfg_geoipset_main.php',
