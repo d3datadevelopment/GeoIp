@@ -19,7 +19,7 @@ class d3geoip_update extends d3install_updatebase
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
     public $sModVersion = '3.0.1.0';
-    public $sModRevision = '63';
+    public $sModRevision = '67';
     public $sBaseConf = '5FibjlIQlRvbWMzY29mVi85RXFxbkc5bFI3R24rNkd5Y0lEcXJFOGhtaGExRVcyaEF6a281cVhRUXFMU
 0d6dnNDbCtLRVdObFh3bnVEdUNRTFJrVlE5VGtsRkF3Tyt4TU1Pd290WDliOTQ2SUE5Skk0eTcxTGdlT
 XZna0dhS2ZOekJUSC94ZUd5YmxXZzRXcG5QSWcvZnFJa1l0N1MrdWRZaFU1VG5nUGFwNEF1WTh6azNja
