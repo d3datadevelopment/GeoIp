@@ -39,11 +39,11 @@
 
 class requConfig
 {
-    protected $_sModName = 'D³ GeoIP';
+    public $sModName = 'D³ GeoIP';
 
     public $sModId   = 'd3_geoip';
 
-    protected $_sModVersion = '3.0.0.X';
+    public $sModVersion = '3.0.1.0';
 
     /********************** check configuration section ************************/
 
@@ -60,7 +60,7 @@ class requConfig
         'hasMaxPhpVersion'       => array(
             'blExec'  => 0,
             'aParams' => array(
-                'version' => '5.4.200'
+                'version' => '5.6.200'
             )
         ),
 
@@ -69,7 +69,7 @@ class requConfig
             'blExec'  => 1,
             'aParams' => array(
                 'from' => '5.2.0',
-                'to'   => '5.4.200',
+                'to'   => '5.6.200',
             )
         ),
 
@@ -113,9 +113,9 @@ class requConfig
         'hasMaxShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.8.3',
-                'CE' => '4.8.3',
-                'EE' => '5.1.3'
+                'PE' => '4.9.6',
+                'CE' => '4.9.6',
+                'EE' => '5.2.6'
             ),
         ),
 
@@ -132,7 +132,9 @@ class requConfig
         ),
 
         // benötigt Modul-Connector
-        'hasModCfg'              => array('blExec' => 1),
+        'hasModCfg'              => array(
+            'blExec' => 1
+        ),
 
         // benötigt mindestens diese Erweiterungen / Version lt. d3_cfg_mod (kaskadierbar (siehe "Desc1"))
         'hasMinModCfgVersion'    => array(
@@ -141,7 +143,7 @@ class requConfig
                 'aParams' => array(
                     'id'      => 'd3modcfg_lib',
                     'name'    => 'Modul-Connector',
-                    'version' => '3.9.0.0',
+                    'version' => '4.3.0.0',
                 ),
             ),
             array(
@@ -161,7 +163,18 @@ class requConfig
                 'aParams' => array(
                     'id'      => 'd3modcfg_lib',
                     'name'    => 'Modul-Connector',
-                    'version' => '3.9.0.5',
+                    'version' => '5.0.0.0',
+                ),
+            ),
+        ),
+
+        // benötigt neuen Lizenzschlüssel
+        'requireNewLicence'    => array(
+            array(
+                'blExec'  => 1,
+                'aParams' => array(
+                    'checkVersion' => true, // soll Versionsnummer des installierten Moduls gegengeprüft werden?
+                    'remainingDigits' => 2, // zu prüfende Stellen für neue Lizenz
                 ),
             ),
         ),
@@ -177,7 +190,7 @@ date_default_timezone_set('Europe/Berlin');
  */
 class requCheck
 {
-    public $sVersion = '4.1';
+    public $sVersion = '4.6.2';
 
     protected $_db = false;
 
@@ -196,6 +209,8 @@ class requCheck
     public $oLayout;
 
     protected $_sInFolderFileName = 'd3precheckinfolder.php';
+
+    public $sVersionTag = '@@version@@';
 
     /********************** functional section ************************/
 
@@ -281,8 +296,11 @@ class requCheck
         $aCheckScripts = array();
 
         /** @var SplFileInfo $oFileInfo */
-        foreach (new RecursiveDirectoryIterator($sFolder) AS $oFileInfo) {
-            if (!in_array($oFileInfo->getFileName(), $aIgnoreDirItems) && $oFileInfo->isDir()) {
+        foreach (new RecursiveDirectoryIterator($sFolder) as $oFileInfo) {
+            if (in_array($oFileInfo->getFileName(), $aIgnoreDirItems)) {
+                continue;
+            }
+            if ($oFileInfo->isDir()) {
                 $aCheckScripts = array_merge($aCheckScripts, $this->_walkThroughDirs($oFileInfo->getRealPath()));
             } elseif ($oFileInfo->isFile()) {
                 if (strtolower($oFileInfo->getFilename()) == $this->_sInFolderFileName) {
@@ -312,10 +330,83 @@ class requCheck
                 $aArguments
             );
 
-            $aReturn[$this->getBasePath($sScriptPath)] = unserialize(file_get_contents($sUrl));
+            $sVersionUrl = $this->_getFolderCheckUrl(
+                $sScriptPath,
+                'getVersion',
+                array()
+            );
+
+            $sContent = serialize(null);
+            $sVersion = serialize(null);
+
+            if ($this->_hasCurl()) {
+                $sContent = $this->_getContentByCurl($sUrl);
+                $sVersion = $this->_getContentByCurl($sVersionUrl);
+            } elseif ($this->_hasAllowUrlFopen()) {
+                $sContent = file_get_contents($sUrl);
+                $sVersion = file_get_contents($sVersionUrl);
+            }
+
+            $sBasePath = $this->getBasePath($sScriptPath);
+            $aReturn[$sBasePath] = unserialize($sContent);
+            $aReturn[$this->sVersionTag][$sBasePath] = unserialize($sVersion);
         }
 
         return $aReturn;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function _hasCurl()
+    {
+        if (extension_loaded('curl') && function_exists('curl_init')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function _hasAllowUrlFopen()
+    {
+        if (ini_get('allow_url_fopen')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $sUrl
+     *
+     * @return bool|mixed
+     */
+    protected function _getContentByCurl($sUrl)
+    {
+        $ch = curl_init();
+        $sCurl_URL = preg_replace('@^((http|https)://)@', '', $sUrl);
+        curl_setopt($ch, CURLOPT_URL, $sCurl_URL);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_POST, 0);
+        $sContent = curl_exec($ch);
+        curl_close($ch);
+
+        if (false == $sContent ||
+            strstr(strtolower($sContent), strtolower('Request Entity Too Large')) ||
+            strstr(strtolower($sContent), strtolower('not allow request data with POST requests'))
+        ) {
+            return false;
+        }
+
+        return $sContent;
     }
 
     /**
@@ -364,15 +455,23 @@ class requCheck
     }
 
     /**
-     * @param $aResult
+     * @return string
+     */
+    public function getVersion()
+    {
+        return $this->sVersion;
+    }
+
+    /**
+     * @param $mResult
      *
      * @return bool
      */
-    protected function _hasFalseInResult($aResult)
+    protected function _hasFalseInResult($mResult)
     {
-        if (is_array($aResult)) {
-            foreach ($aResult as $blResult) {
-                if (!$blResult) {
+        if (is_array($mResult)) {
+            foreach ($mResult as $blResult) {
+                if (false === $blResult) {
                     $this->blGlobalResult = false;
 
                     return true;
@@ -380,13 +479,66 @@ class requCheck
             }
 
             return false;
-        } else {
-            if (!$aResult) {
-                $this->blGlobalResult = false;
+        }
+
+        if (false === $mResult) {
+            $this->blGlobalResult = false;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $mResult
+     *
+     * @return bool
+     */
+    protected function _hasNullInResult($mResult)
+    {
+        if (is_array($mResult)) {
+            foreach ($mResult as $blResult) {
+                if ($blResult === null) {
+                    $this->blGlobalResult = false;
+
+                    return true;
+                }
             }
 
-            return !$aResult;
+            return false;
         }
+
+        if ($mResult === null) {
+            $this->blGlobalResult = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $mResult
+     *
+     * @return bool
+     */
+    protected function _hasNoticeInResult($mResult)
+    {
+        if (is_array($mResult)) {
+            foreach ($mResult as $blResult) {
+                if ($blResult === 'notice') {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if ($mResult === 'notice') {
+            return true;
+        }
+
+        return false;
     }
 
     /********************** conversion function section ************************/
@@ -421,8 +573,8 @@ class requCheck
         if (!$this->_db) {
             if (file_exists('config.inc.php')) {
                 require_once('config.inc.php');
-                $this->_db = mysql_connect($this->dbHost, $this->dbUser, $this->dbPwd);
-                mysql_select_db($this->dbName, $this->_db);
+                ini_set('error_reporting', E_ALL^E_NOTICE);
+                $this->_db = mysqli_connect($this->dbHost, $this->dbUser, $this->dbPwd, $this->dbName);
             }
         }
 
@@ -441,15 +593,22 @@ class requCheck
 
         return sprintf(
             '%d%03d%03d%03d',
-            intval($match[0] !== null ? $match[0] : $iUnsetPart),
-            intval(
-                $match[1] !== null ? $match[1] : $iUnsetPart
-            ),
-            intval($match[2] !== null ? $match[2] : $iUnsetPart),
-            intval(
-                $match[3] !== null ? $match[3] : $iUnsetPart
-            )
+            $this->_getVersionDigit($match[0], $iUnsetPart),
+            $this->_getVersionDigit($match[1], $iUnsetPart),
+            $this->_getVersionDigit($match[2], $iUnsetPart),
+            $this->_getVersionDigit($match[3], $iUnsetPart)
         );
+    }
+
+    /**
+     * @param $sMatch
+     * @param $iUnsetPart
+     *
+     * @return int
+     */
+    protected function _getVersionDigit($sMatch, $iUnsetPart)
+    {
+        return intval($sMatch !== null ? $sMatch : $iUnsetPart);
     }
 
     /********************** layout function section ************************/
@@ -503,20 +662,34 @@ class requCheck
     {
         $sGenCheckType = preg_replace("@(\_[0-9]$)@", "", $sCheckType);
         $oTests = new requTests($this, $this->oConfig, $this->getDb(), $this->oRemote);
-
         if (method_exists($oTests, $sGenCheckType)) {
-            $aResult = $oTests->{$sGenCheckType}($aConfiguration);
-            $sElementId = (md5($sGenCheckType . serialize($aConfiguration)));
-
-            if ($this->_hasFalseInResult($aResult)) {
-                $this->oLayout->getNoSuccessItem($aResult, $sElementId, $sCheckType, $aConfiguration);
-            } else {
-                $this->oLayout->getSuccessItem($aResult, $sElementId, $sCheckType, $aConfiguration);
-            }
+            $this->_checkResult($oTests, $sGenCheckType, $sCheckType, $aConfiguration);
         } else {
             $this->oLayout->getUncheckableItem($sCheckType, $aConfiguration);
             $this->blGlobalResult = false;
         }
+    }
+
+    /**
+     * @param $oTests
+     * @param $sGenCheckType
+     * @param $sCheckType
+     * @param $aConfiguration
+     */
+    protected function _checkResult($oTests, $sGenCheckType, $sCheckType, $aConfiguration)
+    {
+            $mResult = $oTests->{$sGenCheckType}($aConfiguration);
+            $sElementId = (md5($sGenCheckType . serialize($aConfiguration)));
+
+            if ($this->_hasNoticeInResult($mResult)) {
+                $this->oLayout->getUnknownItem($mResult, $sElementId, $sCheckType, $aConfiguration);
+            } elseif ($this->_hasNullInResult($mResult)) {
+                $this->oLayout->getUnknownItem($mResult, $sElementId, $sCheckType, $aConfiguration);
+            } elseif ($this->_hasFalseInResult($mResult)) {
+                $this->oLayout->getNoSuccessItem($mResult, $sElementId, $sCheckType, $aConfiguration);
+            } else {
+                $this->oLayout->getSuccessItem($mResult, $sElementId, $sCheckType, $aConfiguration);
+            }
     }
 
     public function showinfo()
@@ -559,21 +732,137 @@ class requLayout
                     </title>
                     <style type="text/css">
                         <!--
-                        body {background: #FFF url($sScriptName?fnc=getGifBg) repeat-x; font: 13px Trebuchet MS,Tahoma,Verdana,Arial,Helvetica,sans-serif;}
-                        .btn_1 {background: url($sScriptName?fnc=getPngButton) no-repeat scroll right 0; height: 22px; padding: 0 3px 0 0; float: left; margin-bottom: 10px;}
-                        .btn_2 {background: url($sScriptName?fnc=getPngButton) no-repeat; height: 22px; color: white; font-weight: bold; line-height: 1; display: block; padding: 4px 5px 0px; text-decoration: none; font-family: Verdana; font-size: 12px;}
+                        body {
+                            background: #FFF url($sScriptName?fnc=getGifBg) repeat-x;
+                            font: 13px Trebuchet MS,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+                        }
+                        div.langswitch {
+                            clear: both;
+                            float: none;
+                            height: 13px;
+                            margin: 10px 0 25px;
+                        }
+                        .langswitch a {
+                            text-decoration: none;
+                            margin-right: 5px;
+                            width: 18px;
+                            height: 13px;
+                            display: block;
+                            float: left;
+                        }
+                        .btn_1 {
+                            background: url($sScriptName?fnc=getPngButton) no-repeat scroll right 0;
+                            height: 22px; padding: 0 3px 0 0; float: left; margin-bottom: 10px;
+                        }
+                        .btn_2 {
+                            background: url($sScriptName?fnc=getPngButton) no-repeat;
+                            height: 22px; color: white; font-weight: bold; line-height: 1;
+                            display: block; padding: 4px 5px 0px; text-decoration: none;
+                            font-family: Verdana; font-size: 12px;
+                        }
                         #logo {position: absolute; top: 10px; right: 30px;}
-                        .box_warning { text-align: center; background-color: DarkRed; border: 1px solid black; color: white; font-weight: normal; padding: 1px;}
-                        .box_ok { text-align: center; background-color: DarkGreen; border: 1px solid black; color: white; font-weight: normal; padding: 1px;}
+                        .box_warning {
+                            text-align: center; background-color: DarkRed; border: 1px solid black;
+                            color: white; font-weight: normal; padding: 1px;
+                        }
+                        .box_ok {
+                            text-align: center; background-color: DarkGreen; border: 1px solid black;
+                            color: white; font-weight: normal; padding: 1px;
+                        }
                         .box_warning a, .box_ok a {font-weight: bold; color: white;}
-                        .squ_bullet {float: left; height: 10px; width: 10px; border: 1px solid black; margin: 0 5px 0 50px;  display: inline-block;}
-                        .squ_toggle {font-size: 15px; line-height: 0.5; cursor: pointer; float: left; height: 10px; width: 9px; padding-left: 1px; border: 1px solid black; margin: 0 5px 0 3px;  display: inline-block;}
+                        .squ_bullet {
+                            float: left;
+                            height: 10px;
+                            width: 5px;
+                            border: 1px solid black;
+                            margin: 0 5px 0 50px;
+                            display: inline-block;
+                            font-size: 11px;
+                            color: white;
+                            padding: 0 3px;
+                            line-height: 10px;
+                            cursor: pointer;
+                        }
+                        .squ_toggle {
+                            font-size: 15px; line-height: 0.5; cursor: pointer; float: left;
+                            height: 10px; width: 9px; padding-left: 1px; border: 1px solid black;
+                            margin: 0 5px 0 3px;  display: inline-block;
+                        }
+                        .squ_desc {
+                            position: relative;
+                            font-size: 11px;
+                            line-height: 10px;
+                            cursor: help;
+                            height: 10px;
+                            width: 5px;
+                            padding: 0 3px;
+                            border: 1px solid black;
+                            margin: 0 5px 0 3px;
+                            display: inline-block;
+                        }
+                        .squ_desc div {
+                            font-size: 13px;
+                            background-color: white;
+                            border: 1px solid black;
+                            box-shadow: 4px 3px 7px #c9c9c9;
+                            display: none;
+                            left: 0;
+                            padding: 20px;
+                            position: absolute;
+                            top: -25px;
+                            width: 400px;
+                            z-index: 2500;
+                        }
+                        .squ_desc:hover div,
+                        .squ_desc div:hover {
+                            display: block;
+                            margin-left: 30px;
+                        }
+                        .squ_desc div.hoverhelper {
+                            background: transparent none repeat scroll 0 0;
+                            border: medium none;
+                            box-shadow: none;
+                            margin-left: 0;
+                            width: 0;
+                            padding: 0 0 150px 30px;
+                        }
+                        .squ_desc:hover div div {
+                            display: inline-block;
+                            position: unset;
+                            border: none;
+                            box-shadow: none;
+                            padding: 0;
+                            margin: 5px 0;
+                            line-height: normal;
+                        }
+                        .squ_desc:hover div div.squ_bullet {
+                            border: 1px solid black; display: inline-block; padding: 0; position: unset; width: 10px;
+                            margin: 0 5px; box-shadow: none;
+                        }
+                        .desc_box {
+                            width: 400px;
+                            position: absolute;
+                            left: 400px;
+                        }
+                        .note {
+                            color: gray;
+                            font-size: 10px;
+                        }
                         -->
                     </style>
                 </head>
                 <body>
-                    <a href="http://www.oxidmodule.com/"><img id="logo" src="$sScriptName?fnc=getPngLogo"></a>
-                    <a href="$sScriptName?lang=de"><img src="$sScriptName?fnc=getGifDe"></a> <a href="$sScriptName?lang=en"><img src="$sScriptName?fnc=getGifEn"></a>
+                    <a id="logo" href="http://www.oxidmodule.com/">
+                        <img src="$sScriptName?fnc=getPngLogo">
+                    </a>
+                    <div class="langswitch">
+                        <a href="$sScriptName?lang=de">
+                            <img src="$sScriptName?fnc=getGifDe">
+                        </a>
+                        <a href="$sScriptName?lang=en">
+                            <img src="$sScriptName?fnc=getGifEn">
+                        </a>
+                    </div>
 EOT;
         echo "<h3>" . $this->translate('RequCheck') . ' "' . $this->oConfig->sModName . ' ' . $sModVersion . '"</h3>';
         echo '<p>' . $this->translate('ExecNotice') . '</p>' . PHP_EOL;
@@ -599,15 +888,43 @@ EOT;
             <sub>$sTranslDependent</sub><br>
             <p>
                 <span class="btn_1">
-                    <a href="#" class="btn_2" onClick="document.getElementById('phpinfo').style.display = document.getElementById('phpinfo').style.display == 'none' ? 'block' : 'none';">$sTranslShopPhpInfo</a>
+                    <a href="#" class="btn_2"
+                        onClick="document.getElementById('phpinfo').style.display =
+                        document.getElementById('phpinfo').style.display == 'none' ? 'block' : 'none';">
+                        $sTranslShopPhpInfo
+                    </a>
                 </span>
             </p>
-            <iframe id="phpinfo" src="$sScriptName?fnc=showinfo" style="display:none; width: 100%; height: 700px;"></iframe>
+            <iframe id="phpinfo" src="$sScriptName?fnc=showinfo" style="display:none; width: 100%; height: 700px;">
+            </iframe>
               </body>
               </html>
 EOT;
 
         return;
+    }
+
+    /**
+     * @param $aResult
+     *
+     * @return bool
+     */
+    protected function hasRemoteVersionDiff($aResult)
+    {
+        $blDiff = false;
+
+        if (is_array($aResult)
+            && isset($aResult[$this->oBase->sVersionTag])
+            && is_array($aResult[$this->oBase->sVersionTag])
+        ) {
+            foreach ($aResult[$this->oBase->sVersionTag] as $sRemoteVersion) {
+                if (version_compare($sRemoteVersion, $this->oBase->getVersion(), '!=')) {
+                    $blDiff = true;
+                }
+            }
+        }
+
+        return $blDiff;
     }
 
     /**
@@ -618,9 +935,19 @@ EOT;
      */
     public function getNoSuccessItem($aResult, $sElementId, $sCheckType, $aConfiguration)
     {
-        echo "<div class='squ_bullet' style='background-color: red;' title='" . $this->translate('RequNotSucc') .
-            "'></div>" . $this->_addToggleScript($aResult, $sElementId) .
-            $this->translate($sCheckType, $aConfiguration) . "<br>" . PHP_EOL;
+        $sText = '';
+        $sDesc = '';
+        if ($this->hasRemoteVersionDiff($aResult)) {
+            $sText = '!';
+            $sDesc = strip_tags($this->translate('RemoteVersionDiff'));
+        }
+
+        echo '<div class="squ_bullet" style="background-color: red;" title="' .
+            $this->translate('RequNotSucc') . $sDesc . '">'.$sText.'</div>' .
+            $this->_addToggleScript($aResult, $sElementId) .
+            $this->translate($sCheckType, $aConfiguration) .
+            $this->_addDescBox($sCheckType.'_DESC', $aConfiguration) .
+            '<br>' . PHP_EOL;
 
         $this->getSubDirItems($aResult, $sElementId);
     }
@@ -633,10 +960,44 @@ EOT;
      */
     public function getSuccessItem($aResult, $sElementId, $sCheckType, $aConfiguration)
     {
-        echo "<div class='squ_bullet' style='background-color: green;' title='" .
-            $this->translate('RequSucc') . "'></div>" .
+        $sText = '';
+        $sDesc = '';
+        if ($this->hasRemoteVersionDiff($aResult)) {
+            $sText = '!';
+            $sDesc = strip_tags($this->translate('RemoteVersionDiff'));
+        }
+
+        echo '<div class="squ_bullet" style="background-color: green;" title="' .
+            $this->translate('RequSucc') . $sDesc . '">'.$sText.'</div>' .
             $this->_addToggleScript($aResult, $sElementId) .
-            $this->translate($sCheckType, $aConfiguration) . "<br>" . PHP_EOL;
+            $this->translate($sCheckType, $aConfiguration) .
+            $this->_addDescBox($sCheckType.'_DESC', $aConfiguration) .
+            '<br>' . PHP_EOL;
+
+        $this->getSubDirItems($aResult, $sElementId);
+    }
+
+    /**
+     * @param $aResult
+     * @param $sElementId
+     * @param $sCheckType
+     * @param $aConfiguration
+     */
+    public function getUnknownItem($aResult, $sElementId, $sCheckType, $aConfiguration)
+    {
+        $sText = '';
+        $sDesc = '';
+        if ($this->hasRemoteVersionDiff($aResult)) {
+            $sText = '!';
+            $sDesc = strip_tags($this->translate('RemoteVersionDiff'));
+        }
+
+        echo '<div class="squ_bullet" style="background-color: orange;" title="' .
+            $this->translate('RequUnknown') . $sDesc . '">'.$sText.'</div>' .
+            $this->_addToggleScript($aResult, $sElementId) .
+            $this->translate($sCheckType, $aConfiguration) .
+            $this->_addDescBox($sCheckType.'_DESC', $aConfiguration) .
+            '<br>' . PHP_EOL;
 
         $this->getSubDirItems($aResult, $sElementId);
     }
@@ -647,9 +1008,11 @@ EOT;
      */
     public function getUncheckableItem($sCheckType, $aConfiguration)
     {
-        echo "<div class='squ_bullet' style='background-color: orange;' title='" .
-            $this->translate('RequNotCheckable') . "'></div>" .
-            $this->translate($sCheckType, $aConfiguration) . " (" . $this->translate('RequNotCheckable') . ")<br>";
+        echo '<div class="squ_bullet" style="background-color: orange;" title="' .
+            $this->translate('RequNotCheckable') . '"></div>' .
+            $this->translate($sCheckType, $aConfiguration) . ' (' . $this->translate('RequNotCheckable') . ')' .
+            $this->_addDescBox($sCheckType.'_DESC', $aConfiguration) .
+            '<br>' . PHP_EOL;
     }
 
     /**
@@ -659,17 +1022,33 @@ EOT;
     public function getSubDirItems($aResult, $sElementId)
     {
         if (is_array($aResult) && count($aResult)) {
-            echo "<div style='margin-left: 20px; display: none;' id='" . $sElementId . "'>";
+            echo '<div style="margin-left: 20px; display: none;" id="' . $sElementId . '">';
             foreach ($aResult as $sPath => $blResult) {
-                if (!$blResult) {
-                    echo "<div class='squ_bullet' style='background-color: red;' title='" .
-                        $this->translate('RequNotSucc') . "'></div>" . $sPath . "<br>";
-                } else {
-                    echo "<div class='squ_bullet' style='background-color: green;' title='" .
-                        $this->translate('RequSucc') . "'></div>" . $sPath . "<br>";
+                if ($sPath != $this->oBase->sVersionTag) {
+                    $sText = '';
+                    $sDesc = '';
+                    if (is_array($aResult[$this->oBase->sVersionTag]) && isset($aResult[$this->oBase->sVersionTag][$sPath])) {
+                        $blDiff = version_compare($aResult[$this->oBase->sVersionTag][$sPath], $this->oBase->getVersion(), '!=');
+                        $sText = $blDiff ? '!' : '';
+                        $sDesc = $blDiff ? $this->translate('RemoteVersionDiff') : '';
+                    }
+
+                    if (false === $blResult) {
+                        echo '<div class="squ_bullet" style="background-color: red;" title="' .
+                            $this->translate('RequNotSucc') . strip_tags($sDesc) . '">'.
+                            $sText.'</div>' . $sPath . $sDesc . '<br>';
+                    } elseif (null === $blResult) {
+                        echo '<div class="squ_bullet" style="background-color: orange;" title="' .
+                            $this->translate('RequUnknown') . strip_tags($sDesc) . '">'.
+                            $sText.'</div>' . $sPath . $sDesc . '<br>';
+                    } else {
+                        echo '<div class="squ_bullet" style="background-color: green;" title="' .
+                            $this->translate('RequSucc') . strip_tags($sDesc) . '">'.
+                            $sText.'</div>' . $sPath . $sDesc . '<br>';
+                    }
                 }
             }
-            echo "</div>" . PHP_EOL;
+            echo '</div>' . PHP_EOL;
         }
     }
 
@@ -682,14 +1061,34 @@ EOT;
     protected function _addToggleScript($aResult, $sElementId)
     {
         if (is_array($aResult) && count($aResult)) {
-            $sScript = "<div class='squ_toggle' title='" . $this->translate(
-                    'toggleswitch'
-                ) . "' onClick='document.getElementById(\"" . $sElementId . "\").style.display = document.getElementById(\"" . $sElementId . "\").style.display == \"none\" ? \"block\" : \"none\"; this.innerHTML = document.getElementById(\"" . $sElementId . "\").style.display == \"none\" ? \"+\" : \"&minus;\";'>+</div>";
+            $sScript = "<div class='squ_toggle' title='" .
+                $this->translate('toggleswitch') .
+                "' onClick='document.getElementById(\"" . $sElementId . "\").style.display =
+                document.getElementById(\"" . $sElementId . "\").style.display == \"none\" ?
+                \"block\" : \"none\"; this.innerHTML =
+                document.getElementById(\"" . $sElementId . "\").style.display == \"none\" ?
+                \"+\" : \"&minus;\";'>+</div>";
         } else {
             $sScript = "";
         }
 
         return $sScript;
+    }
+
+    /**
+     * @param $sTextIdent
+     * @param $aConfiguration
+     *
+     * @return string
+     */
+    protected function _addDescBox($sTextIdent, $aConfiguration)
+    {
+        $sContent = "<div class='squ_desc'>?".
+                "<div class='hoverhelper'></div>".
+                "<div>".$this->translate($sTextIdent, $aConfiguration)."</div>".
+            "</div>";
+
+        return $sContent;
     }
 
     /**
@@ -708,7 +1107,9 @@ EOT;
             array_walk($aConfiguration['aParams'], array($this->oBase, 'aTos'), $sIdent);
         }
 
-        if (($sTranslation = $aTransl[$this->oBase->getLang()][$sGenIdent])) {
+        if (isset($aTransl[$this->oBase->getLang()][$sGenIdent])
+            && ($sTranslation = $aTransl[$this->oBase->getLang()][$sGenIdent])
+        ) {
             if (isset($aConfiguration['aParams'])) {
                 return vsprintf($sTranslation, $aConfiguration['aParams']);
             } else {
@@ -721,7 +1122,24 @@ EOT;
 
     public function getPngButton()
     {
-        $sImg = "iVBORw0KGgoAAAANSUhEUgAABDgAAAAWCAYAAAAl+SzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABMpJREFUeNrs3Y1O4zgUhuFY4hbb2ZthRjtczOz0Ght7cZwfQ5u2E4K0a55XiNDUXyWcT+ZwfGyHw+HQvZI6AACAT+J0OgW9AAAAtnA8Hh/JWYSnbkxuvAYeeg0AAAAAAPynuJevOB6P+ZKe6sYvLy96DgAA7M7z87NOAAAAm7iVq8gxRs5p5CTH03Tz758/uzAUc7x+Hy4pf71ex9fDj2leyxLG1vnNELpmdJPqo21a7afy+/MIj/AIj7zVhS/seWPD4zoAAIAtxJhW44+cy/jx/ftw/2kRxDEQSd0Uraah/RKVlLfK+/kDS0T7eieGZnTdA33QfeF+CpFHeIRHeORSF1Lw3I0Nd3UAAACbEhwprscfadnma05wpL7v8v0Sh4QiLimREqWEt7mSmK9xnLlrSBe6fdq02k9D1oxHeIRHeORCFz13Y8NtHQAAwNYER+zX44+q3Zzg6GOcbw6haqhmXG5MvuQPiw3q9mrTaj/xCI/wCI9c13juxoY/0wEAANxNcPTxbvzxLsHRd7mEo8y+pJIFCWEupy2XMTcSxjKQUMqSl1mb/79urzbN9hOP8AiP8MgV3Zf2vLHhIR0AAMBWcr5iNf6o4owlwdGPCY68hiUsZbRh2DGsWkz7/mUaVl83oxu3R/xwm1b7KfEIj/AIj1zRDfc9d2PDTR0AAMA2hgqOtfijWqOybDKaExzj6pVpzWyYG04zdGn5vByohVC924ou7NSm3X7iER7hER55r/P3w9jw6NgAAADwp+SCjPX442oFR5URWeaY5pKPsmNpmI+SnctN5zKRVnR7tWm1nwKP8AiP8MiKznM3NqzrAAAANic4zuf1+ONaBce576dQZAhMplPepvWzYdn6vSoBCUNJSCkPaUS3V5tm+4lHeIRHeORS97U9b2x4RAcAALA5wZEPRVmJP1K4ckxsPJ/H9SzjOvpuEc11INP805gtWQ6Ka0gXdmrTaD8NGTMe4REe4ZFrOs/d2HBLBwAAsJHzuV+PP6qJlKqCI3ZdvaZliVGm3MiYKZm3EJuvXera0aW0T5tG+2kKYHmER3iER2pdU8/Pc/+0sQEAAGALec/Q9fjjSgVH358v/zFZJNXy6ukYuFQqREZBK7q0U5tm+4lHeIRHeOSqLnnuxoa7YwMAAMAWzvF8M/64THDEOB+xEsYIJlV7d5R1tdNGHsMnlvW2I63opirrj7Zptp86HuERHuGRS92X9ryx4cGxAQAAYBv5mNi1+OP6HhzDMbEVad5JrKoxrdbfzlFa155urzYt9lPgER7hER658bt47saGVR0AAMA28ikqj8QfVQVH3705ceU1KEm5qmM+0y7N8crwOqY5a5Ja0sWd2jTaTykmHuERHuGRS52/H8aGuzoAAIBtxCGIWok/riU4Yl8EZVOwEpSUG9X62XmRS1w+oV5z24RurzaN9tO0QR6P8AiP8MgbnedubLitAwAA2EqfExo34o+LBMevX7+6b9/+KkFItYZlmI0tP1XBS3UE3LhNeju6vdq02k8dj/AIj/DIhW48W8NzNzbcHBsAAAC2MGypsRJ//P7n9/J/yOFwGO6fTie9BgAAPgvrVAAAwFZuzpgcj8fh+jQGHGm6AQAAsDcmUgAAwFYezFeEfwUYAAoCUXB0RZrTAAAAAElFTkSuQmCC";
+        $sImg = "iVBORw0KGgoAAAANSUhEUgAABDgAAAAWCAYAAAAl+SzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAB".
+            "MpJREFUeNrs3Y1O4zgUhuFY4hbb2ZthRjtczOz0Ght7cZwfQ5u2E4K0a55XiNDUXyWcT+ZwfGyHw+HQvZI6AACAT+J0OgW9AAAAtn".
+            "A8Hh/JWYSnbkxuvAYeeg0AAAAAAPynuJevOB6P+ZKe6sYvLy96DgAA7M7z87NOAAAAm7iVq8gxRs5p5CTH03Tz758/uzAUc7x+Hy4".
+            "pf71ex9fDj2leyxLG1vnNELpmdJPqo21a7afy+/MIj/AIj7zVhS/seWPD4zoAAIAtxJhW44+cy/jx/ftw/2kRxDEQSd0Uraah/RKV".
+            "lLfK+/kDS0T7eieGZnTdA33QfeF+CpFHeIRHeORSF1Lw3I0Nd3UAAACbEhwprscfadnma05wpL7v8v0Sh4QiLimREqWEt7mSmK9xn".
+            "LlrSBe6fdq02k9D1oxHeIRHeORCFz13Y8NtHQAAwNYER+zX44+q3Zzg6GOcbw6haqhmXG5MvuQPiw3q9mrTaj/xCI/wCI9c13juxo".
+            "Y/0wEAANxNcPTxbvzxLsHRd7mEo8y+pJIFCWEupy2XMTcSxjKQUMqSl1mb/79urzbN9hOP8AiP8MgV3Zf2vLHhIR0AAMBWcr5iNf6".
+            "o4owlwdGPCY68hiUsZbRh2DGsWkz7/mUaVl83oxu3R/xwm1b7KfEIj/AIj1zRDfc9d2PDTR0AAMA2hgqOtfijWqOybDKaExzj6pVp".
+            "zWyYG04zdGn5vByohVC924ou7NSm3X7iER7hER55r/P3w9jw6NgAAADwp+SCjPX442oFR5URWeaY5pKPsmNpmI+SnctN5zKRVnR7t".
+            "Wm1nwKP8AiP8MiKznM3NqzrAAAANic4zuf1+ONaBce576dQZAhMplPepvWzYdn6vSoBCUNJSCkPaUS3V5tm+4lHeIRHeORS97U9b2".
+            "x4RAcAALA5wZEPRVmJP1K4ckxsPJ/H9SzjOvpuEc11INP805gtWQ6Ka0gXdmrTaD8NGTMe4REe4ZFrOs/d2HBLBwAAsJHzuV+PP6q".
+            "JlKqCI3ZdvaZliVGm3MiYKZm3EJuvXera0aW0T5tG+2kKYHmER3iER2pdU8/Pc/+0sQEAAGALec/Q9fjjSgVH358v/zFZJNXy6ukY".
+            "uFQqREZBK7q0U5tm+4lHeIRHeOSqLnnuxoa7YwMAAMAWzvF8M/64THDEOB+xEsYIJlV7d5R1tdNGHsMnlvW2I63opirrj7Zptp86H".
+            "uERHuGRS92X9ryx4cGxAQAAYBv5mNi1+OP6HhzDMbEVad5JrKoxrdbfzlFa155urzYt9lPgER7hER658bt47saGVR0AAMA28ikqj8".
+            "QfVQVH3705ceU1KEm5qmM+0y7N8crwOqY5a5Ja0sWd2jTaTykmHuERHuGRS52/H8aGuzoAAIBtxCGIWok/riU4Yl8EZVOwEpSUG9X".
+            "62XmRS1w+oV5z24RurzaN9tO0QR6P8AiP8MgbnedubLitAwAA2EqfExo34o+LBMevX7+6b9/+KkFItYZlmI0tP1XBS3UE3LhNeju6".
+            "vdq02k8dj/AIj/DIhW48W8NzNzbcHBsAAAC2MGypsRJ//P7n9/J/yOFwGO6fTie9BgAAPgvrVAAAwFZuzpgcj8fh+jQGHGm6AQAAs".
+            "DcmUgAAwFYezFeEfwUYAAoCUXB0RZrTAAAAAElFTkSuQmCC";
         header("Content-type: image/png");
         echo base64_decode($sImg);
         exit;
@@ -729,7 +1147,64 @@ EOT;
 
     public function getPngLogo()
     {
-        $sImg = "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";
+        $sImg = "iVBORw0KGgoAAAANSUhEUgAAADMAAAA0CAYAAAAnpACSAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAE".
+            "IxJREFUeNq8Wgl4VNXZfu+dLZkkk5BA9kACYQlB2aIga6myuIEtFX+kLW1BJVT/akVrRds+rVqRX2lLRSsal5/nUaCgtmhi8BeaUh".
+            "Al7EYTIWyGQPZlMsnM3Lnn/865dzJ3biaLVnsfDpk59yzf++3fOSMxxvANPlZqUdQs1FRqXmq+Ac7NpbaI2jxqQ6nZqDVR+z9qr1H".
+            "71DxB+nfBPHYYSHUCK8fATl+HUZtK7Wpqo1SGeZ0BQCEYFolQETSrhDJ6d4rax9Q+pFa18SQ8HX6aHAcszUUS9T3U0IU1710ASqid".
+            "dwNuBciMARbSDjcQtDQnnnj7HNYuGvY1gqHnW9RWBBi+f7kT+LwVKG8AjlDj38+0AR1EiJ1kk0XEZFAbO4gQJwOj44F0+m6TsYvWK".
+            "KKWQOQUvVwFPHCAxNBlZDs1psk30wXsv4XWi8VvqefXXwcYWg6FRPy8racBzsXjjQxtXim4sra5bKCG6X3QCLOR4lxBwGakS1g+Ch".
+            "hORN5FcttWpSumpCunZADEH5L2iATa71bAaUUW9XzxVcEs4yCq2zD9qaMML1QQXQGdaMmwYW8PM41RQxwvmgu0+yU8Qap7uUMbN59".
+            "UykUKXF4P0J5hgD4gi5qTjuW6DQkDHehDfMNvLnbgvp/vV7GdpKEGdA5aTMRiAIAQDj6HJHR7rgyHBc+T/a16jaQzNFbYB0FDXa0H".
+            "C0a+QSrrD82J1qj3G73NQJ6buTT+eppdf+cehuauCCCCLDeDkcwAWM8xjA+T8JcKxp3FKu4oFGLUOZJEpyJNIqKfpP4F/kBI9bLIW".
+            "UxIErPLvozNFLb5sOmRgwwbj6kaMbIUrjJMJzIIRooAUOpNzwzdAcMX+hfvlFC6UEaCQ8K0N4FGrzbVQuM+InuZNBjruOcLzpL7Ab".
+            "LSr2LT0lIVG8tpBZnpxDOtwfgX4X2snz5z4y8swaYRfWM2+fhkaS/3gotyqE/RVGnrAgHkz6daQ0D6A8Mlsvm24gDerSYgNhaZiP4".
+            "avvq4giFCgkdJzZa+MAv442zCQxby9hmgK4C7c+MxZCBgZtJam24tVvBmlS4RhoERaH6nRhpvkg4FKfipKXrj32nPjy+p+NsZ9d4W".
+            "L16noPvTu/OBuSSt/z1BaUCNoPN2c7phfhJoqbLfk1qVconwEUw3DEm3L1Xq3W0x9Ix0TDLnHTpwzZ5W5MsYP1gCqTSsxN5jFK+KT".
+            "gbweiW1ChXzhksoXmh7lkx11Vvz8fxsCsaXOsVKI/sD84t3z6pYu5fkaZdCXJUkLSbQd56aWCQz5ZLJ57Juwn3csFV9jaDDCeoEfX".
+            "+owIbceGmT3qseqmOri44oWjam8vmWoMt4iYJk/Pb5WPdpi/h+vC8wszwKHrpzt08zRE4Ql4LEwqL39httGJckD8in8yleUhs7sfV".
+            "sG8MFN0PJ2QB2nAp0A/RrXmzrU+VK2YOTrWlXJEmr7y2w4C0ac90wGQ8UWPmwe1+pCCg/GmvZnO7EOovmPZ19gSn8w2E/LraomlRU".
+            "g6fSmc0lMi1NRopTmjCAeB+UFN80YfQgiUeGoSvzLXMrm9nsxw76sOWYQvmbirxEy3i3j5Vtr1Jqbx1lXbBhtq3wd9Nsi2JteIfmP".
+            "Per/b53HCKuWZafa2dYuduLD74XtYHo2UKdDeY4c2t1K9s2qsgj7E8I3Kw11AZFEYdXRlOKIZEp4tzsHT4Rdny6vrtINdq8DA76nE".
+            "BjaygtSaIi4Hu5FhSfU9FFBs6Xeusm+xKyka1PH/LjUJ2KN25w8PlLlhd3bR8WL2Goy4qV4yxxtxd72/laL893pNK0R4/Vq6t/VOL".
+            "F0Ysqdi6OwndyLb+i/t+ZwXxw127vnBdIMkJXI5kAETwxRcZHy5x8Y/L+8NyyywdKNZBNEfm2kTJON6nYVulHTryMKekyTjWrpGYS".
+            "8pOtKK9jcJPX4uBHJkhYP8M2nta4Z8Nh/4r9NQG8OM+BeIf0Z+qjZAluPceglBJ5LV62nIeIHxZ3IaDncwUZRMtSJ1dBXn74g2AyP".
+            "H72Re5LHtS2q707bNLtFRNstGnUe/RtAe96eJ8PWS4Z01IlJJIEslwWzsEMPWequ39P16Wq5gAmJVuQ6LTgIAFqpkienyhhIsWRZW".
+            "Oskzv87FD28x1IiqHsOd+GkYNkwYxOkmJFYwDnyda2fKrgXLMalkJxs65cGUMZtHw9fS0J2sxtB2oDqG0OaFLpLcOhtaani9WOBrs".
+            "mEEH5SZoRE5ApRNiHfHOeBA6mdOTpOVH/omGbHz/Q9Wqak+HaDF5sSeRAJMTSmLdPKeWLcq3/s+E6x5of7PTg4fqApgnBPCyo7rJJ".
+            "9fkQkvLm4z48OSuqkIORdYBPFx33adT2E6XzNS92LLhgLXmnd6sV7D6naA6k3IsrX2xHXlE7xtDfJX/zTP/7aeWVtddEbeK2aJd5c".
+            "cZQ5w5QUAzgRL1wZe9clWKBhTNS1uOZVU9tJC2ARgzUtNZrn/hBWrWQawOnLLexk2FnpU+P9KrWVL0xHSB9jqINsuPlcP9O72Ta6I".
+            "GrHXz28rLzCmW8ZOjkEWrIS23/xIuFW9txsFYpXJpnX9alcAdBCkBuKI8YMzpRrFeV5ZIwhNRMeB/VkD2YswlVDX0moLXNCg5fFgy".
+            "5lq805RSpV1eXakozQh5MW4QhJ0HmBsonng9iibNrHo6e5E4S+4l6xRDhma4aDH85Is4xttwx3i4pKhMSaupUcdktInGHhazYaWEh".
+            "5jHdylUWYm7QWQXfiX6GDy8KrZjFt5q274ISmsQMC+iDxV/i2NQ0UTy9T3Pag2AoNqDdKzbJqyHCLrUEQioRlC6BO3rJL9IVeuzbK".
+            "rzYd8GHzFgJmXGCEVHcEfkUfT+oBimo4RIS/dDX1hi274Koz/K5Axj+aYMSLo1IyRZNLEgT/uKk8e2JOiVY3ow7SfrPWITii/ClkA".
+            "pZtXHKt4dZyVMBu075hI3fMsqeQK6X1C8oDUOKFFbMRfBMNKShQ0xwceoyq5uVUKTv45mcIsB8ZOzjbjR4znW+lajmQUAyJQYEMI3".
+            "AUHfxmvfdAU5ffLQMa7SkxQyiodFDYDyqyWP1TxN/39wpbIY7R8R+wYmQ+phIxEhESZJTEHnW+CrZKWvSJuY3dhhUwpjpUN+0DMGI".
+            "E7F2SbzxikyABaU66bNGJZwRPQrSCBWqTm9rl+CIg+9gc3sD4VxgekWJUJYbbZMQL7JoLQ8KPpfd3bXu0MpGv67v4SUCp2/BCB6ks".
+            "WtyqlW84XbmJ5A6eXNLT3t1G5HCj6UkYwkSQdXoq0870pA5GCWaK7MaiFCHsO4Jg0klXJonazKudY4MftONLhflXNccqfUb0iCdEi".
+            "L427kOpMeJYHuwneyCM2bEIC2UT820pdPcubsqO00luYEh3bWP2rPaoC82jSMqB+PmXuVMAzOkMSaVI0/GOWrXLLjZCGZ6lk2YTks".
+            "Xw1kuGWbkHmcbw9oZMVydVq/bx30f6bWdZwxM0EhgZleQO7/YpIiz25DxM5PNs8jaRovEOwThPv5/3XDOpUAf0Z+4Oz5VFEgvw7Cd".
+            "iHYNQsbjqgiI32+I1Dz4UeBcPT0Gs7MdfMyr1w53YA595mVEdVNASJWeG3dUdA7gnEANxa4wV60iMVqg6+CSqbwy2TpLGxDpiEjrv".
+            "zpD6Pwhs29QNOv/1t5q0nmeoAU0I3GRY1g3LwF3XhXLpbL4klv1pMVS8kiAp2TYxHYFGfZC8oDLNvyjLfycofusTYrgBGAoxTU3nq".
+            "w5plYO5vDkdLsehCTzyZwYzA147BBbjxgjDpzH8BsLfD5miBX/PTMOIxKtGE2fx6fakRpneYberW/wqJeaPAGUVXfiDIWBRfkxmDb".
+            "UMZyEt+mON5vQyYshrviqGgIhzEENnTWHqZehwCKveGWKoO0MB1PGCXGS3/fwRU14eEuLt5BbFnrZ404kWTPs55aMc4LaOPrcoo8r".
+            "XfxGY+WDM1y42OrDsYteECjUk/smIHzfNa8dcaP0kw5DVduLvZj/Gg2aNGdOjlDjUr7oZ8mxFszKtqOkwoNgmDZG7/GpNsRoLqPRD".
+            "GZLeTsWXxnbvPGA+4nPyYhvGBklJMklQCUvPr7QiaM1XRgcQw6EjGXr7ckjaNr9JVWdhT/ZWq/t91VvImhabJSM8WnCBMqs+sHR2n".
+            "uuiXu85AQVdxZTZUa6MGuYgxP4qtn4+fPI2/XYdqwdflKNFkocm1u9WDIhFh2Ur2TGyGij6Gwho+FG/8xNSYXkhje9Wu7Gqh31+jF".
+            "vX1Ge9X3MQPZ3x4w4Ks/lYl6dBouz12dmRz3u4pt7TekIcW1iukB+JOKC5BaPX/B2B7RaovGmPCc2Lx7CjYnfnUzmHpxaweEa79Sf".
+            "72rEP6o6Q0cprD+6+5Aa0baiIE4cQRlPZ87EOeR/fndczMxXPmwVV1lBjsmkBukihcN8vYWv91RupN1jKY7MaqE0o5pc9p7TnaRuX".
+            "uw82aHZRlCVVaPn6hFA+pYKacyEoVEYM0QwusR81PTcfTPjZ76yv8WwicaV1TvqqG6hOtvSvxZwT+4iPa5u8uOzOj/aOgIhB8TVSt".
+            "bT9+50KZzT3QeO/YmMnFXhVBe3ij/xGGM+neGlkbK2uBG/L2nQ6lvzxVAk8RuPXoMMUAz1u3lymJs1EGrsY4aBkhR+tyOCG9VWOdH".
+            "YuzqLskspjzsx88F5gKZd//C1gxDH3XBADVV0YOFltKqGru/CxhjuMSVT9A5O6C7F1fCC0Fh4ITzCh0V+vRX9VyoH8mAQSKRbgJJY".
+            "u/yHjd9NoRw9SDALJ5gZozALVw9jqmGu9LqBm3I/4x1ON1NgcJyGdflDdK2aOQh5yfb3j9d61/d3pfHsD69y4Z7rEvkhsYGDhvMAY".
+            "3ltrtG736H3iyUjk4xSCkoNxvMIA1hfAFdkReGZRcnCxr1KeKSIBOYUqdt31t+cjGtyozUJhXE/Aje7uWzipvlkxaiW5kOTsLXR82".
+            "SGCOfZxnuFWbyEeKS6wbeTHyoO5LLpLdLHNcWFw5Cf6dAlFEG/zX2RiOhxCYWBXVIhHAgv6fb8LBtpLutTlXW+x/nhiBLAgMDw5+n".
+            "4KPnRsp/lYPrIGHHvFvn2DF/t2m+gjVxwOuWGx9fmYmyK49mqOt8veiO4v0uWx0iU979LElo+fZAmIfVrJraPGorvN2loNPbdNxx5".
+            "KY4n/3nac3dfxA7kxugZCoJLX1qWgUdvTtESTkWNcIJi0vkw2zGU0oz19GbmrEXRwPxgWiL23puDnCT7w6WfuX/Z7y3Ql/i5Cc+vC".
+            "mta/Mt+vOUCdp9s1wKaBaHAJvXyK4w+k0jDxIBWoU7KceLF72diYmb0Xu61XtjftC070U6GLyMlzhqGe3Sy/d/6VdMqX4A9V/xJO/".
+            "60pwF7PneD+fXfYMkSvvTDdBA0dSKp1E9IGsunJCIuSv7liwean+QXWLQfvikw4oiZ2l2kCetP13vx+qEWvHygUTvQ0AnrBiYhdDF".
+            "rVCk9/0uItWJpQYIAcUV6NI/qfxTS+FdTJT+rs1m+eTDBx6ar353tXnXpR2c94O3QeQ9qWv3ooBjVTIkmJ8ZG4FxUzbqiLUgmABMy".
+            "ojBleAymZDsxJNZayu9wqO3+bfHl1iQq5PgtwX8ajPFJ039IN4faWP36Llb/WaOs5yc+PcNt1a/6+I94PuBnCF8HAf8vwADS7GaT0".
+            "D4fMwAAAABJRU5ErkJggg==";
         header("Content-type: image/png");
         echo base64_decode($sImg);
         exit;
@@ -737,7 +1212,12 @@ EOT;
 
     public function getGifBg()
     {
-        $sImg = "R0lGODlhCgAyANUAANHo+pfK85rM8/X6/vb6/v///5jL85bJ8+Hv/KbS9dzt+87m+qTR9fH4/er1/b7e+MTh+P3+/63V9u/3/dfq+rnc97fa96DP9Nns+53N9LLY9tTp+sHg+Mzl+cfi+OPx/Pv9/7DX9p/O9Oz2/bTZ9uXy/KLQ9Pj7/ujz/bzd9/7+//r8//P5/snj+ZvM897u+6nT9avU9qvU9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAKADIAAAbFwINwSAwYj0iDcskUOJ9Ql3RKzVivWJF2y714v2CTeExmmM/ohHrNhrnf8Jh8PpdJ7vh8aM/va/6AgSSDhIUWh4iJFYuMjSmPkJEPk5SVHJeYmRCbnJ0en6ChLaOkpR2nqKkLq6ytAK+wsRuztLUUt7i5GLu8vQq/wMEvw8TFCMfIyR/LzM0lz9DRKNPU1Q7X2Nkj29zdE9/g4Q3j5OUs5+jpA+vs7QTv8PEn8/T1K/f4+SD7/P0R/wADqhhIsGCBgwgTBgEAOw==";
+        $sImg = "R0lGODlhCgAyANUAANHo+pfK85rM8/X6/vb6/v///5jL85bJ8+Hv/KbS9dzt+87m+qTR9fH4/er1/b7e+MTh+P3+/63V9u/3/".
+            "dfq+rnc97fa96DP9Nns+53N9LLY9tTp+sHg+Mzl+cfi+OPx/Pv9/7DX9p/O9Oz2/bTZ9uXy/KLQ9Pj7/ujz/bzd9/7+//r8//P5/s".
+            "nj+ZvM897u+6nT9avU9qvU9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAKADIAAAb".
+            "FwINwSAwYj0iDcskUOJ9Ql3RKzVivWJF2y714v2CTeExmmM/ohHrNhrnf8Jh8PpdJ7vh8aM/va/6AgSSDhIUWh4iJFYuMjSmPkJEP".
+            "k5SVHJeYmRCbnJ0en6ChLaOkpR2nqKkLq6ytAK+wsRuztLUUt7i5GLu8vQq/wMEvw8TFCMfIyR/LzM0lz9DRKNPU1Q7X2Nkj29zdE".
+            "9/g4Q3j5OUs5+jpA+vs7QTv8PEn8/T1K/f4+SD7/P0R/wADqhhIsGCBgwgTBgEAOw==";
         header("Content-type: image/Gif");
         echo base64_decode($sImg);
         exit;
@@ -745,7 +1225,9 @@ EOT;
 
     public function getGifDe()
     {
-        $sImg = "R0lGODlhEgANAIQZAAAAABAFBhEGBhIGBhQHBxUHCCYNDZQqH5QrI9c4M+M4M9w9M+g/MuNDM/BFM99tI+t3H+CyDerIB+zIBuzKBurLCPfcAPfgAPjlAP///////////////////////////ywAAAAAEgANAAAFVaARCGRpmoExAGzrvsBAwHRLFHVdIEfv/8ADouEoGo9IR2PBaDqfUMYioahar1hF4gHper9gyKOCKZvPaExFcmm73/CLZGKp2+94yyRCmfj/gIAUESEAOw==";
+        $sImg = "R0lGODlhEgANAIQZAAAAABAFBhEGBhIGBhQHBxUHCCYNDZQqH5QrI9c4M+M4M9w9M+g/MuNDM/BFM99tI+t3H+CyDerIB+zIB".
+            "uzKBurLCPfcAPfgAPjlAP///////////////////////////ywAAAAAEgANAAAFVaARCGRpmoExAGzrvsBAwHRLFHVdIEfv/8ADou".
+            "EoGo9IR2PBaDqfUMYioahar1hF4gHper9gyKOCKZvPaExFcmm73/CLZGKp2+94yyRCmfj/gIAUESEAOw==";
         header("Content-type: image/Gif");
         echo base64_decode($sImg);
         exit;
@@ -753,7 +1235,20 @@ EOT;
 
     public function getGifEn()
     {
-        $sImg = "R0lGODlhEgANAOfRANzd6P9LQP7//93e6ba32v8HB/J4ef//+/85Of8fFVddwP8aFq+13P8aFPr////f3f8XE/n//62s3fQuLAIDj6ys3uHZ5P8uLOjp793f6dbX6uvBxsyasurCx/9fXcadtS88r+Da5EZHr+Hi7A0NlUVGqcjR9MKaunh5x/8REQAAkv9IP/9BPnh6wi4/td3c5uLl7P8PD7vO9aGSw7bM9uDh6UpLsf8hFv/f3PPx9/Dx9DFCuMDE4cHF4/sAANPU3ufp8JSDvuVocf8ODvz8+/xRTPQgG+PM0ZSWzs/R476+4ujp8v8/PurO0uPZ3//u5fQCAOPj6nFxxf8UE8rM4P/w5YGM18PH4/79/ExUuP3//4CAxqmo3KaZxv7+/RcstO3v89XW6fS8waOj2snM7Nra7Ccon+no9v03OFJZvuK2xBEipP89Ov8dE+be4u3u8/w3OOVocv8sKv8EBOjo9+/u+Kap15SFvgwRlba327uXteHh7tvc5yo3q9XX5SQ4uU5MrtjW5qaVxvDS2f8DA+Tj6vr6/j1FtVlgvL+euvHw9v+rqe7u+XKJ1ebn7p2x7CUmnvb2+dPW8P8cEc/P4efn8/38/5Ws66mYx/ccGNfY5vh0d927zSUlov96ev88OgAAjmmA09rb5v+xsPF5eMnR8i0upuuAgvEyLx0rq97f6cunwEBIuO/Aw/9/fuTm6vn5+vTEyM7P5rq63BESlf+Fgv8fF8SWsOfp7+2rrvX1+La23RgmqLe43PPV2vdydhcnqIWQ2BEgoube4wASn82atOHj6uTT2f97etKjuf9dWsSduZyb08fJ4fn5+/z8/f+ZAP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ywAAAAAEgANAAAI/gB/YHCkig+AAVGGuSmUAYCoEbpgGXsFY8kWM7T6JEI14QMIEpBaVNIBRBOSOtEqmAK27EabYqk6jYl2hpksKnjSmIgmqdEqWw2ShSITrZQCFXb8IDpkRdGBCLGmpBDj4ECOYKyyXHFyyoCQX8hceShQQFktT5viGCDV5AgUaHDjypXrI9exIgHYwEHA5MIcQnJYIEDzKcCKVi+63BE0CMeTUTGGLKrywBemIDMCJVnz5ZIWATI4LYCghoaAaI/+EGNAqQQXQ4xQuDiRYBKHHVLoWJIAaFaNZkSU2KAgTI+RTLd4gRKxC0uZPQPAvAnTiwCPEB02WOiRh4CGZ15wAgUEADs=";
+        $sImg = "R0lGODlhEgANAOfRANzd6P9LQP7//93e6ba32v8HB/J4ef//+/85Of8fFVddwP8aFq+13P8aFPr////f3f8XE/n//62s3fQuL".
+            "AIDj6ys3uHZ5P8uLOjp793f6dbX6uvBxsyasurCx/9fXcadtS88r+Da5EZHr+Hi7A0NlUVGqcjR9MKaunh5x/8REQAAkv9IP/9BPn".
+            "h6wi4/td3c5uLl7P8PD7vO9aGSw7bM9uDh6UpLsf8hFv/f3PPx9/Dx9DFCuMDE4cHF4/sAANPU3ufp8JSDvuVocf8ODvz8+/xRTPQ".
+            "gG+PM0ZSWzs/R476+4ujp8v8/PurO0uPZ3//u5fQCAOPj6nFxxf8UE8rM4P/w5YGM18PH4/79/ExUuP3//4CAxqmo3KaZxv7+/Rcs".
+            "tO3v89XW6fS8waOj2snM7Nra7Ccon+no9v03OFJZvuK2xBEipP89Ov8dE+be4u3u8/w3OOVocv8sKv8EBOjo9+/u+Kap15SFvgwRl".
+            "ba327uXteHh7tvc5yo3q9XX5SQ4uU5MrtjW5qaVxvDS2f8DA+Tj6vr6/j1FtVlgvL+euvHw9v+rqe7u+XKJ1ebn7p2x7CUmnvb2+d".
+            "PW8P8cEc/P4efn8/38/5Ws66mYx/ccGNfY5vh0d927zSUlov96ev88OgAAjmmA09rb5v+xsPF5eMnR8i0upuuAgvEyLx0rq97f6cu".
+            "nwEBIuO/Aw/9/fuTm6vn5+vTEyM7P5rq63BESlf+Fgv8fF8SWsOfp7+2rrvX1+La23RgmqLe43PPV2vdydhcnqIWQ2BEgoube4wAS".
+            "n82atOHj6uTT2f97etKjuf9dWsSduZyb08fJ4fn5+/z8/f+ZAP///////////////////////////////////////////////////".
+            "/////////////////////////////////////////////////////////////////////////////////////////////////////".
+            "///////////////////////////////////ywAAAAAEgANAAAI/gB/YHCkig+AAVGGuSmUAYCoEbpgGXsFY8kWM7T6JEI14QMIEpB".
+            "aVNIBRBOSOtEqmAK27EabYqk6jYl2hpksKnjSmIgmqdEqWw2ShSITrZQCFXb8IDpkRdGBCLGmpBDj4ECOYKyyXHFyyoCQX8hceShQ".
+            "QFktT5viGCDV5AgUaHDjypXrI9exIgHYwEHA5MIcQnJYIEDzKcCKVi+63BE0CMeTUTGGLKrywBemIDMCJVnz5ZIWATI4LYCghoaAa".
+            "I/+EGNAqQQXQ4xQuDiRYBKHHVLoWJIAaFaNZkSU2KAgTI+RTLd4gRKxC0uZPQPAvAnTiwCPEB02WOiRh4CGZ15wAgUEADs=";
         header("Content-type: image/Gif");
         echo base64_decode($sImg);
         exit;
@@ -772,41 +1267,191 @@ class requTranslations
     {
         return array(
             'de' => array(
-                'RequCheck'              => 'Mindestanforderungsprüfung',
-                'ExecNotice'             => 'Führen Sie diese Prüfung immer aus dem Stammverzeichnis Ihres Shops aus. '.
-                    'Nur dann können die Prüfungen erfolgreich durchgeführt werden.',
-                'RequSucc'               => 'Bedingung erfüllt',
-                'RequNotSucc'            => 'Bedingung nicht erfüllt',
-                'RequNotCheckable'       => 'Bedingung nicht prüfbar',
-                'hasMinPhpVersion'       => 'mindestens PHP Version %s',
-                'hasMaxPhpVersion'       => 'maximal PHP Version %s',
-                'hasFromToPhpVersion'    => 'Server verwendet PHP Version zwischen %s und %s',
-                'hasSoap'                => 'SOAP-Erweiterung verfügbar',
-                'hasCurl'                => 'Curl-Erweiterung verfügbar',
-                'hasExtension'           => '%s-Erweiterung verfügbar',
-                'hasMinShopVersion'      => 'mindestens Shop Version %s',
-                'hasMaxShopVersion'      => 'maximal Shop Version %s',
-                'hasMinModCfgVersion'    => 'ModCfg-Eintrag "%s" (%s) mit mindestens Version %s',
-                'hasMaxModCfgVersion'    => 'ModCfg-Eintrag "%s" (%s) mit maximal Version %s',
+                'RequCheck'              => 'Mindestanforderungspr&uuml;fung',
+                'ExecNotice'             => 'F&uuml;hren Sie diese Pr&uuml;fung immer aus dem Stammverzeichnis '.
+                    'Ihres Shops aus. Nur dann k&ouml;nnen die Pr&uuml;fungen erfolgreich durchgef&uuml;hrt werden.',
+                'RequSucc'               => 'Bedingung erf&uuml;llt',
+                'RequNotSucc'            => 'Bedingung nicht erf&uuml;llt',
+                'RequUnknown'            => 'Bedingung unklar, siehe Hinweise im Hilfetext',
+                'RequNotCheckable'       => 'Bedingung nicht pr&uuml;fbar',
+                'hasMinPhpVersion'       => 'mindestens PHP Version %1$s',
+                'hasMinPhpVersion_DESC'  => '<div>Das Modul erfordert eine PHP-Version die nicht kleiner ist '.
+                    'als %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die passende PHP-Version '.
+                    'ist auf Ihrem Server aktiv.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann in '.
+                    'PHP-Versionen kleiner als %1$s nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider '.
+                    'nach der Anpassung der PHP-Installation oder kontaktieren Sie uns f&uuml;r eine alternative '.
+                    'Modulversion.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxPhpVersion'       => 'maximal PHP Version %1$s',
+                'hasMaxPhpVersion_DESC'  => '<div>Das Modul erfordert eine PHP-Version die nicht h&ouml;her ist '.
+                    'als %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die passende PHP-Version '.
+                    'ist auf Ihrem Server aktiv.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann in '.
+                    'PHP-Versionen h&ouml;her als %1$s nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider '.
+                    'nach der Anpassung der PHP-Installation oder kontaktieren Sie uns f&uuml;r eine alternative '.
+                    'Modulversion.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasFromToPhpVersion'    => 'Server verwendet PHP Version zwischen %1$s und %2$s',
+                'hasFromToPhpVersion_DESC' => '<div>Das Modul erfordert eine PHP-Version zwischen %1$s und %2$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die passende PHP-Version '.
+                    'ist auf Ihrem Server aktiv.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann '.
+                    'au&szlig;erhalb der PHP-Versionen nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider '.
+                    'nach der Anpassung der PHP-Installation oder kontaktieren Sie uns f&uuml;r eine alternative '.
+                    'Modulversion.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasExtension'           => '%1$s-Erweiterung verf&uuml;gbar',
+                'hasExtension_DESC'      => '<div>Das Modul erfordert die %1$s-Servererweiterung.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die %1$s-Erweiterung ist '.
+                    'auf Ihrem Server vorhanden.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne die '.
+                    '%1$s-Erweiterung nicht ausgef&uuml;hrt werden. Fragen Sie bei Ihrem Serverprovider nach der '.
+                    'Installation dieser Erweiterung.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinShopVersion'      => 'mindestens Shop Version %1$s',
+                'hasMinShopVersion_DESC' => '<div>Das Modul ist ab Shopversion %1$s freigegeben.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die Shopsoftware ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann in dieser '.
+                    'Version der Shopsoftware nicht installiert werden. Fragen Sie nach einer fr&uuml;heren '.
+                    'Modulversion, die f&uuml;r Ihre Shopversion getestet wurde.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxShopVersion'      => 'maximal Shop Version %1$s',
+                'hasMaxShopVersion_DESC' => '<div>Das Modul ist bis zur Shopversion %1$s freigegeben.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die Shopsoftware ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> Wir k&ouml;nnen nicht '.
+                    'garantieren, dass das Modul in Ihrer Shopversion funktioniert. Fragen Sie nach einer aktuelleren '.
+                    'Modulversion, die f&uuml;r Ihren Shop passt.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinModCfgVersion'    => '%2$s (ModCfg-Eintrag "%1$s") mindestens in Version %3$s',
+                'hasMinModCfgVersion_DESC' => '<div>Das Modul ben&ouml;tigt die Zusatzsoftware "%2$s" mindestens in '.
+                    'Version %3$s </div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die Software ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Die Zusatzsoftware ist '.
+                    'm&ouml;glicherweise gar nicht oder in falscher Version installiert. Bitte installieren Sie die '.
+                    'Zusatzsoftware, bevor Sie diese Installation fortsetzen.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxModCfgVersion'    => '%2$s (ModCfg-Eintrag "%1$s") maximal in Version %3$s',
+                'hasMaxModCfgVersion_DESC' => '<div>Das Modul ben&ouml;tigt die Zusatzsoftware "%2$s" h&ouml;chstens '.
+                    'in Version %3$s </div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Die Software ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Die Zusatzsoftware ist '.
+                    'm&ouml;glicherweise gar nicht oder in falscher Version installiert. Bitte installieren Sie die '.
+                    'Zusatzsoftware, bevor Sie diese Installation fortsetzen.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'requireNewLicence'      => 'bisheriger Lizenzschl&uuml;ssel kann verwendet werden',
+                'requireNewLicence_DESC' => '<div>Diese Pr&uuml;fung versucht zu ermitteln, ob Sie f&uuml;r den '.
+                    'Einsatz dieses Moduls einen aktuellen Lizenzschl&uuml;ssel ben&ouml;tigen:</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Sie haben f&uuml;r dieses '.
+                    'Modul einen Lizenzschl&uuml;ssel hinterlegt, der wahrscheinlich auch f&uuml;r die neue '.
+                    'Modulversion geeignet ist.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> Sie ben&ouml;tigen '.
+                    'f&uuml;r dieses Modul wahrscheinlich einen neuen Lizenzschl&uuml;ssel. Haben Sie diesen schon '.
+                    'vorliegen, f&uuml;hren Sie die Installation aus und tragen den Lizenzschl&uuml;ssel dann im '.
+                    'Adminbereich Ihres Shops ein. Ansonsten k&ouml;nnen Sie den Lizenzschl&uuml;ssel in unserem Shop '.
+                    '<a href="http://www.oxidmodule.com" target="oxidmodule.com">www.oxidmodule.com</a> erwerben oder '.
+                    'sich ebenfalls im Adminbereich Ihres Shops einen kostenfreien Test-Lizenzschl&uuml;ssel '.
+                    'erstellen.</div>'.
+                    '<div>F&uuml;r Details wenden Sie sich bitte an <a href="mailto:buchhaltung@shopmodule.com">'.
+                    'buchhaltung@shopmodule.com</a>.</div>',
                 'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Modul-'.
                     'Connector</a> installiert',
-                'isShopEdition'          => 'ist Shopedition %s',
-                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) oder Zend Guard Loader (PHP 5.3, 5.4) '.
+                'hasModCfg_DESC' => '<div>Das Modul erfordert zwingend den D<sup>3</sup> Modul-Connector.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Der Modul-Connector ist '.
+                    'installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne den Modul-'.
+                    'Connector nicht ausgef&uuml;hrt werden. Bitte laden Sie sich diesen kostenfrei aus unserem Shop '.
+                    'unter <a href="http://www.oxidmodule.com/connector/" target="connector">www.oxidmodule.com/'.
+                    'connector/</a> und installieren diesen vorab.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'isShopEdition'          => 'ist Shopedition %1$s',
+                'isShopEdition_DESC' => '<div>Das Modul erfordert eine dieser Shopeditionen: %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Der Shop ist in der '.
+                    'passenden Edition installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann in Ihrer '.
+                    'Shopedition nicht ausgef&uuml;hrt werden. Bitte fragen Sie nach einer Modulversion f&uuml;r Ihre '.
+                    'Shopedition.</div>'.
+                    '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) oder Zend Guard Loader (PHP 5.3, 5.4, 5.5, 5.6) '.
                     'installiert',
-                'hasIonCubeLoader'       => 'ionCube loader installiert',
-                'globalSuccess'          => 'Die Prüfung war erfolgreich. Sie können das Modul installieren.*<br><br>',
-                'globalNotSuccess'       => 'Die Prüfung war nicht erfolgreich. Bitte kontrollieren Sie die rot '.
-                    'markierten Bedingungen.<br><br>',
-                'deleteFile1'            => 'Löschen Sie diese Datei nach der Verwendung bitte unbedingt wieder von '.
+                'hasZendLoaderOptimizer_DESC' => '<div>Das Modul erfordert (je nach PHP-Version) den Zend Optimizer '.
+                    'bzw. den Zend Guard Loader.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Der passende Decoder ist '.
+                    'auf Ihrem Server installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> Der passende Decoder ist '.
+                    'auf Ihrem Server installiert. Es ist eine zus&auml;tzliche Erweiterungen (Zend OPcache) installiert, '.
+                    'die im Zusammenspiel mit dem Decoder Fehler verursachen kann.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne den '.
+                    'passenden Decoder nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider nach der '.
+                    'Installation des passenden Zend-Decoders.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasIonCubeLoader'       => 'ionCube Loader installiert',
+                'hasIonCubeLoader_DESC'  => '<div>Das Modul erfordert den ionCube Loader.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Der passende Decoder ist '.
+                    'auf Ihrem Server installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne den '.
+                    'passenden Decoder nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider nach der '.
+                    'Installation des ionCube Loaders.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'RemoteVersionDiff'      => ' <span class="note">(Remotescript hat abweichende Version, Ergebnis mglw.'.
+                    'nicht sicher)</span>',
+                'globalSuccess'          => 'Die technische Pr&uuml;fung war erfolgreich. Sie k&ouml;nnen das Modul '.
+                    'installieren.*<br><br>',
+                'globalNotSuccess'       => 'Die technische Pr&uuml;fung war nicht erfolgreich. Bitte kontrollieren '.
+                    'Sie die rot oder orange markierten Bedingungen.<br><br>',
+                'deleteFile1'            => 'L&ouml;schen Sie diese Datei nach der Verwendung bitte unbedingt wieder von '.
                     'Ihrem Server! Klicken Sie <a href="',
-                'deleteFile2'            => '?fnc=deleteme">hier</a>, um diese Datei zu löschen.',
+                'deleteFile2'            => '?fnc=deleteme">hier</a>, um diese Datei zu l&ouml;schen.',
                 'showPhpInfo'            => 'PHPinfo anzeigen',
-                'dependentoffurther'     => '* abhängig von ungeprüften Voraussetzungen',
-                'oneandonedescription'   => '** geprüft wurde das Ausführungsverzeichnis, providerabhängig müssen '.
-                    'Unterverzeichnisse separat geprüft werden (z.B. bei 1&1)',
+                'dependentoffurther'     => '* abh&auml;ngig von ungepr&uuml;ften Voraussetzungen',
+                'oneandonedescription'   => '** gepr&uuml;ft wurde das Ausf&uuml;hrungsverzeichnis, '.
+                    'providerabh&auml;ngig m&uuml;ssen Unterverzeichnisse separat gepr&uuml;ft werden (z.B. bei 1&1)',
                 'or'                     => ' oder ',
-                'toggleswitch'           => 'Klick für Details zur Prüfung',
-                'unableDeleteFile'       => 'Datei konnte nicht gelöscht werden. Bitte löschen Sie diese manuell.',
+                'toggleswitch'           => 'Klick f&uuml;r Details zur Pr&uuml;fung',
+                'unableDeleteFile'       => 'Datei konnte nicht gel&ouml;scht werden. Bitte l&ouml;schen Sie diese '.
+                    'manuell.',
                 'goodBye'                => 'Auf Wiedersehen.',
             ),
             'en' => array(
@@ -815,25 +1460,153 @@ class requTranslations
                     'case only checks can executed succesfully.',
                 'RequSucc'               => 'condition is fulfilled',
                 'RequNotSucc'            => 'condition isn\'t fulfilled',
+                'RequUnknown'            => 'condition unclear, see notes in help text',
                 'RequNotCheckable'       => 'condition isn\'t checkable',
-                'hasMinPhpVersion'       => 'at least PHP version %s',
-                'hasMaxPhpVersion'       => 'not more than PHP version %s',
-                'hasFromToPhpVersion'    => 'server use PHP version between %s and %s',
-                'hasSoap'                => 'SOAP extension available',
-                'hasCurl'                => 'curl extension available',
-                'hasExtension'           => '%s extension is available',
-                'hasMinShopVersion'      => 'at least shop version %s',
-                'hasMaxShopVersion'      => 'not more than shop version %s',
-                'hasMinModCfgVersion'    => 'ModCfg item "%s" (%s) has at least version %s',
-                'hasMaxModCfgVersion'    => 'ModCfg item "%s" (%s) has not more than version %s',
+                'hasMinPhpVersion'       => 'at least PHP version %1$s',
+                'hasMinPhpVersion_DESC'  => '<div>The module requires a PHP version at least %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate version of PHP '.
+                    'is activated on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed within '.
+                    'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
+                    'contact us for another module version.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxPhpVersion'       => 'not more than PHP version %1$s',
+                'hasMaxPhpVersion_DESC'  => '<div>The module requires a PHP version not more than %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate version of PHP '.
+                    'is activated on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed within '.
+                    'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
+                    'contact us for another module version.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasFromToPhpVersion'    => 'server use PHP version between %1$s and %2$s',
+                'hasFromToPhpVersion_DESC'=> '<div>The module requires a PHP version between %1$s and %2$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate version of PHP '.
+                    'is activated on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed within '.
+                    'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
+                    'contact us for another module version.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasExtension'           => '%1$s extension is available',
+                'hasExtension_DESC'      => '<div>The module requires the %1$s server extension.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The %1$s server extension is '.
+                    'available on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed '.
+                    'without the %1$s extension. Ask your server provider for installing this extension.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinShopVersion'      => 'at least shop version %1$s',
+                'hasMinShopVersion_DESC' => '<div>The module is released to shop version %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The shop software is installed '.
+                    'in a suitable version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> We can not guarantee, '.
+                    'that this module works properly in your shop version. Please ask for a matching module version.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxShopVersion'      => 'not more than shop version %1$s',
+                'hasMaxShopVersion_DESC' => '<div>The module is released to shop version %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The shop software is installed '.
+                    'in a suitable version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> We can not guarantee, '.
+                    'that this module works properly in your shop version. Please ask for a matching module version.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinModCfgVersion'    => '%2$s (ModCfg item "%1$s") at least in version %3$s',
+                'hasMinModCfgVersion_DESC' => '<div>The module requires additional software "%2$s" at least '.
+                    'in version %3$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The software is installed '.
+                    'in a suitable version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The additional software is '.
+                    'be installed or in wrong version available. Please install the additional software before '.
+                    'proceeding this installation.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMaxModCfgVersion'    => '%2$s (ModCfg item "%1$s") not more than in version %3$s',
+                'hasMaxModCfgVersion_DESC' => '<div>The module requires additional software "%2$s" not more than '.
+                    'in version %3$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The software is installed '.
+                    'in a suitable version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The additional software is '.
+                    'be installed or in wrong version available. Please install the additional software before '.
+                    'proceeding this installation.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'requireNewLicence'      => 'former licence key can be used',
+                'requireNewLicence_DESC' => '<div>This test tries to determine whether you need a new licence key '.
+                    'for the use of this module</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> You have stored a license key '.
+                    'for this module, which is probably also suitable for the new module version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> You need likely a new license '.
+                    'key for this module. Do you have already one, run the installation and then apply the license '.
+                    'key in the admin panel of your shop. Otherwise, you can purchase it in our shop '.
+                    '<a href="http://www.oxidmodule.com" target="oxidmodule.com">oxidmodule.com</a> or also create a '.
+                    'free trial license key in the admin panel of your shop.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:buchhaltung@shopmodule.com">'.
+                    'buchhaltung@shopmodule.com</a>.</div>',
                 'hasModCfg'              => '<a href="http://www.oxidmodule.com/Connector" target="Connector">Module '.
                     'Connector</a> installed',
-                'isShopEdition'          => 'shop edition is %s',
-                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) or Zend Guard Loader (PHP 5.3, 5.4) installed',
+                'hasModCfg_DESC'         => '<div>The module requires necessarily the D<sup>3</sup> Module Connector.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The Module Connector is '.
+                    'installed.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed '.
+                    'without the Module Connector. Please download this free of charge from our shop '.
+                    '<a href="http://www.oxidmodule.com/connector/" target="connector">www.oxidmodule.com/'.
+                    'connector/</a> and install it beforehand.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'isShopEdition'          => 'shop edition is %1$s',
+                'isShopEdition_DESC'     => '<div>The module requires one of these shop editions: %1$s</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The shop is installed '.
+                    'in the appropriate edition.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed '.
+                    'in your shop edition. Please ask for a module version for your shop edition.</div>'.
+                    '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) or Zend Guard Loader (PHP 5.3, 5.4, 5.5, 5.6) installed',
+                'hasZendLoaderOptimizer_DESC' => '<div>The module requires (depending on the PHP version) the Zend Guard Optimizer '.
+                    'or the Zend Guard Loader.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate decoder is '.
+                    'installed on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> The decoder is '.
+                    'installed on your server. There is an additional installed extension (Zend OPcache), '.
+                    'which can cause errors in combination with the decoder.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The decoder isn\'t '.
+                    'installed on your server. The module can\'t installed or executed. Please contact your server provider.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
                 'hasIonCubeLoader'       => 'ionCube loader installed',
-                'globalSuccess'          => 'The test was successful. Your server is ready for installing the '.
-                    'module.*<br><br>',
-                'globalNotSuccess'       => 'The test wasn\'t successfull. Please check the red marked '.
+                'hasIonCubeLoader_DESC'   => '<div>The module requires the ionCube Loader.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate decoder is '.
+                    'installed on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> The decoder isn\'t '.
+                    'installed on your server. The module can\'t installed or executed. Please contact your server provider.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'RemoteVersionDiff'      => ' <span class="note">(Remote script has different version, result may not '.
+                    'be safe)</span>',
+                'globalSuccess'          => 'The technical test was successful. Your server is ready for installing '.
+                    'the module.*<br><br>',
+                'globalNotSuccess'       => 'The technical test wasn\'t successfull. Please check the red or orange marked '.
                     'conditions.<br><br>',
                 'deleteFile1'            => 'Please delete this file after use on your server! Click <a href="',
                 'deleteFile2'            => '?fnc=deleteme">here</a>, to delete this file.',
@@ -934,28 +1707,30 @@ class requRemote
     /**
      * @param $sUrl
      *
-     * @return string
+     * @return stdClass
      */
     protected function _getRemoteServerData($sUrl)
     {
-        if ($this->oModuleData) {
-            return $this->oModuleData;
+        if (isset($this->oModuleData[$sUrl])) {
+            return $this->oModuleData[$sUrl];
         }
 
-        if ($this->blUseRemote) {
-            $sUrl = '/serialized/' . $sUrl;
+        $oFailureData         = new stdClass();
+        $oFailureData->status = 'NOK';
 
-            $sHost = "http://update.oxidmodule.com";
-            $sData = $this->curlConnect($sHost . $sUrl);
-            $oData = unserialize($sData);
-
-            $this->oModuleData = $oData;
-        } else {
-            $oData = new stdClass();
-            $oData->status = 'NOK';
+        if (false === $this->blUseRemote) {
+            return $oFailureData;
         }
+        $sHost = "http://update.oxidmodule.com";
+        $sData = $this->curlConnect($sHost . '/serialized/' . $sUrl);
+        $oData = unserialize($sData);
 
-        return $oData;
+        if (false == $oData) {
+            return $oFailureData;
+        }
+        $this->oModuleData[$sUrl] = $oData;
+
+        return $this->oModuleData[$sUrl];
     }
 
     /**
@@ -967,10 +1742,7 @@ class requRemote
     {
         $sContent = '';
 
-        if (extension_loaded('curl') &&
-            function_exists('curl_init') && function_exists('curl_exec') &&
-            $ch = curl_init()
-        ) {
+        if (($ch = $this->_hasCurl())) {
             $sCurl_URL = preg_replace('@^((http|https)://)@', '', $sFilePath);
             curl_setopt($ch, CURLOPT_URL, $sCurl_URL);
             if ($_SERVER['HTTP_USER_AGENT']) {
@@ -987,6 +1759,21 @@ class requRemote
         }
 
         return $sContent;
+    }
+
+    /**
+     * @return null|resource
+     */
+    protected function _hasCurl()
+    {
+        if (extension_loaded('curl')
+            && function_exists('curl_init')
+            && function_exists('curl_exec')
+        ) {
+            return curl_init();
+        }
+
+        return null;
     }
 
     /**
@@ -1153,8 +1940,8 @@ class requTests
         if ($this->getDb()) {
             $sField  = 'oxversion';
             $sSelect = "SELECT " . $sField . " FROM oxshops WHERE 1 ORDER BY oxversion ASC LIMIT 1";
-            $rResult = mysql_query($sSelect, $this->getDb());
-            $oResult = mysql_fetch_object($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
 
             $oEditionResult = $this->_getShopEdition();
             $sEdition       = strtoupper($oEditionResult->oxedition);
@@ -1189,8 +1976,8 @@ class requTests
         if ($this->getDb()) {
             $sField  = 'oxversion';
             $sSelect = "SELECT " . $sField . " FROM oxshops WHERE 1 ORDER BY oxversion DESC LIMIT 1";
-            $rResult = mysql_query($sSelect, $this->getDb());
-            $oResult = mysql_fetch_object($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
 
             $oEditionResult = $this->_getShopEdition();
             $sEdition       = strtoupper($oEditionResult->oxedition);
@@ -1252,8 +2039,8 @@ class requTests
         if ($this->getDb()) {
             $sField  = 'oxedition';
             $sSelect = "SELECT " . $sField . " FROM oxshops WHERE 1 LIMIT 1";
-            $rResult = mysql_query($sSelect, $this->getDb());
-            $oResult = mysql_fetch_object($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
 
             return $oResult;
         }
@@ -1269,11 +2056,11 @@ class requTests
         if ($this->getDb()) {
             $sModId  = 'd3modcfg_lib';
             $sSelect = "SELECT 1 as result FROM d3_cfg_mod WHERE oxmodid = '" . $sModId . "' LIMIT 1";
-            $rResult = mysql_query($sSelect, $this->getDb());
-            if (is_resource($rResult)) {
-                $oResult = mysql_fetch_object($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            if (is_object($rResult)) {
+                $oResult = mysqli_fetch_object($rResult);
 
-                if ($oResult->result) {
+                if ((bool) $oResult->result == true) {
                     return true;
                 }
             }
@@ -1298,14 +2085,15 @@ class requTests
                     oxversion != 'basic'
                     ORDER BY oxversion ASC LIMIT 1";
 
-            $rResult = mysql_query($sSelect, $this->getDb());
-            $aResult = mysql_fetch_assoc($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
+            $blReturn = (bool)$oResult->result;
 
-            if (!(int)$aResult['result']) {
+            if (false == $blReturn) {
                 $this->setGlobalResult(false);
             }
 
-            return (int)$aResult['result'];
+            return $blReturn;
         }
 
         $this->setGlobalResult(false);
@@ -1328,19 +2116,72 @@ class requTests
                 oxversion != 'basic'
                 ORDER BY oxversion ASC LIMIT 1";
 
-            $rResult = mysql_query($sSelect, $this->getDb());
-            $aResult = mysql_fetch_assoc($rResult);
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
+            $blResult = (bool)$oResult->result;
 
-            if (!(int)$aResult['result']) {
+            if (false == $blResult) {
                 $this->setGlobalResult(false);
             }
 
-            return (int)$aResult['result'];
+            return $blResult;
         }
 
         $this->setGlobalResult(false);
 
         return false;
+    }
+
+    /**
+     * @param $aConfiguration
+     *
+     * @return bool
+     */
+    public function requireNewLicence(&$aConfiguration)
+    {
+        if ($this->getDb()) {
+            $sSelect = "SELECT
+                oxversion as oxversion
+                FROM d3_cfg_mod WHERE
+                oxmodid = '" . $this->oConfig->sModId . "'
+                ORDER BY oxversion ASC LIMIT 1";
+
+            $rResult = mysqli_query($this->getDb(), $sSelect);
+            $oResult = mysqli_fetch_object($rResult);
+
+            if (isset($oResult)
+                && is_object($oResult)
+                && isset($oResult->oxversion)
+                && isset($aConfiguration['aParams']['checkVersion'])
+            ) {
+                $sInstalledVersion = $this->_getConvertedVersion(
+                    $oResult->oxversion,
+                    $aConfiguration['aParams']['remainingDigits']
+                );
+                $sNewVersion = $this->_getConvertedVersion(
+                    $this->oConfig->sModVersion,
+                    $aConfiguration['aParams']['remainingDigits']
+                );
+                if (version_compare($sInstalledVersion, $sNewVersion, '>=')) {
+                    return true;
+                }
+            }
+        }
+
+        return 'notice';
+    }
+
+    /**
+     * cut not used version digits
+     * @param string $sVersion
+     * @param int $iRemainingDigits
+     *
+     * @return string
+     */
+    protected function _getConvertedVersion($sVersion, $iRemainingDigits)
+    {
+        $aInstalledVersion = explode('.', $sVersion);
+        return implode('.', array_slice($aInstalledVersion, 0, $iRemainingDigits));
     }
 
     /**
@@ -1350,16 +2191,22 @@ class requTests
     {
         $aResult = array($this->getBasePath() => false);
 
-        if ((version_compare(phpversion(), '5.2.0', '>=') &&
-                version_compare(phpversion(), '5.2.900', '<') &&
-                function_exists('zend_optimizer_version')
-            ) || (
-                version_compare(phpversion(), '5.3.0', '>=') &&
-                version_compare(phpversion(), '5.4.900', '<') &&
-                function_exists('zend_loader_version')
-            )
-        ) {
-            $aResult[$this->getBasePath()] = true;
+        if ((version_compare(phpversion(), '5.2.0', '>=')
+            && version_compare(phpversion(), '5.2.900', '<')
+            && function_exists('zend_optimizer_version')
+        ) || (
+            version_compare(phpversion(), '5.3.0', '>=')
+            && version_compare(phpversion(), '5.6.900', '<')
+            && function_exists('zend_loader_version')
+        )) {
+            if (function_exists('opcache_get_status')
+                && ($aOpCacheStatus = opcache_get_status())
+                && $aOpCacheStatus['opcache_enabled']
+            ) {
+                $aResult[$this->getBasePath()] = null;
+            } else {
+                $aResult[$this->getBasePath()] = true;
+            }
         }
 
         $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
@@ -1422,9 +2269,10 @@ class requTransformation
             $sSelect = "SELECT oxversion as result ".
                 "FROM d3_cfg_mod ".
                 "WHERE oxmodid = 'd3modcfg_lib' LIMIT 1";
-            $rResult = mysql_query($sSelect, $this->oCheck->getDb());
-            if (is_resource($rResult)) {
-                $oResult = mysql_fetch_object($rResult);
+            $rResult = mysqli_query($this->oCheck->getDb(), $sSelect);
+
+            if (is_object($rResult)) {
+                $oResult = mysqli_fetch_object($rResult);
                 if ($oResult->result) {
                     $sCheckVersion = $oResult->result;
                 }

@@ -1,3 +1,10 @@
+=> 3.0.1.0
+- Kompatibilität mit OXID Dynamic Content Cache hergestellt
+- prüft IP-Syntax bei Eingabe im Adminbereich
+- weitere Bezugsquellen für Kunden-IP hinzugefügt
+- auf Kompatibilität mit Shopversion 4.9.6 / 5.2.6 geprüft
+- Precheck aktualisiert
+
 => 3.0.0.2
 - auf Kompatibilität mit Shopversion 4.8.3 geprüft
 - Modulstruktur aktualisiert
