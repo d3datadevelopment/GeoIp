@@ -31,9 +31,8 @@ class d3_country_geoip extends oxAdminView
      */
     public function render()
     {
-        if ( !oxRegistry::getConfig()->getConfigParam( 'blAllowSharedEdit' ) )
-        {
-            $this->addTplParam('readonly', TRUE);
+        if (false == oxRegistry::getConfig()->getConfigParam('blAllowSharedEdit')) {
+            $this->addTplParam('readonly', true);
         }
 
         $ret = parent::render();
@@ -41,59 +40,49 @@ class d3_country_geoip extends oxAdminView
         $soxId = oxRegistry::getConfig()->getRequestParameter("oxid");
         // check if we right now saved a new entry
         $sSavedID = oxRegistry::getConfig()->getRequestParameter("saved_oxid");
-        if ( ($soxId == "-1" || !isset( $soxId)) && isset( $sSavedID) )
-        {
+        if (($soxId == "-1" || !isset($soxId)) && isset($sSavedID)) {
             $soxId = $sSavedID;
             oxRegistry::getSession()->deleteVariable("saved_oxid");
-            $this->addTplParam("oxid",$soxId);
+            $this->addTplParam("oxid", $soxId);
             // for reloading upper frame
             $this->addTplParam("updatelist", "1");
         }
 
-        if ( $soxId != "-1" && isset( $soxId))
-        {
+        if ($soxId != "-1" && isset($soxId)) {
             // load object
             /** @var $oCountry oxcountry */
-            $oCountry = oxNew( "oxcountry" );
-            $oCountry->loadInLang( $this->_iEditLang, $soxId );
-
-            if ($oCountry->isForeignCountry())
-            {
-                $this->addTplParam("blForeignCountry", TRUE);
-            }
-            else
-            {
-                $this->addTplParam("blForeignCountry", FALSE);
+            $oCountry = oxNew("oxcountry");
+            $oCountry->loadInLang($this->_iEditLang, $soxId);
+            
+            if ($oCountry->isForeignCountry()) {
+                $this->addTplParam("blForeignCountry", true);
+            } else {
+                $this->addTplParam("blForeignCountry", false);
             }
 
             $oOtherLang = $oCountry->getAvailableInLangs();
-            if (!isset($oOtherLang[$this->_iEditLang]))
-            {
-                $oCountry->loadInLang( key($oOtherLang), $soxId );
+            if (!isset($oOtherLang[$this->_iEditLang])) {
+                $oCountry->loadInLang(key($oOtherLang), $soxId);
             }
 
             $this->oCountry = $oCountry;
             $this->addTplParam("edit", $oCountry);
 
             // remove already created languages
-            $aLang = array_diff (oxRegistry::getLang()->getLanguageNames(), $oOtherLang );
+            $aLang = array_diff(oxRegistry::getLang()->getLanguageNames(), $oOtherLang);
 
-            if ( count( $aLang))
-            {
+            if (count($aLang)) {
                 $this->addTplParam("posslang", $aLang);
             }
 
-            foreach ( $oOtherLang as $id => $language)
-            {
+            foreach ($oOtherLang as $id => $language) {
                 $oLang= new stdClass();
                 $oLang->sLangDesc = $language;
                 $oLang->selected = ($id == $this->_iEditLang);
                 $this->_aViewData["otherlang"][$id] = clone $oLang;
             }
-        }
-        else
-        {
-            $this->addTplParam("blForeignCountry", TRUE);
+        } else {
+            $this->addTplParam("blForeignCountry", true);
         }
 
         $this->oShopList = oxNew('oxshoplist');
@@ -128,38 +117,33 @@ class d3_country_geoip extends oxAdminView
     public function save()
     {
         //allow malladmin only to perform this action
-        if ( !oxRegistry::getConfig()->getConfigParam( 'blAllowSharedEdit' ) )
-        {
+        if (false == oxRegistry::getConfig()->getConfigParam('blAllowSharedEdit')) {
             return;
         }
 
         $soxId   = oxRegistry::getConfig()->getRequestParameter("oxid");
-        $aParams = oxRegistry::getConfig()->getRequestParameter("editval" );
+        $aParams = oxRegistry::getConfig()->getRequestParameter("editval");
 
         /** @var $oCountry oxcountry */
-        $oCountry = oxNew( "oxcountry" );
+        $oCountry = oxNew("oxcountry");
 
-        if ( $soxId != "-1")
-        {
-            $oCountry->loadInLang( $this->_iEditLang, $soxId );
-        }
-        else
-        {
-            $aParams['oxcountry__oxid']        = NULL;
+        if ($soxId != "-1") {
+            $oCountry->loadInLang($this->_iEditLang, $soxId);
+        } else {
+            $aParams['oxcountry__oxid']        = null;
         }
 
         $oCountry->setLanguage(0);
-        $oCountry->assign( $aParams );
+        $oCountry->assign($aParams);
         $oCountry->setLanguage($this->_iEditLang);
-        $oCountry = oxRegistry::get('oxUtilsFile')->processFiles( $oCountry );
+        $oCountry = oxRegistry::get('oxUtilsFile')->processFiles($oCountry);
 
         $oCountry->save();
         $this->addTplParam("updatelist", "1");
 
         // set oxid if inserted
-        if ( $soxId == "-1")
-        {
-            oxRegistry::getSession()->setVariable( "saved_oxid", $oCountry->getId());
+        if ($soxId == "-1") {
+            oxRegistry::getSession()->setVariable("saved_oxid", $oCountry->getId());
         }
     }
 
@@ -176,25 +160,31 @@ class d3_country_geoip extends oxAdminView
      */
     public function getCurList()
     {
-        $aCurrencies = array();
-
-        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop'))
-        {
+        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop')) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
-        }
-        else
-        {
+        } else {
             $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
         }
 
-        $sQ = "select DECODE( oxvarvalue, '".$this->getConfig()->getConfigParam( 'sConfigKey' )."') as oxvarvalue from oxconfig where oxshopid = '".$sShopId."' AND oxvarname = 'aCurrencies'";
+        $sQ = "select DECODE( oxvarvalue, '".oxRegistry::getConfig()->getConfigParam('sConfigKey').
+            "') as oxvarvalue from oxconfig where oxshopid = '".$sShopId."' AND oxvarname = 'aCurrencies'";
 
         $sCurs = oxDb::getDb(oxDb::FETCH_MODE_ASSOC)->getOne($sQ);
 
-        if ($sCurs)
-        {
-            foreach (unserialize($sCurs) as $sKey => $sValue)
-            {
+        return $this->d3ExtractCurList($sCurs);
+    }
+
+    /**
+     * @param $sCurrencies
+     *
+     * @return array
+     */
+    public function d3ExtractCurList($sCurrencies)
+    {
+        $aCurrencies = array();
+
+        if ($sCurrencies) {
+            foreach (unserialize($sCurrencies) as $sKey => $sValue) {
                 $aFields = explode('@', $sValue);
                 $aCurrencies[$sKey]->id = $sKey;
                 $aCurrencies[$sKey]->name  = $aFields[0];
@@ -211,12 +201,9 @@ class d3_country_geoip extends oxAdminView
      */
     public function getLangList()
     {
-        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop'))
-        {
+        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop')) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
-        }
-        else
-        {
+        } else {
             $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
         }
 
@@ -224,60 +211,50 @@ class d3_country_geoip extends oxAdminView
         $aLangParams = oxRegistry::getConfig()->getShopConfVar('aLanguageParams', $sShopId);
         $aConfLanguages = oxRegistry::getConfig()->getShopConfVar('aLanguages', $sShopId);
 
-        if ( is_array( $aConfLanguages ) )
-        {
+        if (is_array($aConfLanguages)) {
             $i = 0;
-            reset( $aConfLanguages );
-            while ( list( $key, $val ) = each( $aConfLanguages ) )
-            {
-                if (is_array($aLangParams) )
-                {
+            reset($aConfLanguages);
+            while ((list($key, $val) = each($aConfLanguages))) {
+                if (is_array($aLangParams)) {
                     //skipping non active languages
-                    if ( !$aLangParams[$key]['active'] )
-                    {
+                    if (false == $aLangParams[$key]['active']) {
                         $i++;
-                    	continue;
+                        continue;
                     }
                 }
 
-                if ( $val)
-                {
+                if ($val) {
                     $oLang = new stdClass();
-                    if ( isset($aLangParams[$key]['baseId']) )
-                    {
+                    if (isset($aLangParams[$key]['baseId'])) {
                         $oLang->id  = $aLangParams[$key]['baseId'];
-                    }
-                    else
-                    {
+                    } else {
                         $oLang->id  = $i;
                     }
                     $oLang->oxid    = $key;
                     $oLang->abbr    = $key;
                     $oLang->name    = $val;
 
-                    if ( is_array($aLangParams) )
-                    {
+                    if (is_array($aLangParams)) {
                         $oLang->active  = $aLangParams[$key]['active'];
                         $oLang->sort   = $aLangParams[$key]['sort'];
                     }
 
-                    if ( isset( $iLanguage ) && $oLang->id == $iLanguage )
-                    {
+                    if (isset($iLanguage) && $oLang->id == $iLanguage) {
                         $oLang->selected = 1;
-                    }
-                    else
-                    {
+                    } else {
                         $oLang->selected = 0;
                     }
-                    if ($oLang->active)
+
+                    if ($oLang->active) {
                         $aLanguages[$oLang->id] = $oLang;
+                    }
                 }
                 ++$i;
             }
         }
 
-        if (is_array($aLangParams) ) {
-            uasort( $aLanguages, array($this, '_sortLanguagesCallback') );
+        if (is_array($aLangParams)) {
+            uasort($aLanguages, array($this, '_sortLanguagesCallback'));
         }
 
         return $aLanguages;
@@ -288,20 +265,16 @@ class d3_country_geoip extends oxAdminView
      * @param $oLang2
      * @return int
      */
-    protected function _sortLanguagesCallback( $oLang1, $oLang2 )
+    protected function _sortLanguagesCallback($oLang1, $oLang2)
     {
         $sSortParam = $this->_sDefSort;
-        $sVal1 = is_string($oLang1->$sSortParam) ? strtolower( $oLang1->$sSortParam ) : $oLang1->$sSortParam;
-        $sVal2 = is_string($oLang2->$sSortParam) ? strtolower( $oLang2->$sSortParam ) : $oLang2->$sSortParam;
+        $sVal1 = is_string($oLang1->$sSortParam) ? strtolower($oLang1->$sSortParam) : $oLang1->$sSortParam;
+        $sVal2 = is_string($oLang2->$sSortParam) ? strtolower($oLang2->$sSortParam) : $oLang2->$sSortParam;
 
-        if ( $this->_sDefSortOrder == 'asc' )
-        {
+        if ($this->_sDefSortOrder == 'asc') {
             return ($sVal1 < $sVal2) ? -1 : 1;
-        }
-        else
-        {
+        } else {
             return ($sVal1 > $sVal2) ? -1 : 1;
         }
     }
-
 }

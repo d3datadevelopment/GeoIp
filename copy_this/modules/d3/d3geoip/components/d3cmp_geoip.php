@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -10,12 +9,20 @@
  *
  * http://www.shopmodule.com
  *
- * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
- * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @copyright © D³ Data Development, Thomas Dartsch
+ * @author    D³ Data Development - Daniel Seifert <ds@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
-class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
+
+class d3cmp_geoip extends oxView
 {
+    /**
+     * Marking object as component
+     *
+     * @var bool
+     */
+    protected $_blIsComponent = true;
+
     private $_sModId = 'd3_geoip';
 
     /**
@@ -23,10 +30,8 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
      */
     public function init()
     {
-        if (d3_cfg_mod::get($this->_sModId)->isActive())
-        {
-            if (d3_cfg_mod::get($this->_sModId)->hasDebugMode())
-            {
+        if (d3_cfg_mod::get($this->_sModId)->isActive()) {
+            if (d3_cfg_mod::get($this->_sModId)->hasDebugMode()) {
                 /** @var $oGeoIp d3geoip */
                 $oGeoIp = oxNew('d3geoip');
                 echo $oGeoIp->getIP();
@@ -35,9 +40,9 @@ class d3_oxcmp_cur_geoip extends d3_oxcmp_cur_geoip_parent
             /** @var $oLocation d3geoip */
             $oLocation = oxNew('d3geoip');
             $oLocation->setCountryCurrency();
+            $oLocation->setCountryLanguage();
         }
 
-        return parent::init();
+        parent::init();
     }
-
 }

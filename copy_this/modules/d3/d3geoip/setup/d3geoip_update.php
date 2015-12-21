@@ -18,14 +18,14 @@ class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '3.0.0.2';
-    public $sModRevision = '52';
-    public $sBaseConf = 'DSdWUJnZzd3RTd4aStQNjFBVnBkK3NFUmwzY2tiNHllWmFjSUZZOS9USTAzbHpHb241YWZTNThRWnpCV
-XBnQ2J0STVReGNTQmVJQ0h3aXVYWVBKcWFuVzM2WVNwdld0cXZ3bEYzTWJRMnJTN2ZYMGFNMkFxT2VQe
-CsxNzVVaytabkRBbCtJWnE1Y3lKZWdmaC9XNDhkZzhhQXhHc2FaZHlyejlSMFE1ZUJjNzA1M1dzSEJPQ
-0NBNGZJbEpZNFVuMG1STEtQRkx1WDZZZzRndXF2OW1oUGdGb2tJZW1lQ09waE5FK29PYmpML2pRVkNaS
-EdaS3RXUW5NZzJhUUF5ZlNIZ1h3MUo3QVpIeFUwL0lmajRTbWw2cmNsckpJVnFYQjFKWTd3RXUrMlhHK
-zQ9';
+    public $sModVersion = '3.0.1.0';
+    public $sModRevision = '67';
+    public $sBaseConf = '5FibjlIQlRvbWMzY29mVi85RXFxbkc5bFI3R24rNkd5Y0lEcXJFOGhtaGExRVcyaEF6a281cVhRUXFMU
+0d6dnNDbCtLRVdObFh3bnVEdUNRTFJrVlE5VGtsRkF3Tyt4TU1Pd290WDliOTQ2SUE5Skk0eTcxTGdlT
+XZna0dhS2ZOekJUSC94ZUd5YmxXZzRXcG5QSWcvZnFJa1l0N1MrdWRZaFU1VG5nUGFwNEF1WTh6azNja
+Gs3SmtzQ05SVjROSGdSZ2N0S3Q1TTV1RGlCSU5RZnh1dGVNNVd6bTBzMU1FdHFiNytJQldBRjRTNmx3U
+VVlRkhrRzYxYUtpaWNBOUUrLzZ2YjN5SDM1cllVMTIrYUFPRnRYcFpibHVBQytEQVFnNFV0RWpFZXAwd
+FE9';
     public $sRequirements = '';
     public $sBaseValue = '';
 
@@ -40,6 +40,10 @@ zQ9';
               'do'    => 'fixGeoIpFields'),
         array('check' => 'checkIndizes',
               'do'    => 'fixIndizes'),
+        array('check' => 'hasUnregisteredFiles',
+              'do'    => 'showUnregisteredFiles'),
+        array('check' => 'checkRegisteredComponent',
+              'do'    => 'registerComponent'),
         array('check' => 'checkModCfgSameRevision',
               'do'    => 'updateModCfgSameRevision'),
     );
@@ -52,101 +56,101 @@ zQ9';
             'sTableName'  => 'oxcountry',
             'sFieldName'  => 'D3GEOIPSHOP',
             'sType'       => 'VARCHAR(10)',
-            'blNull'      => FALSE,
+            'blNull'      => false,
             'sDefault'    => 'oxbaseshop',
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3GEOIPLANG' => array(
             'sTableName'  => 'oxcountry',
             'sFieldName'  => 'D3GEOIPLANG',
             'sType'       => 'TINYINT(2)',
-            'blNull'      => FALSE,
+            'blNull'      => false,
             'sDefault'    => '-1',
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3GEOIPCUR'      => array(
             'sTableName'  => 'oxcountry',
             'sFieldName'  => 'D3GEOIPCUR',
             'sType'       => 'TINYINT(2)',
-            'blNull'      => FALSE,
+            'blNull'      => false,
             'sDefault'    => '-1',
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3GEOIPURL'      => array(
             'sTableName'  => 'oxcountry',
             'sFieldName'  => 'D3GEOIPURL',
             'sType'       => 'VARCHAR(255)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3STARTIP'        => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3STARTIP',
             'sType'       => 'VARCHAR(39)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3ENDIP'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ENDIP',
             'sType'       => 'VARCHAR(39)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3STARTIPNUM'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3STARTIPNUM',
             'sType'       => 'DECIMAL(38,0)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3ENDIPNUM'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ENDIPNUM',
             'sType'       => 'DECIMAL(38,0)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3ISO'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ISO',
             'sType'       => 'CHAR(2)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
         'D3COUNTRYNAME'    => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3COUNTRYNAME',
             'sType'       => 'VARCHAR(50)',
-            'blNull'      => FALSE,
-            'sDefault'    => FALSE,
+            'blNull'      => false,
+            'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
-            'blMultilang' => FALSE,
+            'blMultilang' => false,
         ),
     );
 
@@ -175,7 +179,7 @@ zQ9';
      */
     public function checkGeoIpTableExist()
     {
-        return $this->_checkTableExist('d3geoip');
+        return $this->_checkTableNotExist('d3geoip');
     }
 
     /**
@@ -183,13 +187,9 @@ zQ9';
      */
     public function updateGeoIpTableExist()
     {
-        $blRet = FALSE;
-        if ($this->checkGeoIpTableExist())
-        {
-            $aRet  = $this->_addTable('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP', 'MyISAM');
-            $blRet = $aRet['blRet'];
-            $this->_setActionLog('SQL', $aRet['sql'], __METHOD__);
-            $this->_setUpdateBreak(TRUE);
+        $blRet = false;
+        if ($this->checkGeoIpTableExist()) {
+            $blRet  = $this->_addTable2('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP', 'MyISAM');
         }
 
         return $blRet;
@@ -223,9 +223,8 @@ zQ9';
      */
     public function checkModCfgItemExist()
     {
-        $blRet = FALSE;
-        foreach ($this->_getShopList() as $oShop)
-        {
+        $blRet = false;
+        foreach ($this->getShopList() as $oShop) {
             /** @var $oShop oxshop */
             $aWhere = array(
                 'oxmodid'       => $this->sModKey,
@@ -235,8 +234,7 @@ zQ9';
 
             $blRet = $this->_checkTableItemNotExist('d3_cfg_mod', $aWhere);
 
-            if ($blRet)
-            {
+            if ($blRet) {
                 return $blRet;
             }
         }
@@ -249,12 +247,10 @@ zQ9';
      */
     public function updateModCfgItemExist()
     {
-        $blRet = FALSE;
+        $blRet = false;
 
-        if ($this->checkModCfgItemExist())
-        {
-            foreach ($this->_getShopList() as $oShop)
-            {
+        if ($this->checkModCfgItemExist()) {
+            foreach ($this->getShopList() as $oShop) {
                 /** @var $oShop oxshop */
                 $aWhere = array(
                     'oxmodid'       => $this->sModKey,
@@ -262,8 +258,7 @@ zQ9';
                     'oxnewrevision' => $this->sModRevision,
                 );
 
-                if ($this->_checkTableItemNotExist('d3_cfg_mod', $aWhere))
-                {
+                if ($this->_checkTableItemNotExist('d3_cfg_mod', $aWhere)) {
                     // update don't use this property
                     unset($aWhere['oxnewrevision']);
 
@@ -271,103 +266,98 @@ zQ9';
                         array (
                             'fieldname'     => 'OXID',
                             'content'       => "md5('" . $this->sModKey . " " . $oShop->getId() . " de')",
-                            'force_update'  => TRUE,
-                            'use_quote'     => FALSE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => false,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXSHOPID',
                             'content'       => $oShop->getId(),
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXMODID',
                             'content'       => $this->sModKey,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXNAME',
                             'content'       => $this->sModName,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXACTIVE',
                             'content'       => "0",
-                            'force_update'  => FALSE,
-                            'use_quote'     => FALSE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => false,
+                            'use_quote'     => false,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXBASECONFIG',
                             'content'       => $this->sBaseConf,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXSERIAL',
                             'content'       => "",
-                            'force_update'  => FALSE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => false,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXINSTALLDATE',
                             'content'       => "NOW()",
-                            'force_update'  => TRUE,
-                            'use_quote'     => FALSE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => false,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXVERSION',
                             'content'       => $this->sModVersion,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXSHOPVERSION',
                             'content'       => oxRegistry::getConfig()->getEdition(),
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array (
                             'fieldname'     => 'OXREQUIREMENTS',
                             'content'       => $this->sRequirements,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array(
                             'fieldname'     => 'OXVALUE',
                             'content'       => $this->sBaseValue,
-                            'force_update'  => FALSE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => false,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         ),
                         array(
                             'fieldname'     => 'OXNEWREVISION',
                             'content'       => $this->sModRevision,
-                            'force_update'  => TRUE,
-                            'use_quote'     => TRUE,
-                            'use_multilang' => FALSE,
+                            'force_update'  => true,
+                            'use_quote'     => true,
+                            'use_multilang' => false,
                         )
                     );
-                    $aRet          = $this->_updateTableItem('d3_cfg_mod', $aInsertFields, $aWhere);
-                    $blRet         = $aRet['blRet'];
+                    $blRet          = $this->_updateTableItem2('d3_cfg_mod', $aInsertFields, $aWhere);
 
-                    $this->_setActionLog('SQL', $aRet['sql'], __METHOD__);
-                    $this->_setUpdateBreak(FALSE);
-
-                    if ($this->getStepByStepMode())
-                    {
+                    if ($this->getStepByStepMode()) {
                         break;
                     }
                 }
@@ -383,7 +373,7 @@ zQ9';
     public function checkGeoIpFields()
     {
         /** @var $oShop oxshop */
-        $oShop = $this->_getShopList()->current();
+        $oShop = $this->getShopList()->current();
         $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
 
         return $this->checkFields();
@@ -396,9 +386,73 @@ zQ9';
     public function fixGeoIpFields()
     {
         /** @var $oShop oxshop */
-        $oShop = $this->_getShopList()->current();
+        $oShop = $this->getShopList()->current();
         $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
 
         return $this->fixFields();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasUnregisteredFiles()
+    {
+        return $this->_hasUnregisteredFiles('d3geoip', array('d3FileRegister'));
+    }
+
+    /**
+     * @return bool
+     */
+    public function showUnregisteredFiles()
+    {
+        return $this->_showUnregisteredFiles('d3geoip', array('d3FileRegister'));
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkRegisteredComponent()
+    {
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+        /** @var $oShop oxshop */
+        foreach ($this->getShopListByActiveModule('d3geoip') as $oShop) {
+            /** @var array $aUserComponents */
+            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+
+            if (false == $aUserComponents
+                || false == $aUserComponents['d3cmp_geoip']
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function registerComponent()
+    {
+        $blRet = true;
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+
+        /** @var $oShop oxshop */
+        foreach ($this->getShopList() as $oShop) {
+            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+            if (false == $aUserComponents) {
+                $aUserComponents = array();
+            }
+
+            if (false == $aUserComponents['d3cmp_geoip']) {
+                $blDontUseCache = 1;
+                $aUserComponents['d3cmp_geoip'] = $blDontUseCache;
+                $this->fixOxconfigVariable($sVarName, $oShop->getId(), '', $aUserComponents, 'arr');
+            }
+        }
+
+        return $blRet;
     }
 }

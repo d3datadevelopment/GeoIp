@@ -18,7 +18,7 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
 {
     protected $_sModId = 'd3_geoip';
     protected $_sThisTemplate = "d3_cfg_geoipset_main.tpl";
-    protected $_blHasDebugSwitch = TRUE;
+    protected $_blHasDebugSwitch = true;
     protected $_sDebugHelpTextIdent = 'D3_GEOIP_SET_DEBUG_DESC';
 
     /**
@@ -33,12 +33,9 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
         $oD3GeoIP = oxNew('d3geoip');
         $oCountry = $oD3GeoIP->getUserLocationCountryObject($sIP);
 
-        if ($oCountry->getId())
-        {
+        if ($oCountry->getId()) {
             $sTitle = $oCountry->getFieldData('oxtitle');
-        }
-        else
-        {
+        } else {
             $sTitle = oxRegistry::getLang()->translateString('D3_GEOIP_SET_IP_CHECKIP_NOTSET');
         }
 
@@ -79,7 +76,9 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
         $oCountryList = oxNew('oxcountrylist');
         $oListObject = $oCountryList->getBaseObject();
         $sFieldList = $oListObject->getSelectFields();
-        $sQ = "select (SELECT d3startip FROM ".$oGeoIp->getViewName()." WHERE D3ISO = " .$oListObject->getViewName(). ".oxisoalpha2 LIMIT 1) as IP,  $sFieldList from " . $oListObject->getViewName();
+        $sQ = "select (SELECT d3startip FROM ".$oGeoIp->getViewName().
+            " WHERE D3ISO = " .$oListObject->getViewName(). ".
+            oxisoalpha2 LIMIT 1) as IP,  $sFieldList from " . $oListObject->getViewName();
 
         $oCountryList->selectString($sQ);
 
