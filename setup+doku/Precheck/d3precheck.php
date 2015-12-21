@@ -143,15 +143,7 @@ class requConfig
                 'aParams' => array(
                     'id'      => 'd3modcfg_lib',
                     'name'    => 'Modul-Connector',
-                    'version' => '4.3.0.0',
-                ),
-            ),
-            array(
-                'blExec'  => 1,
-                'aParams' => array(
-                    'id'      => 'd3install_lib',
-                    'name'    => 'Installationsautomatik',
-                    'version' => '2.5.0.0',
+                    'version' => '4.3.3.6',
                 ),
             ),
         ),
