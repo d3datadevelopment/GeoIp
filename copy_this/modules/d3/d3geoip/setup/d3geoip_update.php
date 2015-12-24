@@ -43,7 +43,7 @@ FE9';
         array('check' => 'hasUnregisteredFiles',
               'do'    => 'showUnregisteredFiles'),
         array('check' => 'checkRegisteredComponent',
-              'do'    => 'registerComponent'),
+              'do'    => 'unregisterComponent'),
         array('check' => 'checkModCfgSameRevision',
               'do'    => 'updateModCfgSameRevision'),
     );
@@ -413,15 +413,12 @@ FE9';
      */
     public function checkRegisteredComponent()
     {
-        $sVarName = 'aUserComponentNames';
-        $sModuleId = '';
         /** @var $oShop oxshop */
         foreach ($this->getShopListByActiveModule('d3geoip') as $oShop) {
-            /** @var array $aUserComponents */
-            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+            $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
-            if (false == $aUserComponents
-                || false == $aUserComponents['d3cmp_geoip']
+            if (is_array($aUserComponents)
+                && in_array('d3cmp_geoip', array_keys($aUserComponents))
             ) {
                 return true;
             }
@@ -433,26 +430,48 @@ FE9';
     /**
      * @return bool
      */
-    public function registerComponent()
+    public function unregisterComponent()
     {
         $blRet = true;
         $sVarName = 'aUserComponentNames';
-        $sModuleId = '';
 
         /** @var $oShop oxshop */
         foreach ($this->getShopList() as $oShop) {
-            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
-            if (false == $aUserComponents) {
-                $aUserComponents = array();
-            }
+            $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
-            if (false == $aUserComponents['d3cmp_geoip']) {
-                $blDontUseCache = 1;
-                $aUserComponents['d3cmp_geoip'] = $blDontUseCache;
+            if (is_array($aUserComponents)
+                && in_array('d3cmp_geoip', array_keys($aUserComponents))
+            ) {
+                unset($aUserComponents['d3cmp_geoip']);
+                if (false == count($aUserComponents)) {
+                    $aUserComponents = null;
+                }
                 $this->fixOxconfigVariable($sVarName, $oShop->getId(), '', $aUserComponents, 'arr');
             }
         }
 
         return $blRet;
+    }
+
+    /**
+     * @param oxShop $oShop
+     * @return array|null
+     */
+    protected function _d3GetUserComponentsFromDb(oxShop $oShop)
+    {
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+        $sSelect = "SELECT oxvartype as type, ".oxRegistry::getConfig()->getDecodeValueQuery().
+            " as value FROM `oxconfig` WHERE oxshopid = ".$oDb->quote($oShop->getId()).
+            " AND oxvarname = ".$oDb->quote($sVarName).
+            " AND oxmodule = ".$oDb->quote($sModuleId);
+
+        $aResult = $oDb->getAll($sSelect);
+        $aUserComponents = is_array($aResult) && count($aResult)
+            ? oxRegistry::getConfig()->decodeValue($aResult[0]['type'], $aResult[0]['value'])
+            : null;
+
+        return $aUserComponents;
     }
 }
