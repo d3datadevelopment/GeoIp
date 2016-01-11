@@ -43,7 +43,7 @@ class requConfig
 
     public $sModId   = 'd3_geoip';
 
-    public $sModVersion = '3.0.1.0';
+    public $sModVersion = '3.0.2.0';
 
     /********************** check configuration section ************************/
 
@@ -68,7 +68,7 @@ class requConfig
         'hasFromToPhpVersion'    => array(
             'blExec'  => 1,
             'aParams' => array(
-                'from' => '5.2.0',
+                'from' => '5.3.0',
                 'to'   => '5.6.200',
             )
         ),
@@ -103,9 +103,9 @@ class requConfig
         'hasMinShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.7.0',
-                'CE' => '4.7.0',
-                'EE' => '5.0.0'
+                'PE' => '4.8.0',
+                'CE' => '4.8.0',
+                'EE' => '5.1.0'
             ),
         ),
 
@@ -182,7 +182,7 @@ date_default_timezone_set('Europe/Berlin');
  */
 class requCheck
 {
-    public $sVersion = '4.6.2';
+    public $sVersion = '4.6.3';
 
     protected $_db = false;
 
