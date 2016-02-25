@@ -308,6 +308,22 @@ class d3GeoIP extends oxbase
     }
 
     /**
+     * @param $oCurr
+     * @return bool
+     */
+    public function hasNotSetCurrency($oCurr)
+    {
+        $oCountry = $this->getUserLocationCountryObject();
+        if ($oCountry->getFieldData('d3geoipcur') > 0
+            && $oCurr->id != $oCountry->getFieldData('d3geoipcur')
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * check module active state and perform switching to user country specific shop (EE only)
      *
      */

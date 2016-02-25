@@ -160,7 +160,10 @@ class d3_country_geoip extends oxAdminView
      */
     public function getCurList()
     {
-        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop')) {
+        if ($this->getModCfgValue('blChangeShop')
+            && $this->oCountry->getFieldData('d3geoipshop')
+            && $this->oCountry->getFieldData('d3geoipshop') > 0     // -1 is user choice
+        ) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
         } else {
             $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
@@ -186,9 +189,9 @@ class d3_country_geoip extends oxAdminView
         if ($sCurrencies) {
             foreach (unserialize($sCurrencies) as $sKey => $sValue) {
                 $aFields = explode('@', $sValue);
-                $aCurrencies[$sKey]->id = $sKey;
-                $aCurrencies[$sKey]->name  = $aFields[0];
-                $aCurrencies[$sKey]->sign = $aFields[4];
+                $aCurrencies[$sKey]->id     = trim($sKey);
+                $aCurrencies[$sKey]->name   = trim($aFields[0]);
+                $aCurrencies[$sKey]->sign   = trim($aFields[4]);
             }
         }
 
@@ -201,7 +204,10 @@ class d3_country_geoip extends oxAdminView
      */
     public function getLangList()
     {
-        if ($this->getModCfgValue('blChangeShop') && $this->oCountry->getFieldData('d3geoipshop')) {
+        if ($this->getModCfgValue('blChangeShop')
+            && $this->oCountry->getFieldData('d3geoipshop')
+            && $this->oCountry->getFieldData('d3geoipshop') > 0     // -1 is user choice
+        ) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
         } else {
             $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
@@ -237,12 +243,6 @@ class d3_country_geoip extends oxAdminView
                     if (is_array($aLangParams)) {
                         $oLang->active  = $aLangParams[$key]['active'];
                         $oLang->sort   = $aLangParams[$key]['sort'];
-                    }
-
-                    if (isset($iLanguage) && $oLang->id == $iLanguage) {
-                        $oLang->selected = 1;
-                    } else {
-                        $oLang->selected = 0;
                     }
 
                     if ($oLang->active) {
