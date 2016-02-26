@@ -1,3 +1,6 @@
+=> 3.0.2.1
+- Sprachumschalter wird sofort bei erstem Shopaufruf umgesetzt
+
 => 3.0.2.0
 - Komponente wird dynamisch eingebunden, um bei deaktiviertem Modul keine Exception auszulösen
 
