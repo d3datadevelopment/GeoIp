@@ -126,7 +126,6 @@ td.edittext {
                                 <input id="blChangeShop" class="edittext ext_edittext" type="checkbox" name="value[blChangeShop]" value='1' [{if $edit->getValue('blChangeShop') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGESHOP_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -137,7 +136,6 @@ td.edittext {
                                 <input id="blChangeCurr" class="edittext ext_edittext" type="checkbox" name="value[blChangeCurr]" value='1' [{if $edit->getValue('blChangeCurr') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGECURR_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -148,7 +146,6 @@ td.edittext {
                                 <input id="blChangeLang" class="edittext ext_edittext" type="checkbox" name="value[blChangeLang]" value='1' [{if $edit->getValue('blChangeLang') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGELANG_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -159,7 +156,6 @@ td.edittext {
                                 <input id="blChangeURL" class="edittext ext_edittext" type="checkbox" name="value[blChangeURL]" value='1' [{if $edit->getValue('blChangeURL') == 1}]checked[{/if}]>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_CHANGEURL_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -169,13 +165,12 @@ td.edittext {
                             </dt>
                             <dd>
                                 <select id="sFallbackCountryId" size="5" name="value[sFallbackCountryId]">
-                                    [{foreach from=$oView->getCountryList() item="oCountry"}]
+                                    [{foreach from=$oView->getIPCountryList() item="oCountry"}]
                                         <option value="[{$oCountry->getId()}]" [{if $edit->getValue('sFallbackCountryId') == $oCountry->getId()}] selected[{/if}]>[{$oCountry->oxcountry__oxtitle->value}]</option>
                                     [{/foreach}]
                                 </select>
                                 [{oxinputhelp ident="D3_GEOIP_SET_OPTIONS_NOCOUNTRY_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                     </div>
                 </div>
@@ -197,7 +192,6 @@ td.edittext {
                                 <input id="sTestIp" type="text" maxlength="39" size="17" name="value[sTestIp]" value="[{$edit->getValue('sTestIp')}]">
                                 [{oxinputhelp ident="D3_GEOIP_SET_IP_TESTIP_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -213,7 +207,6 @@ td.edittext {
                                 </select>
                                 [{oxinputhelp ident="D3_GEOIP_SET_IP_TESTCOUNTRY_DESC"}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                         <dl>
                             <dt>
@@ -227,7 +220,6 @@ td.edittext {
                                     [{$oView->getIpCountry($edit->getValue('sCheckIp'))}]
                                 [{/if}]
                             </dd>
-                            <div class="spacer"></div>
                         </dl>
                     </div>
                 </div>
@@ -248,13 +240,3 @@ td.edittext {
 </form>
 
 [{include file="d3_cfg_mod_inc.tpl"}]
-
-<script type="text/javascript">
-    if (parent.parent) {
-        parent.parent.sShopTitle = "[{$actshopobj->oxshops__oxname->getRawValue()|oxaddslashes}]";
-        parent.parent.sMenuItem = "[{oxmultilang ident="d3mxgeoip"}]";
-        parent.parent.sMenuSubItem = "[{oxmultilang ident="d3mxgeoip_settings"}]";
-        parent.parent.sWorkArea = "[{$_act}]";
-        parent.parent.setTitle();
-    }
-</script>

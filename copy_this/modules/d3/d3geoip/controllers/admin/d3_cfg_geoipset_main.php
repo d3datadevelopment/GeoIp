@@ -20,6 +20,9 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
     protected $_sThisTemplate = "d3_cfg_geoipset_main.tpl";
     protected $_blHasDebugSwitch = true;
     protected $_sDebugHelpTextIdent = 'D3_GEOIP_SET_DEBUG_DESC';
+    protected $_sMenuItemTitle = 'd3mxgeoip';
+    protected $_sMenuSubItemTitle = 'd3mxgeoip_settings';
+    public $oCountryList;
 
     /**
      * @param $sIP
@@ -47,43 +50,27 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
     /**
      * @return oxcountrylist
      */
-    public function getCountryList()
-    {
-        startProfile(__METHOD__);
-
-        /** @var $oCountryList oxcountrylist */
-        $oCountryList = oxNew('oxcountrylist');
-        $oListObject = $oCountryList->getBaseObject();
-        $sFieldList = $oListObject->getSelectFields();
-        $sQ = "select $sFieldList from " . $oListObject->getViewName();
-        $oCountryList->selectString($sQ);
-
-        stopProfile(__METHOD__);
-
-        return $oCountryList;
-    }
-
-    /**
-     * @return oxcountrylist
-     */
     public function getIPCountryList()
     {
-        startProfile(__METHOD__);
+        if ($this->oCountryList) {
+            return $this->oCountryList;
+        }
 
+        startProfile(__METHOD__);
         /** @var $oGeoIp  d3geoip */
         $oGeoIp = oxNew('d3geoip');
         /** @var $oCountryList oxcountrylist */
-        $oCountryList = oxNew('oxcountrylist');
-        $oListObject = $oCountryList->getBaseObject();
+        $this->oCountryList = oxNew('oxcountrylist');
+        $oListObject = $this->oCountryList->getBaseObject();
         $sFieldList = $oListObject->getSelectFields();
         $sQ = "select (SELECT d3startip FROM ".$oGeoIp->getViewName().
             " WHERE D3ISO = " .$oListObject->getViewName(). ".
             oxisoalpha2 LIMIT 1) as IP,  $sFieldList from " . $oListObject->getViewName();
 
-        $oCountryList->selectString($sQ);
+        $this->oCountryList->selectString($sQ);
 
         stopProfile(__METHOD__);
 
-        return $oCountryList;
+        return $this->oCountryList;
     }
 }

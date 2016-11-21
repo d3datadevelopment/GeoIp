@@ -25,9 +25,6 @@ class d3cmp_geoip extends oxView
 
     private $_sModId = 'd3_geoip';
 
-    /**
-     * @return null
-     */
     public function init()
     {
         if (d3_cfg_mod::get($this->_sModId)->isActive()) {
