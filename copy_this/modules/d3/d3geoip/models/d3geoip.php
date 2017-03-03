@@ -250,6 +250,7 @@ class d3GeoIP extends oxBase
 
         if (!$this->isAdmin()
             && oxRegistry::getUtils()->isSearchEngine() === false
+            && oxRegistry::getSession()->getId()
             && oxRegistry::getSession()->getVariable('d3isSetLang') === null
             && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
         ) {

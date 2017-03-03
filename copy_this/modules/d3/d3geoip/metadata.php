@@ -20,6 +20,7 @@ $aModule = array(
     'email'        => 'support@shopmodule.com',
     'url'          => 'http://www.oxidmodule.com/',
     'extend'      => array(
+        'oxcmp_lang' => 'd3/d3geoip/modules/components/d3_oxcmp_lang_geoip',
         'oxshopcontrol' => 'd3/d3geoip/modules/controllers/d3_oxshopcontrol_geoip',
     ),
     'files'       => array(
