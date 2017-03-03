@@ -43,7 +43,7 @@ class requConfig
 
     public $sModId   = 'd3_geoip';
 
-    public $sModVersion = '3.0.1.0';
+    public $sModVersion = '3.0.2.1';
 
     /********************** check configuration section ************************/
 
@@ -68,7 +68,7 @@ class requConfig
         'hasFromToPhpVersion'    => array(
             'blExec'  => 1,
             'aParams' => array(
-                'from' => '5.2.0',
+                'from' => '5.3.0',
                 'to'   => '5.6.200',
             )
         ),
@@ -103,9 +103,9 @@ class requConfig
         'hasMinShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.7.0',
-                'CE' => '4.7.0',
-                'EE' => '5.0.0'
+                'PE' => '4.8.0',
+                'CE' => '4.8.0',
+                'EE' => '5.1.0'
             ),
         ),
 
@@ -113,9 +113,9 @@ class requConfig
         'hasMaxShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.9.6',
-                'CE' => '4.9.6',
-                'EE' => '5.2.6'
+                'PE' => '4.9.7',
+                'CE' => '4.9.7',
+                'EE' => '5.2.7'
             ),
         ),
 
@@ -182,7 +182,7 @@ date_default_timezone_set('Europe/Berlin');
  */
 class requCheck
 {
-    public $sVersion = '4.6.2';
+    public $sVersion = '4.7.1';
 
     protected $_db = false;
 
@@ -287,21 +287,40 @@ class requCheck
         $aIgnoreDirItems = array('.', '..');
         $aCheckScripts = array();
 
-        /** @var SplFileInfo $oFileInfo */
-        foreach (new RecursiveDirectoryIterator($sFolder) as $oFileInfo) {
-            if (in_array($oFileInfo->getFileName(), $aIgnoreDirItems)) {
-                continue;
-            }
-            if ($oFileInfo->isDir()) {
-                $aCheckScripts = array_merge($aCheckScripts, $this->_walkThroughDirs($oFileInfo->getRealPath()));
-            } elseif ($oFileInfo->isFile()) {
-                if (strtolower($oFileInfo->getFilename()) == $this->_sInFolderFileName) {
-                    $aCheckScripts[] = str_replace('\\', '/', $oFileInfo->getRealPath());
+        try {
+            /** @var SplFileInfo $oFileInfo */
+            $oIterator = new RecursiveDirectoryIterator($sFolder);
+        
+            foreach ($oIterator as $oFileInfo) {
+                if (in_array($oFileInfo->getFileName(), $aIgnoreDirItems)) {
+                    continue;
+                }
+                if ($oFileInfo->isDir()) {
+                    $aCheckScripts = array_merge($aCheckScripts, $this->_walkThroughDirs($oFileInfo->getRealPath()));
+                } elseif ($oFileInfo->isFile()) {
+                    if (strtolower($oFileInfo->getFilename()) == $this->_sInFolderFileName) {
+                        $aCheckScripts[] = str_replace('\\', '/', $oFileInfo->getRealPath());
+                    }
                 }
             }
+        } catch (UnexpectedValueException $oEx) {
+            sprintf($this->oLayout->translate('unableExecuteDirectoryIterator'), $oEx->getMessage());
+            $this->addMessage(
+                sprintf($this->oLayout->translate('unableExecuteDirectoryIterator'), $oEx->getMessage())
+            );
         }
 
         return $aCheckScripts;
+    }
+    
+    public function addMessage($sMessage)
+    {
+        $this->aMessages[md5($sMessage)] = $sMessage;
+    }
+    
+    public function getMessages()
+    {
+        return $this->aMessages;
     }
 
     /**
@@ -378,15 +397,17 @@ class requCheck
      */
     protected function _getContentByCurl($sUrl)
     {
+        $iTimeOut = 5;
         $ch = curl_init();
         $sCurl_URL = preg_replace('@^((http|https)://)@', '', $sUrl);
+
         curl_setopt($ch, CURLOPT_URL, $sCurl_URL);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $iTimeOut);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $iTimeOut);
         curl_setopt($ch, CURLOPT_POST, 0);
         $sContent = curl_exec($ch);
         curl_close($ch);
@@ -722,6 +743,7 @@ class requLayout
                     <title>
                         $sTranslRequCheck "$sModName" $sModVersion
                     </title>
+                    <meta http-equiv="Content-Type" content="text/html;charset=ISO8859-15">
                     <style type="text/css">
                         <!--
                         body {
@@ -840,6 +862,16 @@ class requLayout
                             color: gray;
                             font-size: 10px;
                         }
+                        .messages {
+                            display: block; 
+                            margin: 13px 0; 
+                            text-align: center; 
+                            background-color: orange; 
+                            border: 1px solid black; 
+                            color: black; 
+                            font-weight: normal; 
+                            padding: 1px;
+                        }
                         -->
                     </style>
                 </head>
@@ -867,6 +899,14 @@ EOT;
         $sScriptName        = $_SERVER['SCRIPT_NAME'];
         $sTranslShopPhpInfo = $this->translate('showPhpInfo');
         $sTranslDependent   = $this->translate('dependentoffurther');
+        
+        if (count($this->oBase->getMessages())) {
+            echo '<span class="messages"><ul>';
+            foreach ($this->oBase->getMessages() as $sMessage) {
+                echo '<li>'.$sMessage.'</li>';
+            }
+            echo '</ul></span>';
+        }
 
         if ($this->oBase->blGlobalResult) {
             echo '<p class="box_ok"><b>' . $this->translate('globalSuccess') . '</b>' .
@@ -1445,6 +1485,8 @@ class requTranslations
                 'unableDeleteFile'       => 'Datei konnte nicht gel&ouml;scht werden. Bitte l&ouml;schen Sie diese '.
                     'manuell.',
                 'goodBye'                => 'Auf Wiedersehen.',
+                'unableExecuteDirectoryIterator' => 'Es können nicht alle Unterverzeichnisse auf weitere Prüfungen '.
+                    'kontrolliert werden. (%1$s)',
             ),
             'en' => array(
                 'RequCheck'              => 'Requirement check',
@@ -1610,6 +1652,7 @@ class requTranslations
                 'toggleswitch'           => 'click for details',
                 'unableDeleteFile'       => 'Unable to delete file. Please delete it manually.',
                 'goodBye'                => 'Good Bye.',
+                'unableExecuteDirectoryIterator' => 'Unable to check subdirectories for further checks. (%1$s)',
             ),
         );
     }

@@ -11,6 +11,7 @@ copy_this/modules/d3/d3geoip/controllers/admin/d3_country_geoip.php -text
 copy_this/modules/d3/d3geoip/menu.xml -text
 copy_this/modules/d3/d3geoip/metadata.php -text
 copy_this/modules/d3/d3geoip/models/d3geoip.php -text
+copy_this/modules/d3/d3geoip/modules/controllers/d3_oxshopcontrol_geoip.php -text
 copy_this/modules/d3/d3geoip/picture.png -text
 copy_this/modules/d3/d3geoip/setup/d3geoip_update.php -text
 copy_this/modules/d3/d3geoip/views/admin/de/d3_geoip_lang.php -text

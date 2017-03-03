@@ -18,14 +18,14 @@ class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '3.0.1.0';
-    public $sModRevision = '67';
-    public $sBaseConf = '5FibjlIQlRvbWMzY29mVi85RXFxbkc5bFI3R24rNkd5Y0lEcXJFOGhtaGExRVcyaEF6a281cVhRUXFMU
-0d6dnNDbCtLRVdObFh3bnVEdUNRTFJrVlE5VGtsRkF3Tyt4TU1Pd290WDliOTQ2SUE5Skk0eTcxTGdlT
-XZna0dhS2ZOekJUSC94ZUd5YmxXZzRXcG5QSWcvZnFJa1l0N1MrdWRZaFU1VG5nUGFwNEF1WTh6azNja
-Gs3SmtzQ05SVjROSGdSZ2N0S3Q1TTV1RGlCSU5RZnh1dGVNNVd6bTBzMU1FdHFiNytJQldBRjRTNmx3U
-VVlRkhrRzYxYUtpaWNBOUUrLzZ2YjN5SDM1cllVMTIrYUFPRnRYcFpibHVBQytEQVFnNFV0RWpFZXAwd
-FE9';
+    public $sModVersion = '3.0.2.1';
+    public $sModRevision = '75';
+    public $sBaseConf = 'sw2M1p3STcxMXh0eDhyR1A3YUJDMDVDakZUM2FnakVDOWdwRm9SQzFiMzhqUEtNTTFXK2ZmSlhqd1k2a
+DJiSi9QSjRTQUhwOXgrMzVOOVRKRWM1c1FUci9OMUtJR2xxQ0JUTzd3V3FaSEFneGRRL3FOOU1sS09ib
+FpDSjBrTUJDQTh6R2pScnZpOXphaUtlZUovQ1UzNlN5di9LeXBIYmlTQzRTRlA0czRBRmVibzZOY1R1V
+lNZVUE1R3hTa2drOGx0a09HN3JhMkx1OVJvcnN5OHUvbVhqWUVURVhGanBva29GOUY3amNTcXhsTVdRM
+W8vRWJtYW9IY0NqdDBlSEtwOFRJMGQ1OElxeG13bDVySGFub1ovYkkrWEtvSm1HY3RMVXlPd0pJU2dmW
+Vk9';
     public $sRequirements = '';
     public $sBaseValue = '';
 
@@ -43,7 +43,7 @@ FE9';
         array('check' => 'hasUnregisteredFiles',
               'do'    => 'showUnregisteredFiles'),
         array('check' => 'checkRegisteredComponent',
-              'do'    => 'registerComponent'),
+              'do'    => 'unregisterComponent'),
         array('check' => 'checkModCfgSameRevision',
               'do'    => 'updateModCfgSameRevision'),
     );
@@ -413,15 +413,12 @@ FE9';
      */
     public function checkRegisteredComponent()
     {
-        $sVarName = 'aUserComponentNames';
-        $sModuleId = '';
         /** @var $oShop oxshop */
         foreach ($this->getShopListByActiveModule('d3geoip') as $oShop) {
-            /** @var array $aUserComponents */
-            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
+            $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
-            if (false == $aUserComponents
-                || false == $aUserComponents['d3cmp_geoip']
+            if (is_array($aUserComponents)
+                && in_array('d3cmp_geoip', array_keys($aUserComponents))
             ) {
                 return true;
             }
@@ -433,26 +430,48 @@ FE9';
     /**
      * @return bool
      */
-    public function registerComponent()
+    public function unregisterComponent()
     {
         $blRet = true;
         $sVarName = 'aUserComponentNames';
-        $sModuleId = '';
 
         /** @var $oShop oxshop */
         foreach ($this->getShopList() as $oShop) {
-            $aUserComponents = oxRegistry::getConfig()->getShopConfVar($sVarName, $oShop->getId(), $sModuleId);
-            if (false == $aUserComponents) {
-                $aUserComponents = array();
-            }
+            $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
-            if (false == $aUserComponents['d3cmp_geoip']) {
-                $blDontUseCache = 1;
-                $aUserComponents['d3cmp_geoip'] = $blDontUseCache;
+            if (is_array($aUserComponents)
+                && in_array('d3cmp_geoip', array_keys($aUserComponents))
+            ) {
+                unset($aUserComponents['d3cmp_geoip']);
+                if (false == count($aUserComponents)) {
+                    $aUserComponents = null;
+                }
                 $this->fixOxconfigVariable($sVarName, $oShop->getId(), '', $aUserComponents, 'arr');
             }
         }
 
         return $blRet;
+    }
+
+    /**
+     * @param oxShop $oShop
+     * @return array|null
+     */
+    protected function _d3GetUserComponentsFromDb(oxShop $oShop)
+    {
+        $sVarName = 'aUserComponentNames';
+        $sModuleId = '';
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+        $sSelect = "SELECT oxvartype as type, ".oxRegistry::getConfig()->getDecodeValueQuery().
+            " as value FROM `oxconfig` WHERE oxshopid = ".$oDb->quote($oShop->getId()).
+            " AND oxvarname = ".$oDb->quote($sVarName).
+            " AND oxmodule = ".$oDb->quote($sModuleId);
+
+        $aResult = $oDb->getAll($sSelect);
+        $aUserComponents = is_array($aResult) && count($aResult)
+            ? oxRegistry::getConfig()->decodeValue($aResult[0]['type'], $aResult[0]['value'])
+            : null;
+
+        return $aUserComponents;
     }
 }

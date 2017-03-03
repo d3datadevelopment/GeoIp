@@ -1,3 +1,9 @@
+=> 3.0.2.1
+- Sprachumschalter wird sofort bei erstem Shopaufruf umgesetzt
+
+=> 3.0.2.0
+- Komponente wird dynamisch eingebunden, um bei deaktiviertem Modul keine Exception auszulösen
+
 => 3.0.1.0
 - Kompatibilität mit OXID Dynamic Content Cache hergestellt
 - prüft IP-Syntax bei Eingabe im Adminbereich

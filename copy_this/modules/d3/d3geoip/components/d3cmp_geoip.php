@@ -41,6 +41,23 @@ class d3cmp_geoip extends oxView
             $oLocation = oxNew('d3geoip');
             $oLocation->setCountryCurrency();
             $oLocation->setCountryLanguage();
+
+            if (!isset($oBasket)) {
+                $oBasket = $this->getSession()->getBasket();
+            }
+
+            // call component again, if curr is registered before we changed it
+            // reason: own component can added after default components only
+            if ($oLocation->hasNotSetCurrency($oBasket->getBasketCurrency())) {
+                /** @var oxUBase $oActView */
+                $oActView = oxRegistry::getConfig()->getActiveView();
+                $aComponents = $oActView->getComponents();
+
+                /** @var oxcmp_cur $oCurCmp */
+                $oCurCmp = $aComponents['oxcmp_cur'];
+                $oCurCmp->init();
+            }
+            // language isn't registered, we don't need an additional check
         }
 
         parent::init();
