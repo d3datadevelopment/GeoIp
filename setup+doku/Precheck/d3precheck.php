@@ -39,11 +39,11 @@
 
 class requConfig
 {
-    public $sModName = 'D³ GeoIP';
+    public $sModName = 'D&sup3; GeoIP';
 
     public $sModId   = 'd3_geoip';
 
-    public $sModVersion = '3.0.2.1';
+    public $sModVersion = '3.0.2.2';
 
     /********************** check configuration section ************************/
 
@@ -75,7 +75,7 @@ class requConfig
 
         // benötigt Zend Optimizer (PHP 5.2) bzw. Zend Guard Loader (> PHP 5.2)
         'hasZendLoaderOptimizer' => array(
-            'blExec' => 1,
+            'blExec' => 0,
         ),
 
         // benötigt IonCubeLoader
@@ -83,7 +83,12 @@ class requConfig
             'blExec' => 0,
         ),
 
-        // benötigt PHP-Extension (kaskadierbar (siehe "Desc1"))
+        // benötigt Zend Decoder oder IonCubeLoader
+        'hasIonCubeOrZendLoader'       => array(
+            'blExec' => 1,
+        ),
+
+        // benötigte PHP-Extension (kaskadierbar (siehe "Desc1"))
         'hasExtension'           => array(
             array(
                 'blExec'  => 1,
@@ -99,13 +104,29 @@ class requConfig
             ),
         ),
 
+        // benötigte cURL-Version
+        'hasMinCurlVersion'           => array(
+            'blExec'  => 0,
+            'aParams' => array(
+                'version' => '7.26.0',
+            ),
+        ),
+
+        // benötigte OpenSSL-Version (Angabe in Versionsformat)
+        'hasMinOpenSSLVersion'           => array(
+            'blExec'  => 0,
+            'aParams' => array(
+                'version' => '1.0.1.5',
+            ),
+        ),
+
         // minimal benötigte Shopversion (editionsgetrennt), wird (sofern möglich) Remote aktualisiert
         'hasMinShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.8.0',
-                'CE' => '4.8.0',
-                'EE' => '5.1.0'
+                'PE' => '4.9.0',
+                'CE' => '4.9.0',
+                'EE' => '5.2.0'
             ),
         ),
 
@@ -113,9 +134,9 @@ class requConfig
         'hasMaxShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.9.7',
-                'CE' => '4.9.7',
-                'EE' => '5.2.7'
+                'PE' => '4.10.3',
+                'CE' => '4.10.3',
+                'EE' => '5.3.3'
             ),
         ),
 
@@ -182,7 +203,7 @@ date_default_timezone_set('Europe/Berlin');
  */
 class requCheck
 {
-    public $sVersion = '4.7.1';
+    public $sVersion = '4.10.2';
 
     protected $_db = false;
 
@@ -827,6 +848,9 @@ class requLayout
                             width: 400px;
                             z-index: 2500;
                         }
+                        .squ_desc li {
+                            line-height: normal;
+                        }
                         .squ_desc:hover div,
                         .squ_desc div:hover {
                             display: block;
@@ -1363,6 +1387,32 @@ class requTranslations
                     '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
                     'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
+                'hasMinCurlVersion'      => 'mindestens cURL Version %1$s',
+                'hasMinCurlVersion_DESC' => '<div>Das Modul ben&ouml;tigt cURL ab der Version %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> cURL ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> cURL ist nicht oder in einer '.
+                    '&auml;lteren Version installiert. Fragen Sie Ihren Serverprovider nach einer passenden '.
+                    'cURL-Version.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinOpenSSLVersion'   => 'mindestens OpenSSL Version %1$s',
+                'hasMinOpenSSLVersion_DESC' => '<div>Das Modul ben&ouml;tigt OpenSSL ab der Version %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> OpenSSL ist in '.
+                    'passender Version installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> OpenSSL ist nicht oder in '.
+                    'einer &auml;lteren Version installiert. Fragen Sie Ihren Serverprovider nach einer passenden '.
+                    'OpenSSL-Version.</div>'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
                 'hasMinShopVersion'      => 'mindestens Shop Version %1$s',
                 'hasMinShopVersion_DESC' => '<div>Das Modul ist ab Shopversion %1$s freigegeben.</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> Die Shopsoftware ist in '.
@@ -1437,9 +1487,10 @@ class requTranslations
                     '<div>Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
                 'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) oder Zend Guard Loader (PHP 5.3, 5.4, 5.5, 5.6) '.
-                    'installiert',
+                    'installiert (auf passendes Zend-Installationspaket achten!)',
                 'hasZendLoaderOptimizer_DESC' => '<div>Das Modul erfordert (je nach PHP-Version) den Zend Optimizer '.
-                    'bzw. den Zend Guard Loader.</div>'.
+                    'bzw. den Zend Guard Loader. Achten Sie darauf, ein f&uuml;r den verf&uuml;gbaren Decoder '.
+                    'erstelltes Installationspaket zu verwenden.</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> Der passende Decoder ist '.
                     'auf Ihrem Server installiert.</div>'.
                     '<div><div class="squ_bullet" style="background-color: orange;"></div> Der passende Decoder ist '.
@@ -1454,8 +1505,9 @@ class requTranslations
                     '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
                     'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
-                'hasIonCubeLoader'       => 'ionCube Loader installiert',
-                'hasIonCubeLoader_DESC'  => '<div>Das Modul erfordert den ionCube Loader.</div>'.
+                'hasIonCubeLoader'       => 'ionCube Loader installiert (auf passendes ionCube-Installationspaket achten!)',
+                'hasIonCubeLoader_DESC'  => '<div>Das Modul erfordert den ionCube Loader. Achten Sie darauf, ein '.
+                    'f&uuml;r den verf&uuml;gbaren Decoder erstelltes Installationspaket zu verwenden.</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> Der passende Decoder ist '.
                     'auf Ihrem Server installiert.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne den '.
@@ -1467,8 +1519,28 @@ class requTranslations
                     '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
                     'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
-                'RemoteVersionDiff'      => ' <span class="note">(Remotescript hat abweichende Version, Ergebnis mglw.'.
-                    'nicht sicher)</span>',
+                'hasIonCubeOrZendLoader'       => 'ionCube Loader oder Zend Optimizer / Guard Loader installiert '.
+                    '<span class="note">(%1$s)</span>',
+                'hasIonCubeOrZendLoader_DESC'  => '<div>Das Modul erfordert den ionCube Loader oder den Zend '.
+                    'Optimizer / Guard Loader. Achten Sie darauf, ein f&uuml;r die verf&uuml;gbaren Decoder erstelltes '.
+                    'Installationspaket zu verwenden (%1$s).</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> Ein passender Decoder ist '.
+                    'auf Ihrem Server installiert.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> Ein passender Decoder ist '.
+                    'auf Ihrem Server installiert. Es ist jedoch ein Abbruchgrund festgestellt worden, der zu Fehlern '.
+                    'f&uuml;hren kann. Details entnehmen Sie bitte den folgenden Hinweisen.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> Das Modul kann ohne einen '.
+                    'passenden Decoder nicht ausgef&uuml;hrt werden. Fragen Sie Ihren Serverprovider nach der '.
+                    'Installation des ionCube Loaders oder des Zend Optimizers / Guard Loaders.</div>'.
+                    '%2$s'.
+                    '<div>&Uuml;ber den [+]-Button k&ouml;nnen Sie Ergebnisse zu den getesteten Verzeichnissen '.
+                    'abrufen. Je nach Servereinstellung k&ouml;nnen die Ergebnisse abweichen. Nur die rot markierten '.
+                    'Verzeichnisse erfordern eine Anpassung.</div>'.
+                    '<div>Details zu Ihrer Serverinstallation sehen Sie durch Klick auf den Button "PHPInfo anzeigen". '.
+                    'Bei Fragen kontaktieren Sie uns bitte &uuml;ber <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'RemoteVersionDiff'      => ' <span class="note">(Remotescript hat abweichende Version oder ist nicht '.
+                    'pr&uuml;fbar, Ergebnis mglw. nicht sicher)</span>',
                 'globalSuccess'          => 'Die technische Pr&uuml;fung war erfolgreich. Sie k&ouml;nnen das Modul '.
                     'installieren.*<br><br>',
                 'globalNotSuccess'       => 'Die technische Pr&uuml;fung war nicht erfolgreich. Bitte kontrollieren '.
@@ -1485,8 +1557,20 @@ class requTranslations
                 'unableDeleteFile'       => 'Datei konnte nicht gel&ouml;scht werden. Bitte l&ouml;schen Sie diese '.
                     'manuell.',
                 'goodBye'                => 'Auf Wiedersehen.',
-                'unableExecuteDirectoryIterator' => 'Es können nicht alle Unterverzeichnisse auf weitere Prüfungen '.
+                'unableExecuteDirectoryIterator' => 'Es k&ouml;nnen nicht alle Unterverzeichnisse auf weitere Pr&uuml;fungen '.
                     'kontrolliert werden. (%1$s)',
+                'availableDecoder'       => 'verf&uuml;gbar: %1$s - auf passendes Installationspaket achten!',
+                'noDecoderAvailable'     => 'kein verwendbarer Decoder verf&uuml;gbar',
+                'availableDecoder_hasZendLoaderOptimizer' => 'Zend Guard Loader / Optimizer',
+                'notAvailableDecoder_hasZendLoaderOptimizer' => '<li>Der Zend Guard Loader / Optimizer ist nicht '.
+                    'installiert.</li>',
+                'decoderIssue_hasZendLoaderOptimizer' => '<li>Der Zend-Decoder ist '.
+                    'auf Ihrem Server installiert. Es ist jedoch eine zus&auml;tzliche Erweiterungen (Zend OPcache) '.
+                    'installiert, die im Zusammenspiel mit dem Zend-Decoder Fehler verursachen kann.</li>',
+                'availableDecoder_hasIonCubeLoader' => 'ionCube Loader',
+                'notAvailableDecoder_hasIonCubeLoader' => '<li>Der ionCube Loader ist nicht installiert.</li>',
+                'decoderIssue_hasIonCubeLoader' => '<li>Es wurde ein nicht definierter Abbruchgrund bei der '.
+                    'Verwendung des ionCube-Decoders festgestellt.</li>',
             ),
             'en' => array(
                 'RequCheck'              => 'Requirement check',
@@ -1504,7 +1588,7 @@ class requTranslations
                     'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
                     'contact us for another module version.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
@@ -1516,7 +1600,7 @@ class requTranslations
                     'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
                     'contact us for another module version.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
@@ -1528,7 +1612,7 @@ class requTranslations
                     'the actived PHP version. Ask your server provider for for the adaption of your PHP installation or '.
                     'contact us for another module version.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
@@ -1539,14 +1623,36 @@ class requTranslations
                     '<div><div class="squ_bullet" style="background-color: red;"></div> The module can not be executed '.
                     'without the %1$s extension. Ask your server provider for installing this extension.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinCurlVersion'      => 'at least cURL version %1$s',
+                'hasMinCurlVersion_DESC' => '<div>The module requires at least cURL version %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> cURL is available '.
+                    'in a compatible version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> cURL is not installed or '.
+                    'installed in an older version. Ask your server provider for an appropriate version.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'hasMinOpenSSLVersion'   => 'at least OpenSSL version %1$s',
+                'hasMinOpenSSLVersion_DESC' => '<div>The module requires at least OpenSSL version %1$s.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> OpenSSL is availabe '.
+                    'in a compatible version.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> OpenSSL is not installed or '.
+                    'installed in an older version. Ask your server provider for an appropriate version.</div>'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
                 'hasMinShopVersion'      => 'at least shop version %1$s',
                 'hasMinShopVersion_DESC' => '<div>The module is released to shop version %1$s</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The shop software is installed '.
-                    'in a suitable version.</div>'.
+                    'in a compatible version.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> We can not guarantee, '.
                     'that this module works properly in your shop version. Please ask for a matching module version.</div>'.
                     '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
@@ -1554,7 +1660,7 @@ class requTranslations
                 'hasMaxShopVersion'      => 'not more than shop version %1$s',
                 'hasMaxShopVersion_DESC' => '<div>The module is released to shop version %1$s</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The shop software is installed '.
-                    'in a suitable version.</div>'.
+                    'in a compatible version.</div>'.
                     '<div><div class="squ_bullet" style="background-color: orange;"></div> We can not guarantee, '.
                     'that this module works properly in your shop version. Please ask for a matching module version.</div>'.
                     '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
@@ -1563,9 +1669,9 @@ class requTranslations
                 'hasMinModCfgVersion_DESC' => '<div>The module requires additional software "%2$s" at least '.
                     'in version %3$s</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The software is installed '.
-                    'in a suitable version.</div>'.
+                    'in a compatible version.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> The additional software is '.
-                    'be installed or in wrong version available. Please install the additional software before '.
+                    'not installed or in wrong version available. Please install the additional software before '.
                     'proceeding this installation.</div>'.
                     '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
@@ -1573,7 +1679,7 @@ class requTranslations
                 'hasMaxModCfgVersion_DESC' => '<div>The module requires additional software "%2$s" not more than '.
                     'in version %3$s</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The software is installed '.
-                    'in a suitable version.</div>'.
+                    'in a compatible version.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> The additional software is '.
                     'be installed or in wrong version available. Please install the additional software before '.
                     'proceeding this installation.</div>'.
@@ -1583,7 +1689,7 @@ class requTranslations
                 'requireNewLicence_DESC' => '<div>This test tries to determine whether you need a new licence key '.
                     'for the use of this module</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> You have stored a license key '.
-                    'for this module, which is probably also suitable for the new module version.</div>'.
+                    'for this module, which is probably also compatible for the new module version.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> You need likely a new license '.
                     'key for this module. Do you have already one, run the installation and then apply the license '.
                     'key in the admin panel of your shop. Otherwise, you can purchase it in our shop '.
@@ -1610,7 +1716,8 @@ class requTranslations
                     'in your shop edition. Please ask for a module version for your shop edition.</div>'.
                     '<div>If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
-                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) or Zend Guard Loader (PHP 5.3, 5.4, 5.5, 5.6) installed',
+                'hasZendLoaderOptimizer' => 'Zend Optimizer (PHP 5.2) or Zend Guard Loader (PHP 5.3, 5.4, 5.5, 5.6) '.
+                    'installed (pay attention to the compatible Zend installation package!)',
                 'hasZendLoaderOptimizer_DESC' => '<div>The module requires (depending on the PHP version) the Zend Guard Optimizer '.
                     'or the Zend Guard Loader.</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate decoder is '.
@@ -1621,23 +1728,40 @@ class requTranslations
                     '<div><div class="squ_bullet" style="background-color: red;"></div> The decoder isn\'t '.
                     'installed on your server. The module can\'t installed or executed. Please contact your server provider.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
-                'hasIonCubeLoader'       => 'ionCube loader installed',
+                'hasIonCubeLoader'       => 'ionCube Loader installed (pay attention to the compatible ionCube installation package!)',
                 'hasIonCubeLoader_DESC'   => '<div>The module requires the ionCube Loader.</div>'.
                     '<div><div class="squ_bullet" style="background-color: green;"></div> The appropriate decoder is '.
                     'installed on your server.</div>'.
                     '<div><div class="squ_bullet" style="background-color: red;"></div> The decoder isn\'t '.
                     'installed on your server. The module can\'t installed or executed. Please contact your server provider.</div>'.
                     '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
-                    'the results may vary. Only the red marked directories require adaptation.</div>'.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
                     '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
                     'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
                     'support@shopmodule.com</a>.</div>',
-                'RemoteVersionDiff'      => ' <span class="note">(Remote script has different version, result may not '.
-                    'be safe)</span>',
+                'hasIonCubeOrZendLoader'       => 'ionCube Loader or Zend Optimizer / Guard Loader installed '.
+                    '<span class="note">(%1$s)</span>',
+                'hasIonCubeOrZendLoader_DESC'   => '<div>The module requires the ionCube Loader or the Zend '.
+                    'Optimizer / Guard Loader. Pay attention to use a compatible installation package (%1$s).</div>'.
+                    '<div><div class="squ_bullet" style="background-color: green;"></div> One of the appropriate '.
+                    'decoders is installed on your server.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: orange;"></div> One of the appropriate '.
+                    'decoder is installed on your server. An undefined abort reason has been found, which can cause '.
+                    'to errors. For details, please refer to the following notes.</div>'.
+                    '<div><div class="squ_bullet" style="background-color: red;"></div> None of the decoders is '.
+                    'installed on your server. The module can\'t installed or executed. Please contact your server provider.</div>'.
+                    '%2$s'.
+                    '<div>The [+] button show details for all tested directories. Depending on the server settings, '.
+                    'the results may vary. Only the red marked directories requires adaptation.</div>'.
+                    '<div>Details about your server installation you can see by clicking on the button "show PHPinfo". '.
+                    'If you have any questions, please contact us at <a href="mailto:support@shopmodule.com">'.
+                    'support@shopmodule.com</a>.</div>',
+                'RemoteVersionDiff'      => ' <span class="note">(Remote script has different version or isn\'t '.
+                    'callable, result may not be safe)</span>',
                 'globalSuccess'          => 'The technical test was successful. Your server is ready for installing '.
                     'the module.*<br><br>',
                 'globalNotSuccess'       => 'The technical test wasn\'t successfull. Please check the red or orange marked '.
@@ -1653,6 +1777,18 @@ class requTranslations
                 'unableDeleteFile'       => 'Unable to delete file. Please delete it manually.',
                 'goodBye'                => 'Good Bye.',
                 'unableExecuteDirectoryIterator' => 'Unable to check subdirectories for further checks. (%1$s)',
+                'availableDecoder'       => 'available: %1$s - pay attention to the compatible installation package!',
+                'noDecoderAvailable'     => 'no usable decoder available',
+                'availableDecoder_hasZendLoaderOptimizer' => 'Zend Guard Loader / Optimizer',
+                'notAvailableDecoder_hasZendLoaderOptimizer' => '<li>Zend Guard Loader / Optimizer isn\'t '.
+                    'available.</li>',
+                'decoderIssue_hasZendLoaderOptimizer' => '<li>The Zend decoder is '.
+                    'installed on your server. There is an additional installed extension (Zend OPcache), '.
+                    'which can cause errors in combination with the decoder.</li>',
+                'availableDecoder_hasIonCubeLoader' => 'ionCube Loader',
+                'notAvailableDecoder_hasIonCubeLoader' => '<li>ionCube Loader isn\'t available.</li>',
+                'decoderIssue_hasIonCubeLoader' => '<li>An undefined abort reason has been found when using the '.
+                    'ionCube decoder.</li>',
             ),
         );
     }
@@ -1898,7 +2034,7 @@ class requTests
      */
     public function hasMinPhpVersion(&$aConfiguration)
     {
-        $aResult[$this->getBasePath()] = false;
+        $aResult = array($this->getBasePath() => false);
 
         if (version_compare(phpversion(), $aConfiguration['aParams']['version'], '>=')) {
             $aResult[$this->getBasePath()] = true;
@@ -1916,7 +2052,7 @@ class requTests
      */
     public function hasFromToPhpVersion(&$aConfiguration)
     {
-        $aResult[$this->getBasePath()] = false;
+        $aResult = array($this->getBasePath() => false);
 
         if ((version_compare(phpversion(), $aConfiguration['aParams']['from'], '>=')) &&
             (version_compare(phpversion(), $aConfiguration['aParams']['to'], '<'))
@@ -1936,7 +2072,7 @@ class requTests
      */
     public function hasMaxPhpVersion(&$aConfiguration)
     {
-        $aResult[$this->getBasePath()] = false;
+        $aResult = array($this->getBasePath() => false);
 
         if (version_compare(phpversion(), $aConfiguration['aParams']['version'], '<=')) {
             $aResult[$this->getBasePath()] = true;
@@ -1954,7 +2090,7 @@ class requTests
      */
     public function hasExtension(&$aConfiguration)
     {
-        $aResult[$this->getBasePath()] = false;
+        $aResult = array($this->getBasePath() => false);
 
         if (extension_loaded($aConfiguration['aParams']['type'])) {
             $aResult[$this->getBasePath()] = true;
@@ -1963,6 +2099,69 @@ class requTests
         $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__, $aConfiguration['aParams']));
 
         return $aResult;
+    }
+
+    /**
+     * @param $aConfiguration
+     * @return array
+     */
+    public function hasMinCurlVersion(&$aConfiguration)
+    {
+        $aCurlVersion = curl_version();
+        $aResult = array(
+            $this->getBasePath() => version_compare($aCurlVersion['version'], $aConfiguration['aParams']['version'], '>=')
+        );
+
+        $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__, $aConfiguration['aParams']));
+
+        return $aResult;
+    }
+
+    /**
+     * @param $aConfiguration
+     * @return array
+     */
+    public function hasMinOpenSSLVersion(&$aConfiguration)
+    {
+        $aResult = array(
+            $this->getBasePath() => version_compare($this->get_openssl_version_number(true), $aConfiguration['aParams']['version'], '>=')
+        );
+
+        $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__, $aConfiguration['aParams']));
+
+        return $aResult;
+    }
+
+    /**
+     * @param bool $patch_as_number
+     * @param null $openssl_version_number
+     * @return bool|string
+     */
+    protected function get_openssl_version_number($patch_as_number=false,$openssl_version_number=null) {
+        if (is_null($openssl_version_number)) $openssl_version_number = OPENSSL_VERSION_NUMBER;
+        $openssl_numeric_identifier = str_pad((string)dechex($openssl_version_number),8,'0',STR_PAD_LEFT);
+
+        $openssl_version_parsed = array();
+        $preg = '/(?<major>[[:xdigit:]])(?<minor>[[:xdigit:]][[:xdigit:]])(?<fix>[[:xdigit:]][[:xdigit:]])';
+        $preg.= '(?<patch>[[:xdigit:]][[:xdigit:]])(?<type>[[:xdigit:]])/';
+        preg_match_all($preg, $openssl_numeric_identifier, $openssl_version_parsed);
+        $openssl_version = false;
+        if (!empty($openssl_version_parsed)) {
+            $alphabet = array(1=>'a',2=>'b',3=>'c',4=>'d',5=>'e',6=>'f',7=>'g',8=>'h',9=>'i',10=>'j',11=>'k',
+                12=>'l',13=>'m',14=>'n',15=>'o',16=>'p',17=>'q',18=>'r',19=>'s',20=>'t',21=>'u',
+                22=>'v',23=>'w',24=>'x',25=>'y',26=>'z');
+            $openssl_version = intval($openssl_version_parsed['major'][0]).'.';
+            $openssl_version.= intval($openssl_version_parsed['minor'][0]).'.';
+            $openssl_version.= intval($openssl_version_parsed['fix'][0]);
+            $patchlevel_dec = hexdec($openssl_version_parsed['patch'][0]);
+            if (!$patch_as_number && array_key_exists($patchlevel_dec, $alphabet)) {
+                $openssl_version.= $alphabet[$patchlevel_dec]; // ideal for text comparison
+            }
+            else {
+                $openssl_version.= '.'.$patchlevel_dec; // ideal for version_compare
+            }
+        }
+        return $openssl_version;
     }
 
     /**
@@ -2222,7 +2421,7 @@ class requTests
     /**
      * @return array
      */
-    public function hasZendLoaderOptimizer()
+    public function hasZendLoaderOptimizer(&$aConfiguration, $blCheckBasePathOnly = false)
     {
         $aResult = array($this->getBasePath() => false);
 
@@ -2244,7 +2443,9 @@ class requTests
             }
         }
 
-        $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
+        if ($blCheckBasePathOnly == false) {
+            $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
+        }
 
         return $aResult;
     }
@@ -2252,7 +2453,7 @@ class requTests
     /**
      * @return array
      */
-    public function hasIonCubeLoader()
+    public function hasIonCubeLoader(&$aConfiguration, $blCheckBasePathOnly = false)
     {
         $aResult = array($this->getBasePath() => false);
 
@@ -2260,7 +2461,59 @@ class requTests
             $aResult[$this->getBasePath()] = true;
         }
 
-        $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
+        if ($blCheckBasePathOnly == false) {
+            $aResult = array_merge($aResult, $this->checkInSubDirs(__FUNCTION__));
+        }
+
+        return $aResult;
+    }
+
+    /**
+     * @return array
+     */
+    public function hasIonCubeOrZendLoader(&$aConfiguration)
+    {
+        $oLayout = $this->getBase()->oLayout;
+
+        $aDecoderTexts = array();
+        $aDecoderErrorTexts = array();
+        foreach (array('hasZendLoaderOptimizer', 'hasIonCubeLoader') as $sDecoderCheck) {
+            $aReturn = call_user_func_array(array($this, $sDecoderCheck), array($aConfiguration, true));
+            if ($aReturn[$this->getBasePath()]) {
+                $aDecoderTexts[$sDecoderCheck] = $oLayout->translate('availableDecoder_'.$sDecoderCheck);
+            } elseif ($aReturn[$this->getBasePath()] === null) {
+                $aDecoderErrorTexts[$sDecoderCheck] = $oLayout->translate('decoderIssue_'.$sDecoderCheck);
+            } else {
+                $aDecoderErrorTexts[$sDecoderCheck] = $oLayout->translate('notAvailableDecoder_'.$sDecoderCheck);
+            }
+        }
+
+        $sDecoderText = count($aDecoderTexts) ?
+            sprintf($oLayout->translate('availableDecoder'), implode(' + ', $aDecoderTexts)) :
+            $oLayout->translate('noDecoderAvailable');
+        $aConfiguration['aParams'][1] = $sDecoderText;
+
+        $sDecoderErrorText = count($aDecoderErrorTexts) ?
+            '<ul>'.implode('', $aDecoderErrorTexts).'</ul>' :
+            '';
+        $aConfiguration['aParams'][2] = $sDecoderErrorText;
+
+        $aZendLoaderResults = $this->hasZendLoaderOptimizer($aConfiguration);
+        $aIonCubeLoaderResults = $this->hasIonCubeLoader($aConfiguration);
+
+        $aResult = array();
+        foreach (array_keys($aZendLoaderResults) as $sPath) {
+            // transfer meta data
+            if (strstr($sPath, '@@')) {
+                $aResult[$sPath] = $aZendLoaderResults[$sPath];
+            } elseif ($aIonCubeLoaderResults[$sPath] || $aZendLoaderResults[$sPath]) {
+                $aResult[$sPath] = true;
+            } elseif ($aIonCubeLoaderResults[$sPath] === null || $aZendLoaderResults[$sPath] === null) {
+                $aResult[$sPath] = null;
+            } else {
+                $aResult[$sPath] = false;
+            }
+        }
 
         return $aResult;
     }

@@ -15,7 +15,7 @@ $aModule = array(
         'en'    =>  '',
     ),
     'thumbnail'    => 'picture.png',
-    'version'      => '3.0.2.1',
+    'version'      => '3.0.2.2',
     'author'       => 'D&sup3; Data Development (Inh.: Thomas Dartsch)',
     'email'        => 'support@shopmodule.com',
     'url'          => 'http://www.oxidmodule.com/',
