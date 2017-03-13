@@ -25,9 +25,6 @@ class d3cmp_geoip extends oxView
 
     private $_sModId = 'd3_geoip';
 
-    /**
-     * @return null
-     */
     public function init()
     {
         if (d3_cfg_mod::get($this->_sModId)->isActive()) {
@@ -40,7 +37,8 @@ class d3cmp_geoip extends oxView
             /** @var $oLocation d3geoip */
             $oLocation = oxNew('d3geoip');
             $oLocation->setCountryCurrency();
-            $oLocation->setCountryLanguage();
+            // moved to oxcmp_lang extension because here it's to late
+            // $oLocation->setCountryLanguage();
 
             if (!isset($oBasket)) {
                 $oBasket = $this->getSession()->getBasket();

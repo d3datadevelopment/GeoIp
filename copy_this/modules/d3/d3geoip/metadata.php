@@ -15,11 +15,12 @@ $aModule = array(
         'en'    =>  '',
     ),
     'thumbnail'    => 'picture.png',
-    'version'      => '3.0.2.1',
+    'version'      => '3.0.2.2',
     'author'       => 'D&sup3; Data Development (Inh.: Thomas Dartsch)',
     'email'        => 'support@shopmodule.com',
     'url'          => 'http://www.oxidmodule.com/',
     'extend'      => array(
+        'oxcmp_lang' => 'd3/d3geoip/modules/components/d3_oxcmp_lang_geoip',
         'oxshopcontrol' => 'd3/d3geoip/modules/controllers/d3_oxshopcontrol_geoip',
     ),
     'files'       => array(

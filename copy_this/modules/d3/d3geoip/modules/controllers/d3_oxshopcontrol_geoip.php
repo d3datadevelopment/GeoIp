@@ -22,7 +22,6 @@ class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
      * @param null $sFunction
      * @param null $aParams
      * @param null $aViewsChain
-     * @return null
      */
     public function start ($sClass = null, $sFunction = null, $aParams = null, $aViewsChain = null)
     {
@@ -33,8 +32,6 @@ class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
     
     /**
      * check, if developer mode has to be enabled
-     *
-     * @return bool
      */
     protected function _d3AddGeoIpComponent()
     {

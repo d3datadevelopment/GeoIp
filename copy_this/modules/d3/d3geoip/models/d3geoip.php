@@ -15,7 +15,7 @@
  * @link      http://www.oxidmodule.com
  */
 
-class d3GeoIP extends oxbase
+class d3GeoIP extends oxBase
 {
     protected $_sClassName = 'd3geoip';
     private $_sModId = 'd3_geoip';
@@ -47,9 +47,7 @@ class d3GeoIP extends oxbase
             }
 
             $iIPNum = $this->_getNumIp(
-                oxRegistry::getConfig()->checkParamSpecialChars(
-                    str_replace(' ', '', $sIP)
-                )
+                oxRegistry::getConfig()->checkParamSpecialChars($sIP)
             );
 
             $sISOAlpha = $this->loadByIPNum($iIPNum);
@@ -120,10 +118,11 @@ class d3GeoIP extends oxbase
                 $sIP = 'UNKNOWN';
             }
         }
+        $sIP = str_replace(' ', '', $sIP);
 
         stopProfile(__METHOD__);
 
-        return oxRegistry::getConfig()->checkParamSpecialChars(str_replace(' ', '', $sIP));
+        return oxRegistry::getConfig()->checkParamSpecialChars($sIP);
     }
 
     /**
@@ -251,6 +250,7 @@ class d3GeoIP extends oxbase
 
         if (!$this->isAdmin()
             && oxRegistry::getUtils()->isSearchEngine() === false
+            && oxRegistry::getSession()->getId()
             && oxRegistry::getSession()->getVariable('d3isSetLang') === null
             && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
         ) {
