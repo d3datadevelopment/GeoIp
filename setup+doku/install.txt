@@ -1,0 +1,7 @@
+Anforderungen:
+
+D3 Modul GeoIP (entwickelt in Version 2.1.1)
+OXID Modul "Länderspezifische MwSt."
+
+Moduleinträge:
+	oxvatselector => d3_geoip_vat/core/d3_oxvatselector_geoip
