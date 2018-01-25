@@ -29,6 +29,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     public $sRequirements = '';
     public $sBaseValue = '';
 
+    public $sMinModCfgVersion = '4.4.1.0';
+    
     protected $_aUpdateMethods = array(
         array('check' => 'checkGeoIpTableExist',
               'do'    => 'updateGeoIpTableExist'),

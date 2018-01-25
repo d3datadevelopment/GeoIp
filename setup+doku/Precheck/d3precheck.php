@@ -43,7 +43,7 @@ class requConfig
 
     public $sModId   = 'd3_geoip';
 
-    public $sModVersion = '3.0.2.2';
+    public $sModVersion = '3.1.0.0';
 
     /********************** check configuration section ************************/
 
@@ -91,7 +91,7 @@ class requConfig
         // benötigte PHP-Extension (kaskadierbar (siehe "Desc1"))
         'hasExtension'           => array(
             array(
-                'blExec'  => 1,
+                'blExec'  => 0,
                 'aParams' => array(
                     'type' => 'bcmath',
                 ),
@@ -134,9 +134,9 @@ class requConfig
         'hasMaxShopVersion'      => array(
             'blExec'  => 1,
             'aParams' => array(
-                'PE' => '4.10.3',
-                'CE' => '4.10.3',
-                'EE' => '5.3.3'
+                'PE' => '4.10.6',
+                'CE' => '4.10.6',
+                'EE' => '5.3.6'
             ),
         ),
 
@@ -164,7 +164,7 @@ class requConfig
                 'aParams' => array(
                     'id'      => 'd3modcfg_lib',
                     'name'    => 'Modul-Connector',
-                    'version' => '4.3.3.6',
+                    'version' => '4.4.1.0',
                 ),
             ),
         ),
