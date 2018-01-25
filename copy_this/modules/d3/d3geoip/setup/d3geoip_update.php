@@ -18,28 +18,34 @@ class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '3.0.2.2';
-    public $sModRevision = '81';
-    public $sBaseConf = 'G1oR3FtR0ZJMXNwbXNjQ0Q2WnNsdGtmU2FGVCt5NEY3MEozb2hwRnV4b2JPdXljQUFEbDJRSzFadjF6Y
-nZWbEVDallzY1I0b0J5Tm9wU1IyakNPbXNkb2ZnU0J0ZzJZUnN0cEtNM3BSbjQ5NGxRTWR5THNkVDcvZ
-UNuMklya3ZsUHlNeUxGeE9UYStwY3NIYTE2YVZzOHF1dFpBRTNMZU5CQ2JMTXdYOUFXSEtQRGQ2OWJmZ
-VpReFVJWDBPMHQ5d2VpZTFwMXVXV1FyK1JhNVljWVJmaTNKUGV1ZjlnRFNsditKOFc4aTU1d2J1ZHlTT
-U8vM0lHaCtkaHhvdGtQa1NaWWZlYklmRUpKcURmYmowVVdZN3JONENSaGdKWXh6WFMwaUlvUVlEQ3ZEW
-lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
+    public $sModVersion = '3.1.0.0';
+    public $sModRevision = '3100';
+    public $sBaseConf = '9qGv2==ZmhGbXhxSWUvZ25tSjFMV3J5aTExOTdhdWg2QkdrdHJBT09CajlXUzRDOGdMZ0YraEp1N0xPc
+WkyOGhMZDBKMmwyUldaOXVrNDNjOWtMRW9BZEJ3VjY5NWQyMmZ3VG9qdHhRSVF4NXYvUGZqUmpxZm1Td
+i9HbkxNZDRxVzNRRlZrRForU0RMSHVNR25hR1ROMkt0ZUM0SXpnKzBYUHJnc0Y1dDJYaDNIMEsrWE9uR
+1FkbmJ4VUlMSGd1UEYxT0pPdGJhazQ4b1l6WDBBRElkM1dTWFM4VFg4S0didCs1aG1lNG9QYTh4YmVZe
+XhDL3N0aXFncEhHWDJqNFFyQ0VDTFlkWUFVR20zU2RuZ05NUnREZythR2x1Z2VQOTYvbXNHZVVHMW9zN
+UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     public $sRequirements = '';
     public $sBaseValue = '';
 
+    public $sMinModCfgVersion = '4.4.1.0';
+    
     protected $_aUpdateMethods = array(
         array('check' => 'checkGeoIpTableExist',
               'do'    => 'updateGeoIpTableExist'),
-        array('check' => 'checkGeoIpItems',
-              'do'    => 'updateGeoIpItems'),
         array('check' => 'checkModCfgItemExist',
               'do'    => 'updateModCfgItemExist'),
+        array('check' => 'hasDeleteGeoIpTableFields',
+              'do'    => 'deleteGeoIpTableFields'),
         array('check' => 'checkGeoIpFields',
               'do'    => 'fixGeoIpFields'),
         array('check' => 'checkIndizes',
               'do'    => 'fixIndizes'),
+        array('check' => 'checkGeoIpTableEngine',
+              'do'    => 'updateGeoIpTableEngine'),
+        array('check' => 'checkGeoIpItems',
+              'do'    => 'updateGeoIpItems'),
         array('check' => 'hasUnregisteredFiles',
               'do'    => 'showUnregisteredFiles'),
         array('check' => 'checkRegisteredComponent',
@@ -92,6 +98,16 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
             'sExtra'      => '',
             'blMultilang' => false,
         ),
+        'D3IP'        => array(
+            'sTableName'  => 'd3geoip',
+            'sFieldName'  => 'D3IP',
+            'sType'       => 'VARCHAR(45)',
+            'blNull'      => false,
+            'sDefault'    => false,
+            'sComment'    => '',
+            'sExtra'      => '',
+            'blMultilang' => false,
+        ),
         'D3STARTIP'        => array(
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3STARTIP',
@@ -114,8 +130,8 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
         ),
         'D3STARTIPNUM'    => array(
             'sTableName'  => 'd3geoip',
-            'sFieldName'  => 'D3STARTIPNUM',
-            'sType'       => 'DECIMAL(38,0)',
+            'sFieldName'  => 'D3STARTIPBIN',
+            'sType'       => 'VARBINARY(16)',
             'blNull'      => false,
             'sDefault'    => false,
             'sComment'    => '',
@@ -124,8 +140,8 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
         ),
         'D3ENDIPNUM'    => array(
             'sTableName'  => 'd3geoip',
-            'sFieldName'  => 'D3ENDIPNUM',
-            'sType'       => 'DECIMAL(38,0)',
+            'sFieldName'  => 'D3ENDIPBIN',
+            'sType'       => 'VARBINARY(16)',
             'blNull'      => false,
             'sDefault'    => false,
             'sComment'    => '',
@@ -136,7 +152,7 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3ISO',
             'sType'       => 'CHAR(2)',
-            'blNull'      => false,
+            'blNull'      => true,
             'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
@@ -146,7 +162,17 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
             'sTableName'  => 'd3geoip',
             'sFieldName'  => 'D3COUNTRYNAME',
             'sType'       => 'VARCHAR(50)',
-            'blNull'      => false,
+            'blNull'      => true,
+            'sDefault'    => false,
+            'sComment'    => '',
+            'sExtra'      => '',
+            'blMultilang' => false,
+        ),
+        'D3CONTINENTCODE'    => array(
+            'sTableName'  => 'd3geoip',
+            'sFieldName'  => 'D3CONTINENTCODE',
+            'sType'       => 'CHAR(2)',
+            'blNull'      => true,
             'sDefault'    => false,
             'sComment'    => '',
             'sExtra'      => '',
@@ -155,13 +181,21 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
     );
 
     public $aIndizes = array(
-        'IPNUM' => array(
+        'PRIMARY' => array(
+            'sTableName' => 'd3geoip',
+            'sType'      => 'PRIMARY',
+            'sName'      => 'PRIMARY',
+            'aFields'    => array(
+                'D3IP'   => 'D3IP',
+            ),
+        ),
+        'IPBIN' => array(
             'sTableName' => 'd3geoip',
             'sType'      => 'INDEX',
-            'sName'      => 'IPNUM',
+            'sName'      => 'IPBIN',
             'aFields'    => array(
-                'D3STARTIPNUM' => 'D3STARTIPNUM',
-                'D3ENDIPNUM' => 'D3ENDIPNUM',
+                'D3STARTIPNUM' => 'D3STARTIPBIN',
+                'D3ENDIPNUM' => 'D3ENDIPBIN',
             ),
         ),
         'D3ISO' => array(
@@ -172,6 +206,19 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
                 'D3ISO' => 'D3ISO',
             ),
         ),
+    );
+
+    public $aDeleteFields = array(
+    	'D3STARTIPNUM' => array(
+    		'sTableName'    => 'd3geoip',
+    		'sFieldName'    => 'D3STARTIPNUM',
+    		'blMultilang'   => false,
+	    ),
+    	'D3ENDIPNUM' => array(
+    		'sTableName'    => 'd3geoip',
+    		'sFieldName'    => 'D3ENDIPNUM',
+    		'blMultilang'   => false,
+	    ),
     );
 
     /**
@@ -189,18 +236,73 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
     {
         $blRet = false;
         if ($this->checkGeoIpTableExist()) {
-            $blRet  = $this->_addTable2('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP', 'MyISAM');
+            $blRet  = $this->_addTable2('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP', 'InnoDB');
         }
 
         return $blRet;
     }
+
+	/**
+	 * @return bool
+	 * @throws oxSystemComponentException
+	 */
+    public function hasDeleteGeoIpTableFields()
+    {
+    	/** @var d3installdbfield $oInstallDbField */
+    	$oInstallDbField = oxNew('d3installdbfield', $this);
+    	return $oInstallDbField->checkDeleteFields();
+    }
+
+	/**
+	 * @return bool
+	 * @throws oxSystemComponentException
+	 */
+    public function deleteGeoIpTableFields()
+    {
+        $blRet = false;
+        if ($this->hasDeleteGeoIpTableFields()) {
+	        /** @var d3installdbfield $oInstallDbField */
+	        $oInstallDbField = oxNew('d3installdbfield', $this);
+            $blRet  = $oInstallDbField->fixDeleteFields(__METHOD__);
+        }
+
+        return $blRet;
+    }
+
+	/**
+	 * @return bool true, if table has wrong engine
+	 * @throws oxSystemComponentException
+	 */
+	public function checkGeoIpTableEngine()
+	{
+		/** @var d3installdbtable $oDbTable */
+		$oDbTable = oxNew('d3installdbtable', $this);
+		$aData = $oDbTable->getTableData('d3geoip');
+
+		if (isset($aData) && count($aData) && isset($aData['ENGINE']) && $aData['ENGINE'] == 'InnoDB') {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 * @throws oxSystemComponentException
+	 */
+	public function updateGeoIpTableEngine()
+	{
+		/** @var d3installdbtable $oDbTable */
+		$oDbTable = oxNew('d3installdbtable', $this);
+		$blRet = $oDbTable->changeTableEngine('d3geoip', 'InnoDB');
+		return $blRet;
+	}
 
     /**
      * @return bool
      */
     public function checkGeoIpItems()
     {
-        /** @var $oShop oxshop */
         $aWhere = array(
             'D3ISO' => 'DE',
         );
@@ -408,9 +510,10 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
         return $this->_showUnregisteredFiles('d3geoip', array('d3FileRegister'));
     }
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 * @throws oxConnectionException
+	 */
     public function checkRegisteredComponent()
     {
         /** @var $oShop oxshop */
@@ -427,9 +530,10 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
         return false;
     }
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 * @throws oxConnectionException
+	 */
     public function unregisterComponent()
     {
         $blRet = true;
@@ -453,10 +557,12 @@ lVKOGhMaUd4c2s2am5HUnEyWFpUeHQ=';
         return $blRet;
     }
 
-    /**
-     * @param oxShop $oShop
-     * @return array|null
-     */
+	/**
+	 * @param oxShop $oShop
+	 *
+	 * @return array|null
+	 * @throws oxConnectionException
+	 */
     protected function _d3GetUserComponentsFromDb(oxShop $oShop)
     {
         $sVarName = 'aUserComponentNames';

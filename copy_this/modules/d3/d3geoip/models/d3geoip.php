@@ -31,12 +31,16 @@ class d3GeoIP extends oxBase
         $this->init('d3geoip');
     }
 
-    /**
-     * get oxcountry object by given IP address (optional)
-     *
-     * @param string $sIP optional
-     * @return oxcountry
-     */
+	/**
+	 * get oxcountry object by given IP address (optional)
+	 *
+	 * @param string $sIP optional
+	 *
+	 * @return oxcountry
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function getUserLocationCountryObject($sIP = null)
     {
         if (!$this->oCountry) {
@@ -46,11 +50,7 @@ class d3GeoIP extends oxBase
                 $sIP = $this->getIP();
             }
 
-            $iIPNum = $this->_getNumIp(
-                oxRegistry::getConfig()->checkParamSpecialChars($sIP)
-            );
-
-            $sISOAlpha = $this->loadByIPNum($iIPNum);
+			$sISOAlpha = $this->loadByIP(oxRegistry::getConfig()->checkParamSpecialChars($sIP));
 
             if (!$sISOAlpha) {
                 $this->_getLog()->log(
@@ -80,11 +80,12 @@ class d3GeoIP extends oxBase
         return $this->oCountry;
     }
 
-    /**
-     * get IP address from client or set test IP address
-     *
-     * @return string
-     */
+	/**
+	 * get IP address from client or set test IP address
+	 *
+	 * @return string
+	 * @throws d3_cfg_mod_exception
+	 */
     public function getIP()
     {
         startProfile(__METHOD__);
@@ -125,60 +126,36 @@ class d3GeoIP extends oxBase
         return oxRegistry::getConfig()->checkParamSpecialChars($sIP);
     }
 
-    /**
-     * get IP number by IP address
-     * @param $sIP
-     * @return bool
-     * @throws Exception|int
-     */
-    protected function _getNumIp($sIP)
-    {
-        // make sure it is an ip
-        if (filter_var($sIP, FILTER_VALIDATE_IP) === false) {
-            return false;
-        }
-
-        startProfile(__METHOD__);
-
-        $parts = unpack('N*', inet_pton($sIP));
-
-        if (strpos($sIP, '.') !== false) {
-            $parts = array(1=>0, 2=>0, 3=>0, 4=>$parts[1]);
-        }
-
-        foreach ($parts as &$part) {
-            if ($part < 0) {
-                $part += 4294967296;
-            }
-        }
-
-        if (function_exists('bcadd')) {
-            $dIP = $parts[4];
-            $dIP = bcadd($dIP, bcmul($parts[3], '4294967296'));
-            $dIP = bcadd($dIP, bcmul($parts[2], '18446744073709551616'));
-            $dIP = bcadd($dIP, bcmul($parts[1], '79228162514264337593543950336'));
-        } else {
-            throw new Exception('extension BCMath is required');
-        }
-
-        $aIP = explode('.', $dIP);
-
-        stopProfile(__METHOD__);
-
-        return $aIP[0];
-    }
-
-    /**
-     * get ISO alpha 2 ID by IP number
-     *
-     * @param int $iIPNum IP number
-     * @return string
-     */
-    public function loadByIPNum($iIPNum)
+	/**
+	 * get ISO alpha 2 ID by IP address
+	 *
+	 * @param int $sIP IP address
+	 *
+	 * @return string
+	 * @throws oxConnectionException
+	 */
+    public function loadByIP($sIP)
     {
         startProfile(__METHOD__);
 
-        $sSelect = "SELECT d3iso FROM ".$this->_sClassName." WHERE $iIPNum BETWEEN d3startipnum AND d3endipnum";
+	    $sSelect = "
+			SELECT 
+				d3iso 
+			FROM 
+				".$this->_sClassName." 
+			WHERE 
+				LPAD(
+					BINARY(
+						if(
+							IS_IPV4('" . $sIP . "'),
+							INET_ATON('" . $sIP . "'),
+							INET6_ATON('" . $sIP . "')
+						)
+					), 
+					16, 
+					0
+				) BETWEEN D3STARTIPBIN AND D3ENDIPBIN";
+
         $sISO = oxDb::getDb()->getOne($sSelect);
 
         stopProfile(__METHOD__);
@@ -186,12 +163,15 @@ class d3GeoIP extends oxBase
         return $sISO;
     }
 
-    /**
-     * get oxcountry object by ISO alpha 2 ID
-     *
-     * @param string $sISOAlpha
-     * @return oxcountry
-     */
+	/**
+	 * get oxcountry object by ISO alpha 2 ID
+	 *
+	 * @param string $sISOAlpha
+	 *
+	 * @return oxcountry
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function getCountryObject($sISOAlpha)
     {
         startProfile(__METHOD__);
@@ -207,11 +187,13 @@ class d3GeoIP extends oxBase
         return $oCountry;
     }
 
-    /**
-     * get oxcountry object for fallback, if set
-     *
-     * @return oxcountry
-     */
+	/**
+	 * get oxcountry object for fallback, if set
+	 *
+	 * @return oxcountry
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxSystemComponentException
+	 */
     public function getCountryFallBackObject()
     {
         startProfile(__METHOD__);
@@ -229,10 +211,13 @@ class d3GeoIP extends oxBase
         return $oCountry;
     }
 
-    /**
-     * check module active state and set user country specific language
-     *
-     */
+	/**
+	 * check module active state and set user country specific language
+	 *
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function setCountryLanguage()
     {
         startProfile(__METHOD__);
@@ -270,10 +255,13 @@ class d3GeoIP extends oxBase
         stopProfile(__METHOD__);
     }
 
-    /**
-     * check module active state and set user country specific currency
-     *
-     */
+	/**
+	 * check module active state and set user country specific currency
+	 *
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function setCountryCurrency()
     {
         if (!$this->_getModConfig()->isActive()
@@ -307,10 +295,14 @@ class d3GeoIP extends oxBase
         stopProfile(__METHOD__);
     }
 
-    /**
-     * @param $oCurr
-     * @return bool
-     */
+	/**
+	 * @param $oCurr
+	 *
+	 * @return bool
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function hasNotSetCurrency($oCurr)
     {
         $oCountry = $this->getUserLocationCountryObject();
@@ -323,10 +315,13 @@ class d3GeoIP extends oxBase
         return false;
     }
 
-    /**
-     * check module active state and perform switching to user country specific shop (EE only)
-     *
-     */
+	/**
+	 * check module active state and perform switching to user country specific shop (EE only)
+	 *
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function performShopSwitch()
     {
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeShop')) {
@@ -393,10 +388,13 @@ class d3GeoIP extends oxBase
         stopProfile(__METHOD__);
     }
 
-    /**
-     * check module active state and perform switching to user country specific url
-     *
-     */
+	/**
+	 * check module active state and perform switching to user country specific url
+	 *
+	 * @throws d3_cfg_mod_exception
+	 * @throws oxConnectionException
+	 * @throws oxSystemComponentException
+	 */
     public function performURLSwitch()
     {
         if (!$this->_getModConfig()->isActive()
@@ -432,11 +430,12 @@ class d3GeoIP extends oxBase
         stopProfile(__METHOD__);
     }
 
-    /**
-     * get all shop urls
-     *
-     * @return array
-     */
+	/**
+	 * get all shop urls
+	 *
+	 * @return array
+	 * @throws oxSystemComponentException
+	 */
     public function getShopUrls()
     {
         startProfile(__METHOD__);
@@ -454,21 +453,23 @@ class d3GeoIP extends oxBase
         return $aShopUrls;
     }
 
-    /**
-     * get modcfg instance
-     *
-     * @return d3_cfg_mod
-     */
+	/**
+	 * get modcfg instance
+	 *
+	 * @return d3_cfg_mod
+	 * @throws d3_cfg_mod_exception
+	 */
     protected function _getModConfig()
     {
         return d3_cfg_mod::get($this->_sModId);
     }
 
-    /**
-     * get d3log instance
-     *
-     * @return d3log
-     */
+	/**
+	 * get d3log instance
+	 *
+	 * @return d3log
+	 * @throws d3_cfg_mod_exception
+	 */
     protected function _getLog()
     {
         if (!$this->oD3Log) {

@@ -1,3 +1,7 @@
+=> 3.1.0.0
+- Verwendung der GeoLite2 Country-Datenbank
+- Umstellung der Queries auf neue Datenbankstruktur
+
 => 3.0.2.2
 - Fehler bei der "Abfragegenerierung während des Sprachwechsels" behoben (#6133)
 - Strict Standard Messages korrigiert (#5772)
