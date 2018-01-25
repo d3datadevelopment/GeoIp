@@ -1,5 +1,5 @@
 => 3.1.0.0
-- Verwendung der GeoLite2 Country-Datenbankabfrage
+- Verwendung der GeoLite2 Country-Datenbank
 - Umstellung der Queries auf neue Datenbankstruktur
 
 => 3.0.2.2
