@@ -38,6 +38,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
               'do'    => 'updateModCfgItemExist'),
         array('check' => 'hasDeleteGeoIpTableFields',
               'do'    => 'deleteGeoIpTableFields'),
+        array('check' => 'checkPrimaryIndexFieldExist',
+              'do'    => 'addPrimaryIndexField'),
         array('check' => 'checkGeoIpFields',
               'do'    => 'fixGeoIpFields'),
         array('check' => 'checkIndizes',
@@ -46,6 +48,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
               'do'    => 'updateGeoIpTableEngine'),
         array('check' => 'checkGeoIpItems',
               'do'    => 'updateGeoIpItems'),
+        array('check' => 'checkUnvalidGeoIpItems',
+              'do'    => 'updateUnvalidGeoIpItems'),
         array('check' => 'hasUnregisteredFiles',
               'do'    => 'showUnregisteredFiles'),
         array('check' => 'checkRegisteredComponent',
@@ -257,6 +261,54 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 	 * @return bool
 	 * @throws oxSystemComponentException
 	 */
+	public function checkPrimaryIndexFieldExist()
+	{
+		$aCurrFields = $this->aFields;
+
+		$this->aFields = array(
+			'D3IP' => $this->aFields['D3IP']
+		);
+
+		$oDbFields = oxNew('d3installdbfield', $this);
+		$blRet = $oDbFields->checkFields();
+
+		$this->aFields = $aCurrFields;
+
+		return $blRet;
+	}
+
+	/**
+	 * @return bool
+	 * @throws oxSystemComponentException
+	 */
+	public function addPrimaryIndexField()
+	{
+		$aCurrFields = $this->aFields;
+
+		$aIpFieldData = $this->aFields['D3IP'];
+		$this->aFields = array(
+			'D3IP' => $aIpFieldData
+		);
+
+		$oDbFields = oxNew('d3installdbfield', $this);
+		$blRet1 = $oDbFields->fixFields();
+
+		$sQuery = "UPDATE `".$aIpFieldData['sTableName']."` set `".$aIpFieldData['sFieldName']."` = MD5(D3STARTIP) WHERE `".$aIpFieldData['sFieldName']."` = '';";
+
+		$this->setInitialExecMethod(__METHOD__);
+		/** @var d3installdbcommon $oDbCommon */
+		$oDbCommon = oxNew('d3installdbcommon', $this);
+		$blRet2 = $oDbCommon->tableSqlExecute($sQuery, $aIpFieldData['sTableName']);
+
+		$this->aFields = $aCurrFields;
+
+		return $blRet1 && $blRet2;
+	}
+
+	/**
+	 * @return bool
+	 * @throws oxSystemComponentException
+	 */
     public function deleteGeoIpTableFields()
     {
         $blRet = false;
@@ -318,6 +370,27 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     public function updateGeoIpItems()
     {
         return $this->_confirmMessage('D3_GEOIP_UPDATE_ITEMINSTALL');
+    }
+
+	/**
+	 * @return bool
+	 * @throws oxConnectionException
+	 */
+    public function checkUnvalidGeoIpItems()
+    {
+	    $sCheckQuery = 'SELECT COUNT(*) FROM (
+	        SELECT d3ip FROM d3geoip WHERE d3ip NOT LIKE "%.%" OR d3ip NOT LIKE "%:%" OR D3STARTIPBIN = "" LIMIT 1
+		) AS iptmp;';
+
+	    return (bool) oxDb::getDb()->getOne($sCheckQuery);
+    }
+
+    /**
+     * @return bool
+     */
+    public function updateUnvalidGeoIpItems()
+    {
+        return $this->_confirmMessage('D3_GEOIP_UPDATE_ITEMUPDATE');
     }
 
     /**

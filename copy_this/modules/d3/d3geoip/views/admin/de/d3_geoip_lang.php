@@ -66,6 +66,12 @@ $aLang = array(
     'D3_GEOIP_UPDATE_ITEMINSTALL'                   => 'Die umfangreiche IP-Liste kann leider nicht über die '.
         'automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.
         'Laden Sie bitte die aktuellen CSV-Daten des Anbieters Maxmind. In "setup+doku/importCSVtoMySQL" des Modulpaketes finden Sie weitere Informationen und die erforderlichen Datenbank-Befehle, um die nötigen Daten zu generieren.'.PHP_EOL.PHP_EOL.
-        'Alternativ finden Sie die erforderlichen Daten im Installationspaket des Moduls unter "setup+doku/geoip-data_*". '.PHP_EOL.PHP_EOL.
-        'Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
+        'Alternativ finden Sie die erforderlichen Daten im Installationspaket des Moduls unter "setup+doku/geoip-data_*.sql" oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts_*/". '.PHP_EOL.PHP_EOL.
+        'Sie benötigen entweder die Komplettdateien oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
+
+    'D3_GEOIP_UPDATE_ITEMUPDATE'                    => 'Durch die Datenbankaktualisieren ist es notwendig geworden, die IP-Liste zu aktualisieren. Die umfangreiche IP-Liste kann leider nicht über die '.
+        'automatische Installation eingebunden werden. Bitte installieren Sie diese manuell. '.PHP_EOL.PHP_EOL.
+        'Laden Sie bitte die aktuellen CSV-Daten des Anbieters Maxmind. In "setup+doku/importCSVtoMySQL" des Modulpaketes finden Sie weitere Informationen und die erforderlichen Datenbank-Befehle, um die nötigen Daten zu generieren.'.PHP_EOL.PHP_EOL.
+        'Alternativ finden Sie die erforderlichen Daten im Installationspaket des Moduls unter "setup+doku/geoip-data_*.sql" oder als handlichere SQL-Dateien unter "setup+doku/geoip_data_parts_*/". '.PHP_EOL.PHP_EOL.
+        'Sie benötigen entweder die Komplettdateien oder die Sammlung kleinerer Daten. Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
 );
