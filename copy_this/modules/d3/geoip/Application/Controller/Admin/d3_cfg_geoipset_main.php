@@ -79,6 +79,7 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
         $sQ = "select (SELECT d3startip FROM ".$oGeoIp->getViewName().
             " WHERE D3ISO = " .$oListObject->getViewName(). ".
             oxisoalpha2 LIMIT 1) as IP,  $sFieldList from " . $oListObject->getViewName();
+        $sQ.= " ORDER  BY oxactive DESC, oxtitle";
 
         $this->oCountryList->selectString($sQ);
 
