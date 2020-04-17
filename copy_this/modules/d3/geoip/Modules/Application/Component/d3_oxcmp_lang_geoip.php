@@ -1,6 +1,6 @@
 <?php
 
-namespace D3\GeoIp\Modules\Component;
+namespace D3\GeoIp\Modules\Application\Component;
 
 use D3\GeoIp\Application\Model\d3geoip;
 use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;

@@ -27,7 +27,7 @@ use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
 
-class d3cmp_geoip extends BaseController
+class GeoIpComponent extends BaseController
 {
     /**
      * Marking object as component

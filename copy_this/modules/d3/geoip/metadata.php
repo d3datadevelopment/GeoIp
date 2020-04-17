@@ -4,15 +4,15 @@
  */
 $sMetadataVersion = '2.0';
 
-use D3\GeoIp\Application\Component\d3cmp_geoip;
+use D3\GeoIp\Application\Component\GeoIpComponent;
 use D3\GeoIp\Application\Controller\Admin\d3_cfg_geoipset;
 use D3\GeoIp\Application\Controller\Admin\d3_cfg_geoipset_licence;
 use D3\GeoIp\Application\Controller\Admin\d3_cfg_geoipset_list;
 use D3\GeoIp\Application\Controller\Admin\d3_cfg_geoipset_main;
 use D3\GeoIp\Application\Controller\Admin\d3_country_geoip;
 use D3\GeoIp\Application\Model\d3geoip;
-use D3\GeoIp\Modules\Component\d3_oxcmp_lang_geoip;
-use D3\GeoIp\Modules\Controller\d3_oxshopcontrol_geoip;
+use D3\GeoIp\Modules\Application\Component\d3_oxcmp_lang_geoip;
+use D3\GeoIp\Modules\Core\d3_oxshopcontrol_geoip;
 use D3\GeoIp\Setup as ModuleSetup;
 use D3\GeoIp\Setup\d3geoip_update;
 use OxidEsales\Eshop\Application\Component\LanguageComponent;
@@ -40,7 +40,7 @@ $aModule = array(
         ShopControl::class => d3_oxshopcontrol_geoip::class
     ),
     'controllers'       => array(
-        'd3cmp_geoip'               => d3cmp_geoip::class,
+        'GeoIpComponent'            => GeoIpComponent::class,
         'd3_cfg_geoipset'           => d3_cfg_geoipset::class,
         'd3_cfg_geoipset_list'      => d3_cfg_geoipset_list::class,
         'd3_cfg_geoipset_main'      => d3_cfg_geoipset_main::class,

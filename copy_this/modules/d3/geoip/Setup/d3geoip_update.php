@@ -536,7 +536,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
             $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
             if (is_array($aUserComponents)
-                && in_array('d3cmp_geoip', array_keys($aUserComponents))
+                && in_array('GeoIpComponent', array_keys($aUserComponents))
             ) {
                 return true;
             }
@@ -559,9 +559,9 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
             $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
             if (is_array($aUserComponents)
-                && in_array('d3cmp_geoip', array_keys($aUserComponents))
+                && in_array('GeoIpComponent', array_keys($aUserComponents))
             ) {
-                unset($aUserComponents['d3cmp_geoip']);
+                unset($aUserComponents['GeoIpComponent']);
                 if (false == count($aUserComponents)) {
                     $aUserComponents = null;
                 }
