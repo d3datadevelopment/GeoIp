@@ -1,0 +1,37 @@
+{
+  "name": "d3/geoip",
+  "description": "D3: GeoIp",
+  "type": "oxideshop-module",
+  "version": "1.0",
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "d3"
+  ],
+  "authors": [
+    {
+      "name": "D3 Data Development (Inh. Thomas Dartsch)",
+      "email": "info@shopmodule.com",
+      "homepage": "http://www.d3data.de",
+      "role": "Owner"
+    }
+  ],
+  "support": {
+    "email": "support@shopmodule.com"
+  },
+  "homepage": "https://www.oxidmodule.com/",
+  "license": [
+    "proprietary"
+  ],
+  "extra": {
+    "source-directory": "/",
+    "target-directory": "d3/geoip"
+  },
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "D3\\GeoIp\\": "../../../../source/modules/d3/geoip"
+    }
+  }
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -15,7 +14,16 @@
  * @link      http://www.oxidmodule.com
  */
 
-class d3_country_geoip extends oxAdminView
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Request;
+use stdClass;
+
+class d3_country_geoip extends AdminDetailsController
 {
     protected $_sDefSort = 'sort';
     protected $_sDefSortOrder = 'asc';
@@ -31,18 +39,18 @@ class d3_country_geoip extends oxAdminView
      */
     public function render()
     {
-        if (false == oxRegistry::getConfig()->getConfigParam('blAllowSharedEdit')) {
+        if (false == Registry::getConfig()->getConfigParam('blAllowSharedEdit')) {
             $this->addTplParam('readonly', true);
         }
 
         $ret = parent::render();
 
-        $soxId = oxRegistry::getConfig()->getRequestParameter("oxid");
+        $soxId = Registry::get(Request::class)->getRequestParameter("oxid");
         // check if we right now saved a new entry
-        $sSavedID = oxRegistry::getConfig()->getRequestParameter("saved_oxid");
+        $sSavedID = Registry::get(Request::class)->getRequestParameter("saved_oxid");
         if (($soxId == "-1" || !isset($soxId)) && isset($sSavedID)) {
             $soxId = $sSavedID;
-            oxRegistry::getSession()->deleteVariable("saved_oxid");
+            Registry::getSession()->deleteVariable("saved_oxid");
             $this->addTplParam("oxid", $soxId);
             // for reloading upper frame
             $this->addTplParam("updatelist", "1");
@@ -69,7 +77,7 @@ class d3_country_geoip extends oxAdminView
             $this->addTplParam("edit", $oCountry);
 
             // remove already created languages
-            $aLang = array_diff(oxRegistry::getLang()->getLanguageNames(), $oOtherLang);
+            $aLang = array_diff(Registry::getLang()->getLanguageNames(), $oOtherLang);
 
             if (count($aLang)) {
                 $this->addTplParam("posslang", $aLang);
@@ -98,6 +106,9 @@ class d3_country_geoip extends oxAdminView
     /**
      * @param $sIdent
      * @return mixed
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
      */
     public function getModCfgValue($sIdent)
     {
@@ -117,12 +128,12 @@ class d3_country_geoip extends oxAdminView
     public function save()
     {
         //allow malladmin only to perform this action
-        if (false == oxRegistry::getConfig()->getConfigParam('blAllowSharedEdit')) {
+        if (false == Registry::getConfig()->getConfigParam('blAllowSharedEdit')) {
             return;
         }
 
-        $soxId   = oxRegistry::getConfig()->getRequestParameter("oxid");
-        $aParams = oxRegistry::getConfig()->getRequestParameter("editval");
+        $soxId   = Registry::get(Request::class)->getRequestParameter("oxid");
+        $aParams = Registry::get(Request::class)->getRequestParameter("editval");
 
         /** @var $oCountry oxcountry */
         $oCountry = oxNew("oxcountry");
@@ -136,14 +147,14 @@ class d3_country_geoip extends oxAdminView
         $oCountry->setLanguage(0);
         $oCountry->assign($aParams);
         $oCountry->setLanguage($this->_iEditLang);
-        $oCountry = oxRegistry::get('oxUtilsFile')->processFiles($oCountry);
+        $oCountry = Registry::get('oxUtilsFile')->processFiles($oCountry);
 
         $oCountry->save();
         $this->addTplParam("updatelist", "1");
 
         // set oxid if inserted
         if ($soxId == "-1") {
-            oxRegistry::getSession()->setVariable("saved_oxid", $oCountry->getId());
+            Registry::getSession()->setVariable("saved_oxid", $oCountry->getId());
         }
     }
 
@@ -157,6 +168,9 @@ class d3_country_geoip extends oxAdminView
 
     /**
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
      */
     public function getCurList()
     {
@@ -166,13 +180,14 @@ class d3_country_geoip extends oxAdminView
         ) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
         } else {
-            $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
+            $sShopId = Registry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
         }
 
-        $sQ = "select DECODE( oxvarvalue, '".oxRegistry::getConfig()->getConfigParam('sConfigKey').
+        $sQ = "select DECODE( oxvarvalue, '".Registry::getConfig()->getConfigParam('sConfigKey').
             "') as oxvarvalue from oxconfig where oxshopid = '".$sShopId."' AND oxvarname = 'aCurrencies'";
 
-        $sCurs = oxDb::getDb(oxDb::FETCH_MODE_ASSOC)->getOne($sQ);
+        $oDB = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $sCurs = $oDB->getOne($sQ);
 
         return $this->d3ExtractCurList($sCurs);
     }
@@ -201,6 +216,9 @@ class d3_country_geoip extends oxAdminView
     /**
      * ToDo: has to be refactored
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
      */
     public function getLangList()
     {
@@ -210,12 +228,12 @@ class d3_country_geoip extends oxAdminView
         ) {
             $sShopId = $this->oCountry->getFieldData('d3geoipshop');
         } else {
-            $sShopId = oxRegistry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
+            $sShopId = Registry::getConfig()->getActiveView()->getViewConfig()->getActiveShopId();
         }
 
         $aLanguages = array();
-        $aLangParams = oxRegistry::getConfig()->getShopConfVar('aLanguageParams', $sShopId);
-        $aConfLanguages = oxRegistry::getConfig()->getShopConfVar('aLanguages', $sShopId);
+        $aLangParams = Registry::getConfig()->getShopConfVar('aLanguageParams', $sShopId);
+        $aConfLanguages = Registry::getConfig()->getShopConfVar('aLanguages', $sShopId);
 
         if (is_array($aConfLanguages)) {
             $i = 0;

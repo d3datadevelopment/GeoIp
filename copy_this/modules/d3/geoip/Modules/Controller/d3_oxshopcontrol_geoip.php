@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -14,6 +13,10 @@
  * @author    D3 Data Development - Daniel Seifert <support@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
+
+namespace D3\GeoIp\Modules\Controller;
+
+use OxidEsales\Eshop\Core\Registry;
 
 class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
 {
@@ -37,7 +40,7 @@ class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
     {
         startProfile(__METHOD__);
 
-        $aUserComponentNames = oxRegistry::getConfig()->getConfigParam('aUserComponentNames');
+        $aUserComponentNames = Registry::getConfig()->getConfigParam('aUserComponentNames');
         $sGeoIpCmpName = 'd3cmp_geoip';
         $blDontUseCache = 1;
 
@@ -47,7 +50,7 @@ class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
 
         if (false == in_array($sGeoIpCmpName, array_keys($aUserComponentNames))) {
             $aUserComponentNames[$sGeoIpCmpName] = $blDontUseCache;
-            oxRegistry::getConfig()->setConfigParam('aUserComponentNames', $aUserComponentNames);
+            Registry::getConfig()->setConfigParam('aUserComponentNames', $aUserComponentNames);
         }
 
         stopProfile(__METHOD__);

@@ -1,5 +1,9 @@
 <?php
 
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_;
+
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -14,28 +18,18 @@
  * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
-
-class d3_cfg_geoipset_list extends d3_cfg_mod_list
+class d3_cfg_geoipset extends d3_cfg_mod_
 {
-    // enables language depended configuration
-    protected $_blD3ShowLangSwitch = false;
-
-    protected $_sMenuItemTitle = 'd3mxgeoip';
-
-    protected $_sMenuSubItemTitle = 'd3mxgeoip_settings';
-
     /**
-     * @return null
+     * @return string
      */
     public function render()
     {
-        $sRet = parent::render();
+        $this->addTplParam('sListClass', 'd3_cfg_geoipset_list');
+        $this->addTplParam('sMainClass', 'd3_cfg_geoipset_main');
 
-        // default page number 1
-        $this->addTplParam('oxid', 1);
-        $this->addTplParam("default_edit", "d3_cfg_geoipset_main");
-        $this->addTplParam("updatemain", $this->_blUpdateMain);
+        $this->_hasListItems = false;
 
-        return $sRet;
+        return parent::render();
     }
 }

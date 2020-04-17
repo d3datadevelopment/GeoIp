@@ -14,7 +14,20 @@
  * @link      http://www.oxidmodule.com
  */
 
-class d3cmp_geoip extends oxView
+namespace D3\GeoIp\Application\Component;
+
+use D3\GeoIp\Application\Model\d3geoip;
+use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
+use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
+use D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException;
+use Doctrine\DBAL\DBALException;
+use OxidEsales\Eshop\Core\Controller\BaseController;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\StandardException;
+use OxidEsales\Eshop\Core\Registry;
+
+class d3cmp_geoip extends BaseController
 {
     /**
      * Marking object as component
@@ -25,17 +38,27 @@ class d3cmp_geoip extends oxView
 
     private $_sModId = 'd3_geoip';
 
+    /**
+     * @throws d3ShopCompatibilityAdapterException
+     * @throws d3_cfg_mod_exception
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws StandardException
+     * @throws ConnectionException
+     * @throws SystemComponentException
+     */
     public function init()
     {
         if (d3_cfg_mod::get($this->_sModId)->isActive()) {
             if (d3_cfg_mod::get($this->_sModId)->hasDebugMode()) {
                 /** @var $oGeoIp d3geoip */
-                $oGeoIp = oxNew('d3geoip');
+                $oGeoIp = oxNew(d3geoip::class);
                 echo $oGeoIp->getIP();
             }
 
             /** @var $oLocation d3geoip */
-            $oLocation = oxNew('d3geoip');
+            $oLocation = oxNew(d3geoip::class);
             $oLocation->setCountryCurrency();
             // moved to oxcmp_lang extension because here it's to late
             // $oLocation->setCountryLanguage();
@@ -48,7 +71,7 @@ class d3cmp_geoip extends oxView
             // reason: own component can added after default components only
             if ($oLocation->hasNotSetCurrency($oBasket->getBasketCurrency())) {
                 /** @var oxUBase $oActView */
-                $oActView = oxRegistry::getConfig()->getActiveView();
+                $oActView = Registry::getConfig()->getActiveView();
                 $aComponents = $oActView->getComponents();
 
                 /** @var oxcmp_cur $oCurCmp */

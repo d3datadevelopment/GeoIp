@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -14,18 +13,9 @@
  * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
-class d3_cfg_geoipset extends d3_cfg_mod_
-{
-    /**
-     * @return string
-     */
-    public function render()
-    {
-        $this->addTplParam('sListClass', 'd3_cfg_geoipset_list');
-        $this->addTplParam('sMainClass', 'd3_cfg_geoipset_main');
 
-        $this->_hasListItems = false;
+/**  */
+class d3_oxcmp_cur_geoip_parent extends oxcmp_cur {}
 
-        return parent::render();
-    }
-}
+/** */
+class d3_oxcmp_lang_geoip_parent extends oxcmp_lang {}

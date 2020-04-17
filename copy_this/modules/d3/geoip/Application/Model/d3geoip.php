@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -15,7 +14,17 @@
  * @link      http://www.oxidmodule.com
  */
 
-class d3GeoIP extends oxBase
+namespace D3\GeoIp\Application\Model;
+
+use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
+use D3\ModCfg\Application\Model\Log\d3log;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Request;
+
+class d3geoip extends BaseModel
 {
     protected $_sClassName = 'd3geoip';
     private $_sModId = 'd3_geoip';
@@ -31,16 +40,19 @@ class d3GeoIP extends oxBase
         $this->init('d3geoip');
     }
 
-	/**
-	 * get oxcountry object by given IP address (optional)
-	 *
-	 * @param string $sIP optional
-	 *
-	 * @return oxcountry
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * get oxcountry object by given IP address (optional)
+     *
+     * @param string $sIP optional
+     *
+     * @return oxcountry
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     */
     public function getUserLocationCountryObject($sIP = null)
     {
         if (!$this->oCountry) {
@@ -50,7 +62,7 @@ class d3GeoIP extends oxBase
                 $sIP = $this->getIP();
             }
 
-			$sISOAlpha = $this->loadByIP(oxRegistry::getConfig()->checkParamSpecialChars($sIP));
+			$sISOAlpha = $this->loadByIP(Registry::getConfig()->checkParamSpecialChars($sIP));
 
             if (!$sISOAlpha) {
                 $this->_getLog()->log(
@@ -80,12 +92,14 @@ class d3GeoIP extends oxBase
         return $this->oCountry;
     }
 
-	/**
-	 * get IP address from client or set test IP address
-	 *
-	 * @return string
-	 * @throws d3_cfg_mod_exception
-	 */
+    /**
+     * get IP address from client or set test IP address
+     *
+     * @return string
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
     public function getIP()
     {
         startProfile(__METHOD__);
@@ -123,17 +137,17 @@ class d3GeoIP extends oxBase
 
         stopProfile(__METHOD__);
 
-        return oxRegistry::getConfig()->checkParamSpecialChars($sIP);
+        return Registry::getConfig()->checkParamSpecialChars($sIP);
     }
 
-	/**
-	 * get ISO alpha 2 ID by IP address
-	 *
-	 * @param int $sIP IP address
-	 *
-	 * @return string
-	 * @throws oxConnectionException
-	 */
+    /**
+     * get ISO alpha 2 ID by IP address
+     *
+     * @param int $sIP IP address
+     *
+     * @return string
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     */
     public function loadByIP($sIP)
     {
         startProfile(__METHOD__);
@@ -156,44 +170,47 @@ class d3GeoIP extends oxBase
 					0
 				) BETWEEN D3STARTIPBIN AND D3ENDIPBIN";
 
-        $sISO = oxDb::getDb()->getOne($sSelect);
+        $oDB = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $sISO = $oDB->getOne($sSelect);
 
         stopProfile(__METHOD__);
 
         return $sISO;
     }
 
-	/**
-	 * get oxcountry object by ISO alpha 2 ID
-	 *
-	 * @param string $sISOAlpha
-	 *
-	 * @return oxcountry
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * get Country object by ISO alpha 2 ID
+     *
+     * @param string $sISOAlpha
+     *
+     * @return Country
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     */
     public function getCountryObject($sISOAlpha)
     {
         startProfile(__METHOD__);
 
-        $oCountry = oxNew('oxcountry');
+        /** @var Country $oCountry */
+        $oCountry = oxNew(Country::class);
         $sSelect = "SELECT oxid FROM ".$oCountry->getViewName().
             " WHERE OXISOALPHA2 = '".$sISOAlpha."' AND OXACTIVE = '1'";
 
-        $oCountry->load(oxDb::getDb()->getOne($sSelect));
+        $oDB = DatabaseProvider::getDb();
+        $oCountry->load($oDB->getOne($sSelect));
 
         stopProfile(__METHOD__);
 
         return $oCountry;
     }
 
-	/**
-	 * get oxcountry object for fallback, if set
-	 *
-	 * @return oxcountry
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * get Country object for fallback, if set
+     *
+     * @return oxcountry
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
     public function getCountryFallBackObject()
     {
         startProfile(__METHOD__);
@@ -211,13 +228,18 @@ class d3GeoIP extends oxBase
         return $oCountry;
     }
 
-	/**
-	 * check module active state and set user country specific language
-	 *
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * check module active state and set user country specific language
+     *
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     * @throws oxConnectionException
+     * @throws oxSystemComponentException
+     */
     public function setCountryLanguage()
     {
         startProfile(__METHOD__);
@@ -234,9 +256,9 @@ class d3GeoIP extends oxBase
         $oCountry = $this->getUserLocationCountryObject();
 
         if (!$this->isAdmin()
-            && oxRegistry::getUtils()->isSearchEngine() === false
-            && oxRegistry::getSession()->getId()
-            && oxRegistry::getSession()->getVariable('d3isSetLang') === null
+            && Registry::getUtils()->isSearchEngine() === false
+            && Registry::getSession()->getId()
+            && Registry::getSession()->getVariable('d3isSetLang') === null
             && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
         ) {
             $this->_getLog()->log(
@@ -247,21 +269,26 @@ class d3GeoIP extends oxBase
                 'set language',
                 $this->getIP().' => '.$oCountry->getFieldData('d3geoiplang')
             );
-            oxRegistry::getLang()->setTplLanguage((int) $oCountry->getFieldData('d3geoiplang'));
-            oxRegistry::getLang()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
-            oxRegistry::getSession()->setVariable('d3isSetLang', true);
+            Registry::getLang()->setTplLanguage((int) $oCountry->getFieldData('d3geoiplang'));
+            Registry::getLang()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
+            Registry::getSession()->setVariable('d3isSetLang', true);
         }
 
         stopProfile(__METHOD__);
     }
 
-	/**
-	 * check module active state and set user country specific currency
-	 *
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * check module active state and set user country specific currency
+     *
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     * @throws oxConnectionException
+     * @throws oxSystemComponentException
+     */
     public function setCountryCurrency()
     {
         if (!$this->_getModConfig()->isActive()
@@ -275,8 +302,8 @@ class d3GeoIP extends oxBase
         $oCountry = $this->getUserLocationCountryObject();
 
         if (!$this->isAdmin()
-            && oxRegistry::getUtils()->isSearchEngine() === false
-            && !oxRegistry::getSession()->getVariable('d3isSetCurr')
+            && Registry::getUtils()->isSearchEngine() === false
+            && !Registry::getSession()->getVariable('d3isSetCurr')
             && $oCountry->getId()
             && $oCountry->getFieldData('d3geoipcur') > -1
         ) {
@@ -288,8 +315,8 @@ class d3GeoIP extends oxBase
                 'set currency',
                 $this->getIP().' => '.$oCountry->getFieldData('d3geoipcur')
             );
-            oxRegistry::getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
-            oxRegistry::getSession()->setVariable('d3isSetCurr', true);
+            Registry::getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
+            Registry::getSession()->setVariable('d3isSetCurr', true);
         }
 
         stopProfile(__METHOD__);
@@ -315,13 +342,18 @@ class d3GeoIP extends oxBase
         return false;
     }
 
-	/**
-	 * check module active state and perform switching to user country specific shop (EE only)
-	 *
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * check module active state and perform switching to user country specific shop (EE only)
+     *
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     * @throws oxConnectionException
+     * @throws oxSystemComponentException
+     */
     public function performShopSwitch()
     {
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeShop')) {
@@ -333,15 +365,15 @@ class d3GeoIP extends oxBase
         $oCountry = $this->getUserLocationCountryObject();
         $iNewShop = $oCountry->getFieldData('d3geoipshop');
 
-        if (oxRegistry::getConfig()->getRequestParameter('d3redirect') != 1
+        if (Registry::get(Request::class)->getRequestParameter('d3redirect') != 1
             && false == $this->isAdmin()
-            && oxRegistry::getUtils()->isSearchEngine() === false
+            && Registry::getUtils()->isSearchEngine() === false
             && $oCountry->getId()
             && $this->getConfig()->isMall()
             && $iNewShop > -1 &&
             (
                 $iNewShop != $this->getConfig()->getShopId()
-                || strtolower($this->getConfig()->getActiveView()->getClassName()) == 'mallstart'
+                || strtolower($this->getConfig()->getActiveView()->getClassKey()) == 'mallstart'
             )
         ) {
             $oNewConf = new oxConfig();
@@ -350,7 +382,7 @@ class d3GeoIP extends oxBase
 
             $this->getConfig()->onShopChange();
 
-            if (!oxRegistry::getSession()->getVariable('d3isSetLang')
+            if (!Registry::getSession()->getVariable('d3isSetLang')
                 && $this->_getModConfig()->getValue('blChangeLang')
                 && $oCountry->getFieldData('d3geoiplang') > -1
             ) {
@@ -360,10 +392,10 @@ class d3GeoIP extends oxBase
             }
 
             /** @var  $oStr d3str */
-            $oStr = oxRegistry::get('d3str');
+            $oStr = Registry::get('d3str');
             $aParams = array(
                 'd3redirect' => '1',
-                'fnc'        => oxRegistry::getConfig()->getRequestParameter('fnc'),
+                'fnc'        => Registry::get(Request::class)->getRequestParameter('fnc'),
                 'shp'        => $iNewShop
             );
             $sUrl = str_replace(
@@ -388,13 +420,18 @@ class d3GeoIP extends oxBase
         stopProfile(__METHOD__);
     }
 
-	/**
-	 * check module active state and perform switching to user country specific url
-	 *
-	 * @throws d3_cfg_mod_exception
-	 * @throws oxConnectionException
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * check module active state and perform switching to user country specific url
+     *
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     * @throws oxConnectionException
+     * @throws oxSystemComponentException
+     */
     public function performURLSwitch()
     {
         if (!$this->_getModConfig()->isActive()
@@ -407,7 +444,7 @@ class d3GeoIP extends oxBase
         $oCountry = $this->getUserLocationCountryObject();
 
         if (false == $this->isAdmin()
-            && oxRegistry::getUtils()->isSearchEngine() === false
+            && Registry::getUtils()->isSearchEngine() === false
             && $oCountry->getId()
             && $oCountry->getFieldData('d3geoipurl')
             && strlen(trim($oCountry->getFieldData('d3geoipurl'))) > 0
@@ -453,23 +490,27 @@ class d3GeoIP extends oxBase
         return $aShopUrls;
     }
 
-	/**
-	 * get modcfg instance
-	 *
-	 * @return d3_cfg_mod
-	 * @throws d3_cfg_mod_exception
-	 */
+    /**
+     * get modcfg instance
+     *
+     * @return d3_cfg_mod
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
     protected function _getModConfig()
     {
         return d3_cfg_mod::get($this->_sModId);
     }
 
-	/**
-	 * get d3log instance
-	 *
-	 * @return d3log
-	 * @throws d3_cfg_mod_exception
-	 */
+    /**
+     * get d3log instance
+     *
+     * @return d3log
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
     protected function _getLog()
     {
         if (!$this->oD3Log) {

@@ -1,5 +1,12 @@
 <?php
 
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\GeoIp\Application\Model\d3geoip;
+use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_main;
+use OxidEsales\Eshop\Application\Model\CountryList;
+use OxidEsales\Eshop\Core\Registry;
+
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -27,19 +34,25 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
     /**
      * @param $sIP
      * @return string
+     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
+     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
      */
     public function getIpCountry($sIP)
     {
         startProfile(__METHOD__);
 
         /** @var $oD3GeoIP d3geoip */
-        $oD3GeoIP = oxNew('d3geoip');
+        $oD3GeoIP = oxNew(d3geoip::class);
         $oCountry = $oD3GeoIP->getUserLocationCountryObject($sIP);
 
         if ($oCountry->getId()) {
             $sTitle = $oCountry->getFieldData('oxtitle');
         } else {
-            $sTitle = oxRegistry::getLang()->translateString('D3_GEOIP_SET_IP_CHECKIP_NOTSET');
+            $sTitle = Registry::getLang()->translateString('D3_GEOIP_SET_IP_CHECKIP_NOTSET');
         }
 
         stopProfile(__METHOD__);
@@ -48,7 +61,7 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
     }
 
     /**
-     * @return oxcountrylist
+     * @return CountryList
      */
     public function getIPCountryList()
     {
@@ -57,10 +70,10 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
         }
 
         startProfile(__METHOD__);
-        /** @var $oGeoIp  d3geoip */
-        $oGeoIp = oxNew('d3geoip');
-        /** @var $oCountryList oxcountrylist */
-        $this->oCountryList = oxNew('oxcountrylist');
+        /** @var $oGeoIp d3geoip */
+        $oGeoIp = oxNew(d3geoip::class);
+        /** @var $oCountryList CountryList */
+        $this->oCountryList = oxNew(CountryList::class);
         $oListObject = $this->oCountryList->getBaseObject();
         $sFieldList = $oListObject->getSelectFields();
         $sQ = "select (SELECT d3startip FROM ".$oGeoIp->getViewName().

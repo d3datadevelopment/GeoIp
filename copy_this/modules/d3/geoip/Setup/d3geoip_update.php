@@ -14,6 +14,18 @@
  * @link      http://www.oxidmodule.com
  */
 
+namespace D3\GeoIp\Setup;
+
+use D3\ModCfg\Application\Model\Install\d3install_updatebase;
+use D3\ModCfg\Application\Model\Installwizzard\d3installdbfield;
+use D3\ModCfg\Application\Model\Installwizzard\d3installdbrecord;
+use d3\modcfg\Application\Model\d3database;
+use D3\ModCfg\Application\Model\Installwizzard\d3installdbtable;
+use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Facts\Facts;
+
 class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
@@ -249,7 +261,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     public function hasDeleteGeoIpTableFields()
     {
     	/** @var d3installdbfield $oInstallDbField */
-    	$oInstallDbField = oxNew('d3installdbfield', $this);
+    	$oInstallDbField = oxNew(d3installdbfield::class, $this);
     	return $oInstallDbField->checkDeleteFields();
     }
 
@@ -262,7 +274,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
         $blRet = false;
         if ($this->hasDeleteGeoIpTableFields()) {
 	        /** @var d3installdbfield $oInstallDbField */
-	        $oInstallDbField = oxNew('d3installdbfield', $this);
+	        $oInstallDbField = oxNew(d3installdbfield::class, $this);
             $blRet  = $oInstallDbField->fixDeleteFields(__METHOD__);
         }
 
@@ -276,7 +288,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 	public function checkGeoIpTableEngine()
 	{
 		/** @var d3installdbtable $oDbTable */
-		$oDbTable = oxNew('d3installdbtable', $this);
+		$oDbTable = oxNew(d3installdbtable::class, $this);
 		$aData = $oDbTable->getTableData('d3geoip');
 
 		if (isset($aData) && count($aData) && isset($aData['ENGINE']) && $aData['ENGINE'] == 'InnoDB') {
@@ -286,14 +298,15 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 		return true;
 	}
 
-	/**
-	 * @return bool
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * @return bool
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
 	public function updateGeoIpTableEngine()
 	{
 		/** @var d3installdbtable $oDbTable */
-		$oDbTable = oxNew('d3installdbtable', $this);
+		$oDbTable = oxNew(d3installdbtable::class, $this);
 		$blRet = $oDbTable->changeTableEngine('d3geoip', 'InnoDB');
 		return $blRet;
 	}
@@ -322,6 +335,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 
     /**
      * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
     public function checkModCfgItemExist()
     {
@@ -430,7 +445,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
                         ),
                         array (
                             'fieldname'     => 'OXSHOPVERSION',
-                            'content'       => oxRegistry::getConfig()->getEdition(),
+                            'content'       => Registry::getConfig()->getEdition(),
                             'force_update'  => true,
                             'use_quote'     => true,
                             'use_multilang' => false,
@@ -516,7 +531,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 	 */
     public function checkRegisteredComponent()
     {
-        /** @var $oShop oxshop */
+        /** @var $oShop Shop */
         foreach ($this->getShopListByActiveModule('d3geoip') as $oShop) {
             $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
@@ -557,25 +572,26 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
         return $blRet;
     }
 
-	/**
-	 * @param oxShop $oShop
-	 *
-	 * @return array|null
-	 * @throws oxConnectionException
-	 */
-    protected function _d3GetUserComponentsFromDb(oxShop $oShop)
+    /**
+     * @param Shop $oShop
+     *
+     * @return array|null
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     */
+    protected function _d3GetUserComponentsFromDb(Shop $oShop)
     {
         $sVarName = 'aUserComponentNames';
         $sModuleId = '';
-        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
-        $sSelect = "SELECT oxvartype as type, ".oxRegistry::getConfig()->getDecodeValueQuery().
+        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $sSelect = "SELECT oxvartype as type, ".Registry::getConfig()->getDecodeValueQuery().
             " as value FROM `oxconfig` WHERE oxshopid = ".$oDb->quote($oShop->getId()).
             " AND oxvarname = ".$oDb->quote($sVarName).
             " AND oxmodule = ".$oDb->quote($sModuleId);
 
         $aResult = $oDb->getAll($sSelect);
         $aUserComponents = is_array($aResult) && count($aResult)
-            ? oxRegistry::getConfig()->decodeValue($aResult[0]['type'], $aResult[0]['value'])
+            ? Registry::getConfig()->decodeValue($aResult[0]['type'], $aResult[0]['value'])
             : null;
 
         return $aUserComponents;

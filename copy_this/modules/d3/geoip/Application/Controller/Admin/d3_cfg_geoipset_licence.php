@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -14,6 +13,10 @@
  * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
+
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_licence;
 
 class d3_cfg_geoipset_licence extends d3_cfg_mod_licence 
 {
