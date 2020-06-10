@@ -31,7 +31,7 @@ $aModule = array(
         'en'    =>  '',
     ),
     'thumbnail'    => 'picture.png',
-    'version'      => '3.1.0.0',
+    'version'      => '4.0.0.0',
     'author'       => 'D&sup3; Data Development (Inh.: Thomas Dartsch)',
     'email'        => 'support@shopmodule.com',
     'url'          => 'http://www.oxidmodule.com/',
@@ -65,5 +65,6 @@ $aModule = array(
         'd3/geoip/IntelliSenseHelper.php',
         'd3/geoip/metadata.php',
         'd3/geoip/Application/views/admin/de/d3_geoip_lang.php',
+        'd3/geoip/Setup/Events.php'
     ),
 );

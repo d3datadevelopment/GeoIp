@@ -1,12 +1,5 @@
 <?php
 
-namespace D3\GeoIp\Application\Controller\Admin;
-
-use D3\GeoIp\Application\Model\d3geoip;
-use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_main;
-use OxidEsales\Eshop\Application\Model\CountryList;
-use OxidEsales\Eshop\Core\Registry;
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -18,9 +11,23 @@ use OxidEsales\Eshop\Core\Registry;
  * http://www.shopmodule.com
  *
  * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
- * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @author    D3 Data Development - Daniel Seifert <support@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
+
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\GeoIp\Application\Model\d3geoip;
+use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_main;
+use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
+use D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException;
+use Doctrine\DBAL\DBALException;
+use OxidEsales\Eshop\Application\Model\CountryList;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\StandardException;
+use OxidEsales\Eshop\Core\Registry;
+
 class d3_cfg_geoipset_main extends d3_cfg_mod_main
 {
     protected $_sModId = 'd3_geoip';
@@ -34,12 +41,12 @@ class d3_cfg_geoipset_main extends d3_cfg_mod_main
     /**
      * @param $sIP
      * @return string
-     * @throws \D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException
-     * @throws \D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
-     * @throws \OxidEsales\Eshop\Core\Exception\StandardException
+     * @throws d3ShopCompatibilityAdapterException
+     * @throws d3_cfg_mod_exception
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws StandardException
      */
     public function getIpCountry($sIP)
     {

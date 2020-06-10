@@ -1,6 +1,6 @@
 {
   "name": "d3/geoip",
-  "description": "GeoIP preselection for oxid eShop v6",
+  "description": "GeoIP preselection",
   "type": "oxideshop-module",
   "authors": [
     {
@@ -19,6 +19,7 @@
     "eShop",
     "d3",
     "GeoIp",
+    "language",
     "country",
     "countries",
     "currency",
@@ -36,7 +37,7 @@
   },
   "require": {
     "php": ">=5.6",
-    "oxid-esales/oxideshop-ce": "6.0 - 6.3",
+    "oxid-esales/oxideshop-ce": "6.2 - 6.3",
     "d3/modcfg": "^5.3.1.0"
   },
   "autoload": {

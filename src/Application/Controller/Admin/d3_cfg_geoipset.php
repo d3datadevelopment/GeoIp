@@ -1,9 +1,5 @@
 <?php
 
-namespace D3\GeoIp\Application\Controller\Admin;
-
-use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_;
-
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -15,9 +11,14 @@ use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_;
  * http://www.shopmodule.com
  *
  * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
- * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @author    D3 Data Development - Daniel Seifert <support@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
+
+namespace D3\GeoIp\Application\Controller\Admin;
+
+use D3\ModCfg\Application\Controller\Admin\d3_cfg_mod_;
+
 class d3_cfg_geoipset extends d3_cfg_mod_
 {
     /**

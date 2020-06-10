@@ -11,41 +11,39 @@
  * http://www.shopmodule.com
  *
  * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
- * @author    D3 Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @author    D3 Data Development - Daniel Seifert <support@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
 
-namespace D3\GeoIp\Modules\Application\Component;
+// @codeCoverageIgnoreStart
 
-use D3\GeoIp\Application\Model\d3geoip;
-use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
-use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
+namespace D3\GeoIp\Setup;
+
 use D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException;
+use D3\ModCfg\Application\Model\Install\d3install;
 use Doctrine\DBAL\DBALException;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
+use OxidEsales\Eshop\Core\Exception\SystemComponentException;
 
-class d3_oxcmp_lang_geoip extends d3_oxcmp_lang_geoip_parent
+class Events
 {
-    private $_sModId = 'd3_geoip';
-
     /**
      * @throws d3ShopCompatibilityAdapterException
-     * @throws d3_cfg_mod_exception
      * @throws DBALException
      * @throws DatabaseConnectionException
      * @throws DatabaseErrorException
      * @throws StandardException
+     * @throws SystemComponentException
      */
-    public function init()
+    public static function onActivate()
     {
-        if (d3_cfg_mod::get($this->_sModId)->isActive()) {
-            /** @var $oLocation d3geoip */
-            $oLocation = oxNew(d3geoip::class);
-            $oLocation->setCountryLanguage();
-        }
+        d3install::checkUpdateStart();
+    }
 
-        parent::init();
+    public static function onDeactivate()
+    {
     }
 }
+// @codeCoverageIgnoreEnd

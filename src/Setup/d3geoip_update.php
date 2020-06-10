@@ -1,5 +1,5 @@
 <?php
- /**
+/**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
  *
@@ -9,8 +9,8 @@
  *
  * http://www.shopmodule.com
  *
- * @copyright © D³ Data Development, Thomas Dartsch
- * @author    D³ Data Development - Daniel Seifert <ds@shopmodule.com>
+ * @copyright (C) D3 Data Development (Inh. Thomas Dartsch)
+ * @author    D3 Data Development - Daniel Seifert <support@shopmodule.com>
  * @link      http://www.oxidmodule.com
  */
 
@@ -18,30 +18,31 @@ namespace D3\GeoIp\Setup;
 
 use D3\ModCfg\Application\Model\Install\d3install_updatebase;
 use D3\ModCfg\Application\Model\Installwizzard\d3installdbfield;
-use D3\ModCfg\Application\Model\Installwizzard\d3installdbrecord;
-use d3\modcfg\Application\Model\d3database;
 use D3\ModCfg\Application\Model\Installwizzard\d3installdbtable;
+use Doctrine\DBAL\DBALException;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\ConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException as DatabaseErrorException;
 use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Facts\Facts;
 
 class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '3.1.0.0';
-    public $sModRevision = '3100';
-    public $sBaseConf = '9qGv2==ZmhGbXhxSWUvZ25tSjFMV3J5aTExOTdhdWg2QkdrdHJBT09CajlXUzRDOGdMZ0YraEp1N0xPc
-WkyOGhMZDBKMmwyUldaOXVrNDNjOWtMRW9BZEJ3VjY5NWQyMmZ3VG9qdHhRSVF4NXYvUGZqUmpxZm1Td
-i9HbkxNZDRxVzNRRlZrRForU0RMSHVNR25hR1ROMkt0ZUM0SXpnKzBYUHJnc0Y1dDJYaDNIMEsrWE9uR
-1FkbmJ4VUlMSGd1UEYxT0pPdGJhazQ4b1l6WDBBRElkM1dTWFM4VFg4S0didCs1aG1lNG9QYTh4YmVZe
-XhDL3N0aXFncEhHWDJqNFFyQ0VDTFlkWUFVR20zU2RuZ05NUnREZythR2x1Z2VQOTYvbXNHZVVHMW9zN
-UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
+    public $sModVersion = '4.0.0.0';
+    public $sModRevision = '4000';
+    public $sBaseConf = '3Ouv2==YmlyRktwdlovdEFuVDFsa2dPYmV6MGxYKzcrV3p1RVRBN1lIOUh5dnp1T2dCQmd4c0pJeVA1Z
+WtrbnlIRC9Tc0Jud2N3VUFNbG1sVU15Yk9ZK2N1VVZWNHdmem9iV1AxeklXY1Bqa3k2UE5MVTN5NmVpR
+m40TVBFQ3h2V3dsQmpXeVBXTTFQcm1VOGhiSFZxL0taUGgveWZXUlgwaVdrb2RyQ1V6Nk1wOXJsajVaM
+UVoaHYwdml4N1IxVmp5QmZEUm8xS3VnQWxrTi9UeWtKRERlMjlwY29DTGd3bys3bkU1TXFOM3lXR3FOZ
+1FyMkpCaFFBTXova2VkckIvQVlvdzVOeko5YWlpWUxXbHFjWFZKT2N1b0tSN016c3J2WEhqNnNPYTdpT
+k11QjlHNmttejJjYkRxT0lNNWJ3aFRCMmY=';
     public $sRequirements = '';
     public $sBaseValue = '';
 
-    public $sMinModCfgVersion = '4.4.1.0';
+    public $sMinModCfgVersion = '5.3.1.0';
     
     protected $_aUpdateMethods = array(
         array('check' => 'checkGeoIpTableExist',
@@ -66,7 +67,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
               'do'    => 'updateModCfgSameRevision'),
     );
 
-    // Standardwerte für checkMultiLangTables() und fixRegisterMultiLangTables()
+    // default values for checkMultiLangTables() and fixRegisterMultiLangTables()
     public $aMultiLangTables = array();
 
     public $aFields = array(
@@ -254,10 +255,12 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
         return $blRet;
     }
 
-	/**
-	 * @return bool
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     */
     public function hasDeleteGeoIpTableFields()
     {
     	/** @var d3installdbfield $oInstallDbField */
@@ -265,10 +268,12 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     	return $oInstallDbField->checkDeleteFields();
     }
 
-	/**
-	 * @return bool
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     */
     public function deleteGeoIpTableFields()
     {
         $blRet = false;
@@ -281,10 +286,11 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
         return $blRet;
     }
 
-	/**
-	 * @return bool true, if table has wrong engine
-	 * @throws oxSystemComponentException
-	 */
+    /**
+     * @return bool true, if table has wrong engine
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     */
 	public function checkGeoIpTableEngine()
 	{
 		/** @var d3installdbtable $oDbTable */
@@ -300,8 +306,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 
     /**
      * @return bool
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
 	public function updateGeoIpTableEngine()
 	{
@@ -335,14 +341,14 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 
     /**
      * @return bool
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
      */
     public function checkModCfgItemExist()
     {
         $blRet = false;
         foreach ($this->getShopList() as $oShop) {
-            /** @var $oShop oxshop */
+            /** @var $oShop Shop */
             $aWhere = array(
                 'oxmodid'       => $this->sModKey,
                 'oxnewrevision' => $this->sModRevision,
@@ -368,7 +374,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
 
         if ($this->checkModCfgItemExist()) {
             foreach ($this->getShopList() as $oShop) {
-                /** @var $oShop oxshop */
+                /** @var $oShop Shop */
                 $aWhere = array(
                     'oxmodid'       => $this->sModKey,
                     'oxshopid'      => $oShop->getId(),
@@ -489,7 +495,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
      */
     public function checkGeoIpFields()
     {
-        /** @var $oShop oxshop */
+        /** @var $oShop Shop */
         $oShop = $this->getShopList()->current();
         $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
 
@@ -502,7 +508,7 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
      */
     public function fixGeoIpFields()
     {
-        /** @var $oShop oxshop */
+        /** @var $oShop Shop */
         $oShop = $this->getShopList()->current();
         $this->aFields['D3GEOIPSHOP']['sDefault'] = $oShop->getId();
 
@@ -526,9 +532,11 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
     }
 
 	/**
-	 * @return bool
-	 * @throws oxConnectionException
-	 */
+     * @return bool
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws ConnectionException
+     */
     public function checkRegisteredComponent()
     {
         /** @var $oShop Shop */
@@ -545,16 +553,18 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
         return false;
     }
 
-	/**
-	 * @return bool
-	 * @throws oxConnectionException
-	 */
+    /**
+     * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     */
     public function unregisterComponent()
     {
         $blRet = true;
         $sVarName = 'aUserComponentNames';
 
-        /** @var $oShop oxshop */
+        /** @var $oShop Shop */
         foreach ($this->getShopList() as $oShop) {
             $aUserComponents = $this->_d3GetUserComponentsFromDb($oShop);
 
@@ -576,8 +586,8 @@ UUrZ3pOeW9TUmo3MDg4dGx0RkRUK0wzb2k=';
      * @param Shop $oShop
      *
      * @return array|null
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _d3GetUserComponentsFromDb(Shop $oShop)
     {

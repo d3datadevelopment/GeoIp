@@ -17,10 +17,15 @@
 namespace D3\GeoIp\Application\Controller\Admin;
 
 use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
+use Doctrine\DBAL\DBALException;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Application\Model\ShopList;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Eshop\Core\Request;
 use stdClass;
 
 class d3_country_geoip extends AdminDetailsController
@@ -29,9 +34,9 @@ class d3_country_geoip extends AdminDetailsController
     protected $_sDefSortOrder = 'asc';
     protected $_sThisTemplate = 'd3_country_geoip.tpl';
     private $_sModId = 'd3_geoip';
-    /** @var  oxcountry */
+    /** @var  Country */
     public $oCountry;
-    /** @var  oxshoplist */
+    /** @var  ShopList */
     public $oShopList;
 
     /**
@@ -45,9 +50,9 @@ class d3_country_geoip extends AdminDetailsController
 
         $ret = parent::render();
 
-        $soxId = Registry::get(Request::class)->getRequestParameter("oxid");
+        $soxId = Registry::getRequest()->getRequestEscapedParameter("oxid");
         // check if we right now saved a new entry
-        $sSavedID = Registry::get(Request::class)->getRequestParameter("saved_oxid");
+        $sSavedID = Registry::getRequest()->getRequestEscapedParameter("saved_oxid");
         if (($soxId == "-1" || !isset($soxId)) && isset($sSavedID)) {
             $soxId = $sSavedID;
             Registry::getSession()->deleteVariable("saved_oxid");
@@ -58,8 +63,8 @@ class d3_country_geoip extends AdminDetailsController
 
         if ($soxId != "-1" && isset($soxId)) {
             // load object
-            /** @var $oCountry oxcountry */
-            $oCountry = oxNew("oxcountry");
+            /** @var $oCountry Country */
+            $oCountry = oxNew(Country::class);
             $oCountry->loadInLang($this->_iEditLang, $soxId);
             
             if ($oCountry->isForeignCountry()) {
@@ -93,9 +98,9 @@ class d3_country_geoip extends AdminDetailsController
             $this->addTplParam("blForeignCountry", true);
         }
 
-        $this->oShopList = oxNew('oxshoplist');
-        /** @var $oShop oxshop */
-        $oShop = oxNew('oxshop');
+        $this->oShopList = oxNew(ShopList::class);
+        /** @var $oShop Shop */
+        $oShop = oxNew(Shop::class);
         $sSelect = "SELECT * FROM ".$oShop->getViewName()." WHERE ".$oShop->getSqlActiveSnippet();
         $this->oShopList->selectString($sSelect);
         $this->getLangList();
@@ -106,9 +111,9 @@ class d3_country_geoip extends AdminDetailsController
     /**
      * @param $sIdent
      * @return mixed
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getModCfgValue($sIdent)
     {
@@ -132,11 +137,11 @@ class d3_country_geoip extends AdminDetailsController
             return;
         }
 
-        $soxId   = Registry::get(Request::class)->getRequestParameter("oxid");
-        $aParams = Registry::get(Request::class)->getRequestParameter("editval");
+        $soxId   = Registry::getRequest()->getRequestEscapedParameter("oxid");
+        $aParams = Registry::getRequest()->getRequestEscapedParameter("editval");
 
-        /** @var $oCountry oxcountry */
-        $oCountry = oxNew("oxcountry");
+        /** @var $oCountry Country */
+        $oCountry = oxNew(Country::class);
 
         if ($soxId != "-1") {
             $oCountry->loadInLang($this->_iEditLang, $soxId);
@@ -159,7 +164,7 @@ class d3_country_geoip extends AdminDetailsController
     }
 
     /**
-     * @return oxshoplist
+     * @return ShopList
      */
     public function getShopList()
     {
@@ -168,9 +173,9 @@ class d3_country_geoip extends AdminDetailsController
 
     /**
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getCurList()
     {
@@ -204,9 +209,11 @@ class d3_country_geoip extends AdminDetailsController
         if ($sCurrencies) {
             foreach (unserialize($sCurrencies) as $sKey => $sValue) {
                 $aFields = explode('@', $sValue);
-                $aCurrencies[$sKey]->id     = trim($sKey);
-                $aCurrencies[$sKey]->name   = trim($aFields[0]);
-                $aCurrencies[$sKey]->sign   = trim($aFields[4]);
+                $cur = new stdClass();
+                $cur->id     = trim($sKey);
+                $cur->name   = trim($aFields[0]);
+                $cur->sign   = trim($aFields[4]);
+                $aCurrencies[$sKey] = $cur;
             }
         }
 
@@ -216,9 +223,9 @@ class d3_country_geoip extends AdminDetailsController
     /**
      * ToDo: has to be refactored
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     * @throws \OxidEsales\Eshop\Core\Exception\DatabaseErrorException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getLangList()
     {

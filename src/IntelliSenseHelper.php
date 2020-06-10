@@ -14,8 +14,16 @@
  * @link      http://www.oxidmodule.com
  */
 
-/**  */
-class d3_oxcmp_cur_geoip_parent extends oxcmp_cur {}
+namespace D3\GeoIp\Modules\Application\Component {
 
-/** */
-class d3_oxcmp_lang_geoip_parent extends oxcmp_lang {}
+    use OxidEsales\Eshop\Application\Component\LanguageComponent;
+
+    class d3_oxcmp_lang_geoip_parent extends LanguageComponent {}
+}
+
+namespace D3\GeoIp\Modules\Core {
+
+    use OxidEsales\Eshop\Core\ShopControl;
+
+    class d3_oxshopcontrol_geoip_parent extends ShopControl {}
+}

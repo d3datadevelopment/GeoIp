@@ -16,6 +16,7 @@
 
 namespace D3\GeoIp\Modules\Core;
 
+use D3\GeoIp\Application\Component\GeoIpComponent;
 use OxidEsales\Eshop\Core\Registry;
 
 class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
@@ -41,8 +42,7 @@ class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
         startProfile(__METHOD__);
 
         $aUserComponentNames = Registry::getConfig()->getConfigParam('aUserComponentNames');
-        $sGeoIpCmpName = 'GeoIpComponent';
-        $sGeoIpCmpName = \D3\GeoIp\Application\Component\GeoIpComponent::class;
+        $sGeoIpCmpName = GeoIpComponent::class;
         $blDontUseCache = 1;
 
         if (false == is_array($aUserComponentNames)) {
