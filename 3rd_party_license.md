@@ -1,4 +1,4 @@
-GeoLite2 Country
+# GeoLite2 Country Database
 
 This product includes GeoLite2 data created by MaxMind, available from  
 <a href="http://www.maxmind.com">http://www.maxmind.com</a>.
