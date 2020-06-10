@@ -1,0 +1,47 @@
+{
+  "name": "d3/geoip",
+  "description": "GeoIP preselection for oxid eShop v6",
+  "type": "oxideshop-module",
+  "authors": [
+    {
+      "name": "D3 Data Development (Inh. Thomas Dartsch)",
+      "email": "info@shopmodule.com",
+      "homepage": "https://www.d3data.de",
+      "role": "Owner"
+    }
+  ],
+  "support": {
+    "email": "support@shopmodule.com"
+  },
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "d3",
+    "GeoIp",
+    "country",
+    "countries",
+    "currency",
+    "currencies"
+  ],
+  "homepage": "https://www.oxidmodule.com/",
+  "license": [
+    "proprietary"
+  ],
+  "extra": {
+    "oxideshop": {
+      "source-directory": "/src",
+      "target-directory": "d3/geoip"
+    }
+  },
+  "require": {
+    "php": ">=5.6",
+    "oxid-esales/oxideshop-ce": "6.0 - 6.3",
+    "d3/modcfg": "^5.3.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "D3\\GeoIp\\": "../../../source/modules/d3/geoip"
+    }
+  }
+}
