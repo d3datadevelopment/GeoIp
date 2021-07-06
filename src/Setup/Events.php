@@ -41,9 +41,4 @@ class Events
     {
         d3install::checkUpdateStart();
     }
-
-    public static function onDeactivate()
-    {
-    }
 }
-// @codeCoverageIgnoreEnd

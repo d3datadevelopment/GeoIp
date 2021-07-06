@@ -1,5 +1,10 @@
 # Changelog
 
+- 4.0.1.0
+  - Support für OXID 6.2.x / 6.3.x
+
+---
+
 - 4.0.0.0
   - Umstellung auf OXID 6.x
   - Verwendung von Composer

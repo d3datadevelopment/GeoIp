@@ -31,18 +31,20 @@ class d3geoip_update extends d3install_updatebase
 {
     public $sModKey = 'd3_geoip';
     public $sModName = 'GeoIP';
-    public $sModVersion = '4.0.0.0';
-    public $sModRevision = '4000';
-    public $sBaseConf = '3Ouv2==YmlyRktwdlovdEFuVDFsa2dPYmV6MGxYKzcrV3p1RVRBN1lIOUh5dnp1T2dCQmd4c0pJeVA1Z
-WtrbnlIRC9Tc0Jud2N3VUFNbG1sVU15Yk9ZK2N1VVZWNHdmem9iV1AxeklXY1Bqa3k2UE5MVTN5NmVpR
-m40TVBFQ3h2V3dsQmpXeVBXTTFQcm1VOGhiSFZxL0taUGgveWZXUlgwaVdrb2RyQ1V6Nk1wOXJsajVaM
-UVoaHYwdml4N1IxVmp5QmZEUm8xS3VnQWxrTi9UeWtKRERlMjlwY29DTGd3bys3bkU1TXFOM3lXR3FOZ
-1FyMkpCaFFBTXova2VkckIvQVlvdzVOeko5YWlpWUxXbHFjWFZKT2N1b0tSN016c3J2WEhqNnNPYTdpT
-k11QjlHNmttejJjYkRxT0lNNWJ3aFRCMmY=';
+    public $sModVersion = '4.0.1.0';
+    public $sModRevision = '4010';
+    public $sBaseConf = '--------------------------------------------------------------------------------
+0esv2==ZmRWMjBYdm03REl5TnVxcGxsK0xYU1FzaklaSjlXZ3pHYXNUMTJ0VW96U1pJczBPaEwydHhiM
+lRVSU1WdWhSZGFJL2s4S0ppWEdCR21TUlc1Ty9PMmc0bTF0WU9RV28xZzVCbDJ2Z0xDeEdEZUhzYXFiO
+TU5M1dpZHUxalRtMVg0ZHZxOTl6c0pkaHBDZkFMNVpodFdnYU1FbXRURzc1T0RnTHkrVGUzNmMwTVRTR
+G1naVEydGU1enhOWHdicWNSd3Z4eDRFZnE1NGlMSGdaNW1uV3hMWXdodmpnRklZRVFDSG9RNEJhQksvT
+VdRVUY3NmYyemdoTWlkc0N1dGU1NnByVHBudEplNE1NVTg5cTI1NHZUUFVCVDFudzcvSi95Y0x2RzFrR
+nNaenNxYlptVURKaFFwbUZmRCszYUhXM1c=
+--------------------------------------------------------------------------------';
     public $sRequirements = '';
     public $sBaseValue = '';
 
-    public $sMinModCfgVersion = '5.3.1.0';
+    public $sMinModCfgVersion = '5.3.6.0';
     
     protected $_aUpdateMethods = array(
         array('check' => 'checkGeoIpTableExist',
