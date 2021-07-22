@@ -58,7 +58,8 @@ $aLang = array(
     'D3_GEOIP_SELURL_DESC'                          => 'Sobald im URL-Feld eine Eingabe vorhanden ist, wird bei '.
         'passenden Kunden versucht, zur hinterlegten URL zu wechseln. Möchten Sie den Mandanten, die Währung und / '.
         'oder die Sprache einstellen, entfernen Sie die URL.<br><br>Aktivieren / deaktivieren Sie den URL-Wechsel '.
-        'zusätzlich in den Modul-Grundeinstellungen.',
+        'zusätzlich in den Modul-Grundeinstellungen.<br><br>Mit dem URL-Parameter "forceUrl=1" können Sie ungewollte URL-'.
+        'Weiterleitungen unterbinden.',
 
     'D3_GEOIP_METADATA_TITLE'                       => 'D³ GeoIP Vorauswahl',
     'D3_GEOIP_METADATA_DESC'                        => 'Begrüßen Sie Ihre Kunden in seiner Landessprache.',

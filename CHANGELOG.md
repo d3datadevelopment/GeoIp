@@ -1,5 +1,11 @@
 # Changelog
 
+- 4.0.2.0
+
+  - Parameter hinzugefügt, um ungewollte URL-Weiterleitungen zu verhindern
+  
+---
+
 - 4.0.1.0
   - Support für OXID 6.2.x / 6.3.x
 

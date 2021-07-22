@@ -445,7 +445,8 @@ class d3geoip extends BaseModel
 
         $oCountry = $this->getUserLocationCountryObject();
 
-        if (false == $this->isAdmin()
+        if (false == (bool) Registry::getRequest()->getRequestEscapedParameter('forceUrl')
+            && false == $this->isAdmin()
             && Registry::getUtils()->isSearchEngine() === false
             && $oCountry->getId()
             && $oCountry->getFieldData('d3geoipurl')
