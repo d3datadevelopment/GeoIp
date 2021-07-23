@@ -14,12 +14,14 @@
  * @link      http://www.oxidmodule.com
  */
 
-$sLangName  = 'Deutsch';
-$iLangNr    = 0;
+use D3\GeoIp\Application\Model\d3geoip;
+
+$sLangName = 'Deutsch';
+$iLangNr   = 0;
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset'                                       => 'UTF-8',
     'd3mxgeoip'                                     => "<i class='fa fa-globe'></i> GeoIP",
     'd3mxgeoip_settings'                            => 'Einstellungen',
@@ -58,7 +60,7 @@ $aLang = array(
     'D3_GEOIP_SELURL_DESC'                          => 'Sobald im URL-Feld eine Eingabe vorhanden ist, wird bei '.
         'passenden Kunden versucht, zur hinterlegten URL zu wechseln. Möchten Sie den Mandanten, die Währung und / '.
         'oder die Sprache einstellen, entfernen Sie die URL.<br><br>Aktivieren / deaktivieren Sie den URL-Wechsel '.
-        'zusätzlich in den Modul-Grundeinstellungen.<br><br>Mit dem URL-Parameter "forceUrl=1" können Sie ungewollte URL-'.
+        'zusätzlich in den Modul-Grundeinstellungen.<br><br>Mit dem URL-Parameter "' . d3geoip::SKIPURL_REQUEST_PARAM . '=1" können Sie ungewollte URL-' .
         'Weiterleitungen unterbinden.',
 
     'D3_GEOIP_METADATA_TITLE'                       => 'D³ GeoIP Vorauswahl',
@@ -69,4 +71,4 @@ $aLang = array(
         'Laden Sie bitte die aktuellen CSV-Daten des Anbieters Maxmind. In "setup+doku/importCSVtoMySQL" des Modulpaketes finden Sie weitere Informationen und die erforderlichen Datenbank-Befehle, um die nötigen Daten zu generieren.'.PHP_EOL.PHP_EOL.
         'Alternativ finden Sie die erforderlichen Daten im Installationspaket des Moduls unter "setup+doku/geoip-data_*". '.PHP_EOL.PHP_EOL.
         'Führen Sie die SQL-Datei(en) bitte in Ihrer Datenbank aus.',
-);
+];

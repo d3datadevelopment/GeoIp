@@ -33,6 +33,9 @@ use OxidEsales\Eshop\Core\Registry;
 
 class d3geoip extends BaseModel
 {
+    const SKIPURL_REQUEST_PARAM = 'forceUrl';
+    const SKIPURL_SESSION_PARAM = 'd3geoipForceUrl';
+
     protected $_sClassName = 'd3geoip';
     private $_sModId = 'd3_geoip';
     public $oCountry;
@@ -443,9 +446,13 @@ class d3geoip extends BaseModel
 
         startProfile(__METHOD__);
 
+        if (Registry::getRequest()->getRequestEscapedParameter(self::SKIPURL_REQUEST_PARAM)) {
+            Registry::getSession()->setVariable(self::SKIPURL_SESSION_PARAM, true);
+        }
+
         $oCountry = $this->getUserLocationCountryObject();
 
-        if (false == (bool) Registry::getRequest()->getRequestEscapedParameter('forceUrl')
+        if ($this->dontSkipUrlRedirect()
             && false == $this->isAdmin()
             && Registry::getUtils()->isSearchEngine() === false
             && $oCountry->getId()
@@ -468,6 +475,17 @@ class d3geoip extends BaseModel
         }
 
         stopProfile(__METHOD__);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function dontSkipUrlRedirect()
+    {
+        return false === (
+            Registry::getRequest()->getRequestEscapedParameter(self::SKIPURL_REQUEST_PARAM) ||
+            Registry::getSession()->getVariable(self::SKIPURL_SESSION_PARAM)
+            );
     }
 
 	/**

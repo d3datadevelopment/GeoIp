@@ -1,5 +1,11 @@
 # Changelog
 
+- 4.0.3.0
+
+  - behält die Umleitungsverhinderung während der aktuellen Session auch ohne weitere Parameter bei
+  
+---
+
 - 4.0.2.0
 
   - Parameter hinzugefügt, um ungewollte URL-Weiterleitungen zu verhindern
