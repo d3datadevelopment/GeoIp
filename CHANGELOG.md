@@ -1,5 +1,11 @@
 # Changelog
 
+- 4.0.4.0
+
+  - Modul erfordert keine Lizenzschlüssel mehr - Weiterentwicklung erfolgt ausschließlich durch Individualbeauftragung
+  
+---
+
 - 4.0.3.0
 
   - behält die Umleitungsverhinderung während der aktuellen Session auch ohne weitere Parameter bei
