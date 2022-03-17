@@ -1,5 +1,10 @@
 # Changelog
 
+- 4.0.4.1
+  - Support für OXID 6.3.1
+
+---
+
 - 4.0.4.0
 
   - Modul erfordert keine Lizenzschlüssel mehr - Weiterentwicklung erfolgt ausschließlich durch Individualbeauftragung
