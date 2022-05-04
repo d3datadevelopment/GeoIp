@@ -38,7 +38,7 @@ ENGINE=InnoDB
 
 /* import all IPv4 address from CSV file */
 
-LOAD DATA LOW_PRIORITY LOCAL INFILE 'GeoLite2-Country-Blocks-IPv6.csv' INTO TABLE `IPv4` FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (`network`, `geoname_id`, `registered_country_geoname_id`, `represented_country_geoname_id`, `is_anonymous_proxy`, `is_satellite_provider`);
+LOAD DATA LOW_PRIORITY LOCAL INFILE 'GeoLite2-Country-Blocks-IPv6.csv' INTO TABLE `IPv6` FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (`network`, `geoname_id`, `registered_country_geoname_id`, `represented_country_geoname_id`, `is_anonymous_proxy`, `is_satellite_provider`);
 
 /* create a tmp table for imported county data */
 
@@ -56,7 +56,7 @@ ENGINE=InnoDB
 
 /* import all countries from CSV file */
 
-LOAD DATA LOW_PRIORITY LOCAL INFILE 'GeoLite2-Country-Locations-en.csv' INTO TABLE `GeoIP`.`Countries` CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (`geoname_id`, `locale_code`, `continent_code`, `continent_name`, `country_iso_code`, `country_name`);
+LOAD DATA LOW_PRIORITY LOCAL INFILE 'GeoLite2-Country-Locations-en.csv' INTO TABLE `Countries` CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (`geoname_id`, `locale_code`, `continent_code`, `continent_name`, `country_iso_code`, `country_name`);
 
 /* copy all IPv4 data + calculated start and end IP to d3geoip table */
 
@@ -84,7 +84,7 @@ INSERT INTO d3geoip (D3IP, D3STARTIP, D3ENDIP, D3STARTIPBIN, D3ENDIPBIN, D3ISO, 
             Countries 
             ON 
                 IPv4.geoname_id = Countries.geoname_id
-    ) as src
+    ) as src;
     
 /* copy all IPv6 data to d3geoip table */
 
@@ -110,7 +110,7 @@ INSERT INTO d3geoip (D3IP, D3STARTIP, D3ENDIP, D3STARTIPBIN, D3ENDIPBIN, D3ISO, 
             Countries 
             ON 
                 IPv6.geoname_id = Countries.geoname_id
-    ) as src
+    ) as src;
     
 /* create a getFirstIp from IPv6 CIDR method */
     
