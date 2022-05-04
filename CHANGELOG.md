@@ -1,5 +1,10 @@
 # Changelog
 
+- 4.0.4.2
+  - updated geo ip data (May 2022)
+
+---
+
 - 4.0.4.1
   - Support für OXID 6.3.1
 
