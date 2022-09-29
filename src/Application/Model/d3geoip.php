@@ -53,7 +53,7 @@ class d3geoip extends BaseModel
     /**
      * get oxcountry object by given IP address (optional)
      *
-     * @param string $sIP optional
+     * @param string|null $sIP optional
      *
      * @return Country
      * @throws d3ShopCompatibilityAdapterException
@@ -63,7 +63,7 @@ class d3geoip extends BaseModel
      * @throws DatabaseErrorException
      * @throws StandardException
      */
-    public function getUserLocationCountryObject($sIP = null)
+    public function getUserLocationCountryObject(string $sIP = null)
     {
         if (!$this->oCountry) {
             startProfile(__METHOD__);
@@ -123,25 +123,15 @@ class d3geoip extends BaseModel
         ) {
             $sIP = $this->_getModConfig()->getValue('sTestCountryIp');
         } else {
-            if(isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-                $sIP = $_SERVER['HTTP_CF_CONNECTING_IP'];
-            } else if (isset($_SERVER['HTTP_X_REAL_IP'])) {
-                $sIP = $_SERVER['HTTP_X_REAL_IP'];
-            } else if (isset($_SERVER['HTTP_CLIENT_IP'])) {
-                $sIP = $_SERVER['HTTP_CLIENT_IP'];
-            } else if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                $sIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            } else if(isset($_SERVER['HTTP_X_FORWARDED'])) {
-                $sIP = $_SERVER['HTTP_X_FORWARDED'];
-            } else if(isset($_SERVER['HTTP_FORWARDED_FOR'])) {
-                $sIP = $_SERVER['HTTP_FORWARDED_FOR'];
-            } else if(isset($_SERVER['HTTP_FORWARDED'])) {
-                $sIP = $_SERVER['HTTP_FORWARDED'];
-            } else if(isset($_SERVER['REMOTE_ADDR'])) {
-                $sIP = $_SERVER['REMOTE_ADDR'];
-            } else {
-                $sIP = 'UNKNOWN';
-            }
+            $sIP = $_SERVER['HTTP_CF_CONNECTING_IP']
+                ?? $_SERVER['HTTP_X_REAL_IP']
+                ?? $_SERVER['HTTP_CLIENT_IP']
+                ?? $_SERVER['HTTP_X_FORWARDED_FOR']
+                ?? $_SERVER['HTTP_X_FORWARDED']
+                ?? $_SERVER['HTTP_FORWARDED_FOR']
+                ?? $_SERVER['HTTP_FORWARDED']
+                ?? $_SERVER['REMOTE_ADDR']
+                ?? 'UNKNOWN';
         }
         $sIP = str_replace(' ', '', $sIP);
 
@@ -153,12 +143,12 @@ class d3geoip extends BaseModel
     /**
      * get ISO alpha 2 ID by IP address
      *
-     * @param int $sIP IP address
+     * @param string $sIP IP address
      *
      * @return string
      * @throws DatabaseConnectionException
      */
-    public function loadByIP($sIP)
+    public function loadByIP(string $sIP)
     {
         startProfile(__METHOD__);
 
@@ -196,7 +186,7 @@ class d3geoip extends BaseModel
      * @return Country
      * @throws DatabaseConnectionException
      */
-    public function getCountryObject($sISOAlpha)
+    public function getCountryObject(string $sISOAlpha)
     {
         startProfile(__METHOD__);
 
@@ -376,18 +366,18 @@ class d3geoip extends BaseModel
             && false == $this->isAdmin()
             && Registry::getUtils()->isSearchEngine() === false
             && $oCountry->getId()
-            && $this->getConfig()->isMall()
+            && Registry::getConfig()->isMall()
             && $iNewShop > -1 &&
             (
-                $iNewShop != $this->getConfig()->getShopId()
-                || strtolower($this->getConfig()->getActiveView()->getClassKey()) == 'mallstart'
+                $iNewShop != Registry::getConfig()->getShopId()
+                || strtolower(Registry::getConfig()->getActiveView()->getClassKey()) == 'mallstart'
             )
         ) {
             $oNewConf = new Config();
             $oNewConf->setShopId($iNewShop);
             $oNewConf->init();
 
-            $this->getConfig()->onShopChange();
+            Registry::getConfig()->onShopChange();
 
             if (!Registry::getSession()->getVariable('d3isSetLang')
                 && $this->_getModConfig()->getValue('blChangeLang')
@@ -502,7 +492,7 @@ class d3geoip extends BaseModel
         $aShopUrls = array();
 
         foreach ($oShoplist->arrayKeys() as $sId) {
-            $aShopUrls[$sId] = $this->getConfig()->getShopConfVar('sMallShopURL', $sId);
+            $aShopUrls[$sId] = Registry::getConfig()->getShopConfVar('sMallShopURL', $sId);
         }
 
         stopProfile(__METHOD__);

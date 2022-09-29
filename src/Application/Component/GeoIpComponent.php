@@ -23,7 +23,6 @@ use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
 use D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException;
 use Doctrine\DBAL\DBALException;
 use OxidEsales\Eshop\Application\Component\CurrencyComponent;
-use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
@@ -61,17 +60,16 @@ class GeoIpComponent extends BaseController
             /** @var $oLocation d3geoip */
             $oLocation = oxNew(d3geoip::class);
             $oLocation->setCountryCurrency();
-            // moved to oxcmp_lang extension because here it's to late
+            // moved to oxcmp_lang extension because here it's too late
             // $oLocation->setCountryLanguage();
 
             if (!isset($oBasket)) {
-                $oBasket = $this->getSession()->getBasket();
+                $oBasket = Registry::getSession()->getBasket();
             }
 
             // call component again, if curr is registered before we changed it
             // reason: own component can added after default components only
             if ($oLocation->hasNotSetCurrency($oBasket->getBasketCurrency())) {
-                /** @var FrontendController $oActView */
                 $oActView = Registry::getConfig()->getActiveView();
                 $aComponents = $oActView->getComponents();
 

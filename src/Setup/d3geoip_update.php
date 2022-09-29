@@ -16,16 +16,23 @@
 
 namespace D3\GeoIp\Setup;
 
+use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
+use D3\ModCfg\Application\Model\Exception\d3ParameterNotFoundException;
+use D3\ModCfg\Application\Model\Exception\d3ShopCompatibilityAdapterException;
 use D3\ModCfg\Application\Model\Install\d3install_updatebase;
 use D3\ModCfg\Application\Model\Installwizzard\d3installdbfield;
 use D3\ModCfg\Application\Model\Installwizzard\d3installdbtable;
 use Doctrine\DBAL\DBALException;
+use Exception;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\ConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException as DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Facts\Facts;
+use ReflectionException;
 
 class d3geoip_update extends d3install_updatebase
 {
@@ -238,6 +245,9 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function checkGeoIpTableExist()
     {
@@ -246,12 +256,16 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * @return bool
+     * @throws ConnectionException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function updateGeoIpTableExist()
     {
         $blRet = false;
         if ($this->checkGeoIpTableExist()) {
-            $blRet  = $this->_addTable2('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP', 'InnoDB');
+            $blRet  = $this->_addTable2('d3geoip', $this->aFields, $this->aIndizes, 'GeoIP');
         }
 
         return $blRet;
@@ -315,12 +329,13 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 	{
 		/** @var d3installdbtable $oDbTable */
 		$oDbTable = oxNew(d3installdbtable::class, $this);
-		$blRet = $oDbTable->changeTableEngine('d3geoip', 'InnoDB');
-		return $blRet;
+		return $oDbTable->changeTableEngine('d3geoip', 'InnoDB');
 	}
 
     /**
      * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
      */
     public function checkGeoIpItems()
     {
@@ -328,9 +343,7 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
             'D3ISO' => 'DE',
         );
 
-        $blRet = $this->_checkTableItemNotExist('d3geoip', $aWhere);
-
-        return $blRet;
+        return $this->_checkTableItemNotExist('d3geoip', $aWhere);
     }
 
     /**
@@ -369,6 +382,11 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * @return bool
+     * @throws ConnectionException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws Exception
      */
     public function updateModCfgItemExist()
     {
@@ -453,7 +471,7 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
                         ),
                         array (
                             'fieldname'     => 'OXSHOPVERSION',
-                            'content'       => Registry::getConfig()->getEdition(),
+                            'content'       => oxNew(Facts::class)->getEdition(),
                             'force_update'  => true,
                             'use_quote'     => true,
                             'use_multilang' => false,
@@ -493,7 +511,12 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * change default value for shop id in EE
+     *
      * @return bool
+     * @throws ConnectionException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function checkGeoIpFields()
     {
@@ -506,7 +529,12 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * change default value for shop id in EE
+     *
      * @return bool
+     * @throws ConnectionException
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fixGeoIpFields()
     {
@@ -519,6 +547,14 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws d3ParameterNotFoundException
+     * @throws d3ShopCompatibilityAdapterException
+     * @throws d3_cfg_mod_exception
+     * @throws StandardException
+     * @throws ReflectionException
      */
     public function hasUnregisteredFiles()
     {
@@ -527,6 +563,13 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
 
     /**
      * @return bool
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws ReflectionException
+     * @throws StandardException
+     * @throws d3ShopCompatibilityAdapterException
+     * @throws d3_cfg_mod_exception
      */
     public function showUnregisteredFiles()
     {
@@ -602,10 +645,8 @@ XJ5U0QrUFZyUHFnNnNBdnZOa3ZRVUZVOWk=
             " AND oxmodule = ".$oDb->quote($sModuleId);
 
         $aResult = $oDb->getAll($sSelect);
-        $aUserComponents = is_array($aResult) && count($aResult)
+        return is_array($aResult) && count($aResult)
             ? Registry::getConfig()->decodeValue($aResult[0]['type'], $aResult[0]['value'])
             : null;
-
-        return $aUserComponents;
     }
 }

@@ -41,6 +41,9 @@ class d3_country_geoip extends AdminDetailsController
 
     /**
      * @return string
+     * @throws DBALException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function render()
     {
@@ -245,7 +248,7 @@ class d3_country_geoip extends AdminDetailsController
         if (is_array($aConfLanguages)) {
             $i = 0;
             reset($aConfLanguages);
-            while ((list($key, $val) = each($aConfLanguages))) {
+            foreach ($aConfLanguages as $key => $val) {
                 if (is_array($aLangParams)) {
                     //skipping non active languages
                     if (false == $aLangParams[$key]['active']) {

@@ -30,7 +30,7 @@ function EditThis( sID)
 function _groupExp(el) {
     var _cur = el.parentNode;
 
-    if (_cur.className == "exp") _cur.className = "";
+    if (_cur.className === "exp") _cur.className = "";
       else _cur.className = "exp";
 }
 
@@ -47,7 +47,7 @@ function showFormatSettings(sElemId, visible, blUseOldElem)
         sOldSettingElem = sElemId;
     }
 
-    if (visible == true) {
+    if (visible === true) {
         document.getElementById(sElemId).style.display = 'block';
     } else {
         document.getElementById(sElemId).style.display = 'none';
@@ -57,7 +57,7 @@ function showFormatSettings(sElemId, visible, blUseOldElem)
 -->
 </script>
 
-<style type="text/css">
+<style>
 <!--
 fieldset{
     border: 1px inset black;
@@ -104,9 +104,9 @@ td.edittext {
     <input type="hidden" name="oxid" value="[{$oxid}]">
     <input type="hidden" name="editval[d3_cfg_mod__oxid]" value="[{$oxid}]">
 
-    <table border="0" width="98%">
+    <table style="border: 0; width: 98%">
         <tr>
-            <td valign="top" class="edittext">
+            <td style="vertical-align: top" class="edittext">
 
                 [{include file="d3_cfg_mod_active.tpl"}]
 
@@ -224,9 +224,9 @@ td.edittext {
                     </div>
                 </div>
 
-                <table width="100%">
+                <table style="width: 100%">
                     <tr>
-                        <td class="edittext ext_edittext" align="left">
+                        <td class="edittext ext_edittext" style="text-align: left">
                             <span class="d3modcfg_btn icon status_ok">
                                 <input type="submit" name="save" value="[{oxmultilang ident="D3_GENERAL_GEOIP_SAVE"}]">
                                 <span></span>

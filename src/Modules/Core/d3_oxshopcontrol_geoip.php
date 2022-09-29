@@ -22,16 +22,16 @@ use OxidEsales\Eshop\Core\Registry;
 class d3_oxshopcontrol_geoip extends d3_oxshopcontrol_geoip_parent
 {
     /**
-     * @param null $sClass
-     * @param null $sFunction
-     * @param null $aParams
-     * @param null $aViewsChain
+     * @param null $controllerKey
+     * @param null $function
+     * @param null $parameters
+     * @param null $viewsChain
      */
-    public function start ($sClass = null, $sFunction = null, $aParams = null, $aViewsChain = null)
+    public function start ($controllerKey = null, $function = null, $parameters = null, $viewsChain = null)
     {
         $this->_d3AddGeoIpComponent();
 
-        parent::start($sClass, $sFunction, $aParams, $aViewsChain);
+        parent::start( $controllerKey, $function, $parameters, $viewsChain);
     }
     
     /**
