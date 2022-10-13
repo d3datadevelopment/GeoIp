@@ -43,7 +43,9 @@ class d3_oxcmp_lang_geoip extends d3_oxcmp_lang_geoip_parent
         if (d3_cfg_mod::get($this->_sModId)->isActive()) {
             /** @var $oLocation d3geoip */
             $oLocation = oxNew(d3geoip::class);
+            d3_cfg_mod::get($this->_sModId)->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'start perform language switch');
             $oLocation->setCountryLanguage();
+            d3_cfg_mod::get($this->_sModId)->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'end perform language switch');
         }
 
         parent::init();
