@@ -252,11 +252,15 @@ class d3geoip extends BaseModel
     {
         startProfile(__METHOD__);
 
+        $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'start shop or url switch');
         $this->performURLSwitch();
         $this->performShopSwitch();
+        $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'end shop or url switch');
 
         if (!$this->_getModConfig()->isActive()
-            || false == $this->_getModConfig()->getValue('blChangeLang')) {
+            || false == $this->_getModConfig()->getValue('blChangeLang')
+        ) {
+            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'language change option or module is disabled');
             stopProfile(__METHOD__);
             return;
         }
@@ -269,16 +273,16 @@ class d3geoip extends BaseModel
             && Registry::getSession()->getVariable('d3isSetLang') === null
             && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
         ) {
-            $this->_getLog()->log(
-                d3log::INFO,
+            $language = (int) $oCountry->getFieldData('d3geoiplang');
+            $this->_getModConfig()->info(
                 __CLASS__,
                 __FUNCTION__,
                 __LINE__,
                 'set language',
-                $this->getIP().' => '.$oCountry->getFieldData('d3geoiplang')
+                $this->getIP().' => '.$language
             );
-            Registry::getLang()->setTplLanguage((int) $oCountry->getFieldData('d3geoiplang'));
-            Registry::getLang()->setBaseLanguage((int) $oCountry->getFieldData('d3geoiplang'));
+            Registry::getLang()->setTplLanguage($language);
+            Registry::getLang()->setBaseLanguage($language);
             Registry::getSession()->setVariable('d3isSetLang', true);
         }
 
@@ -364,6 +368,7 @@ class d3geoip extends BaseModel
     public function performShopSwitch()
     {
         if (!$this->_getModConfig()->isActive() || !$this->_getModConfig()->getValue('blChangeShop')) {
+            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'shop change option or module is disabled');
             return;
         }
 
@@ -371,6 +376,8 @@ class d3geoip extends BaseModel
 
         $oCountry = $this->getUserLocationCountryObject();
         $iNewShop = $oCountry->getFieldData('d3geoipshop');
+
+        $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'check allowed shop change');
 
         if (Registry::getRequest()->getRequestEscapedParameter('d3redirect') != 1
             && false == $this->isAdmin()
@@ -383,6 +390,8 @@ class d3geoip extends BaseModel
                 || strtolower($this->getConfig()->getActiveView()->getClassKey()) == 'mallstart'
             )
         ) {
+            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'prepare shop change to '.$iNewShop);
+
             $oNewConf = new Config();
             $oNewConf->setShopId($iNewShop);
             $oNewConf->init();
@@ -419,6 +428,8 @@ class d3geoip extends BaseModel
                 'change shop',
                 $this->getIP().' => '.$sUrl
             );
+
+            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'change to shop url', $sUrl);
 
             header("Location: ".$sUrl);
             exit();
