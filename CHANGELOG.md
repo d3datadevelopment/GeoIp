@@ -1,5 +1,9 @@
 # Changelog
 
+- 4.1.1.0
+  - Support für OXID 6.5.2
+  - Logging erweitert
+
 - 4.1.0.0
   - Support für OXID 6.4 und 6.5
   - Support für OXID < 6.3 entfernt
