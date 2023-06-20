@@ -37,7 +37,8 @@
   },
   "require": {
     "oxid-esales/oxideshop-ce": "6.8 - 6.14",
-    "d3/modcfg": "^6"
+    "d3/modcfg": "^6",
+    "beberlei/assert": "^3.3"
   },
   "autoload": {
     "psr-4": {

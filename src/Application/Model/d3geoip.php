@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This Software is the property of Data Development and is protected
  * by copyright law - it is NOT Freeware.
@@ -16,6 +17,8 @@
 
 namespace D3\GeoIp\Application\Model;
 
+use Assert\Assert;
+use Assert\InvalidArgumentException;
 use D3\ModCfg\Application\Model\Configuration\d3_cfg_mod;
 use D3\ModCfg\Application\Model\d3str;
 use D3\ModCfg\Application\Model\Exception\d3_cfg_mod_exception;
@@ -257,12 +260,9 @@ class d3geoip extends BaseModel
 
         $oCountry = $this->getUserLocationCountryObject();
 
-        if (!$this->isAdmin()
-            && Registry::getUtils()->isSearchEngine() === false
-            && Registry::getSession()->getId()
-            && Registry::getSession()->getVariable('d3isSetLang') === null
-            && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
-        ) {
+        try {
+            $this->canChangeLanguage( $oCountry );
+
             $language = (int) $oCountry->getFieldData('d3geoiplang');
             $this->_getModConfig()->d3getLog()->info(
                 __CLASS__,
@@ -274,6 +274,9 @@ class d3geoip extends BaseModel
             Registry::getLang()->setTplLanguage($language);
             Registry::getLang()->setBaseLanguage($language);
             Registry::getSession()->setVariable('d3isSetLang', true);
+            Registry::getLogger()->debug('language set', [$language]);
+        } catch (InvalidArgumentException $e) {
+            Registry::getLogger()->debug($e->getMessage(), [$oCountry]);
         }
 
         stopProfile(__METHOD__);
@@ -301,12 +304,9 @@ class d3geoip extends BaseModel
 
         $oCountry = $this->getUserLocationCountryObject();
 
-        if (!$this->isAdmin()
-            && Registry::getUtils()->isSearchEngine() === false
-            && !Registry::getSession()->getVariable('d3isSetCurr')
-            && $oCountry->getId()
-            && $oCountry->getFieldData('d3geoipcur') > -1
-        ) {
+        try {
+            $this->canChangeCurrency( $oCountry );
+
             $this->_getLog()->log(
                 d3log::INFO,
                 __CLASS__,
@@ -317,6 +317,8 @@ class d3geoip extends BaseModel
             );
             Registry::getConfig()->setActShopCurrency((int) $oCountry->getFieldData('d3geoipcur'));
             Registry::getSession()->setVariable('d3isSetCurr', true);
+        } catch (InvalidArgumentException $e) {
+            Registry::getLogger()->debug($e->getMessage(), [$oCountry]);
         }
 
         stopProfile(__METHOD__);
@@ -369,19 +371,10 @@ class d3geoip extends BaseModel
 
         $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'check allowed shop change');
 
-        if (Registry::getRequest()->getRequestEscapedParameter('d3redirect') != 1
-            && false == $this->isAdmin()
-            && Registry::getUtils()->isSearchEngine() === false
-            && $oCountry->getId()
-            && Registry::getConfig()->isMall()
-            && $iNewShop > -1 &&
-            (
-                $iNewShop != Registry::getConfig()->getShopId()
-                || strtolower(Registry::getConfig()->getActiveView()->getClassKey()) == 'mallstart'
-            )
-        ) {
-            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'prepare shop change to '.$iNewShop);
+        try {
+            $this->canChangeShop( $oCountry, $iNewShop );
 
+            $this->_getModConfig()->d3getLog()->info(__CLASS__, __FUNCTION__, __LINE__, 'prepare shop change to '.$iNewShop);
             $oNewConf = new Config();
             $oNewConf->setShopId($iNewShop);
             $oNewConf->init();
@@ -423,6 +416,8 @@ class d3geoip extends BaseModel
 
             header("Location: ".$sUrl);
             exit();
+        } catch (InvalidArgumentException $e) {
+            Registry::getLogger()->debug($e->getMessage(), [$oCountry]);
         }
 
         stopProfile(__METHOD__);
@@ -453,13 +448,9 @@ class d3geoip extends BaseModel
 
         $oCountry = $this->getUserLocationCountryObject();
 
-        if ($this->dontSkipUrlRedirect()
-            && false == $this->isAdmin()
-            && Registry::getUtils()->isSearchEngine() === false
-            && $oCountry->getId()
-            && $oCountry->getFieldData('d3geoipurl')
-            && strlen(trim($oCountry->getFieldData('d3geoipurl'))) > 0
-        ) {
+        try {
+            $this->canRedirect( $oCountry );
+
             $sNewUrl = $oCountry->getFieldData('d3geoipurl');
 
             $this->_getLog()->log(
@@ -473,6 +464,8 @@ class d3geoip extends BaseModel
 
             header("Location: ".$sNewUrl);
             exit();
+        } catch (InvalidArgumentException $e) {
+            Registry::getLogger()->debug($e->getMessage(), [$oCountry]);
         }
 
         stopProfile(__METHOD__);
@@ -539,6 +532,78 @@ class d3geoip extends BaseModel
         }
 
         return $this->oD3Log;
+    }
+
+    /**
+     * @param Country $oCountry
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function canRedirect( Country $oCountry )
+    {
+        Assert::that($this->dontSkipUrlRedirect())->true('redirect skip is not provided');
+        $this->isUserInFrontend();
+        Assert::that($oCountry->getId())->notBlank('no country loaded');
+        Assert::that($oCountry->getFieldData( 'd3geoipurl' ))->notBlank('no redirect url set');
+    }
+
+    /**
+     * @param Country $oCountry
+     *
+     * @return bool
+     */
+    /**
+     * @param Country $oCountry
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function canChangeLanguage( Country $oCountry )
+    {
+        $this->isUserInFrontend();
+        Assert::that(Registry::getSession()->getVariable( 'd3isSetLang' ))->null('language already set');
+        Assert::that($oCountry->getId())->notBlank('no country loaded');
+        Assert::that($oCountry->getFieldData( 'd3geoiplang' ))->greaterThan(-1, 'no target language set');
+    }
+
+    /**
+     * @param Country $oCountry
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function canChangeCurrency( Country $oCountry )
+    {
+        $this->isUserInFrontend();
+        Assert::that(Registry::getSession()->getVariable( 'd3isSetCurr' ))->null('currency already set');
+        Assert::that($oCountry->getId())->notBlank('no country loaded');
+        Assert::that($oCountry->getFieldData( 'd3geoipcur' ))->greaterThan(-1, 'no target currency set');
+    }
+
+    /**
+     * @param Country $oCountry
+     * @param         $iNewShop
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function canChangeShop( Country $oCountry, $iNewShop )
+    {
+        Assert::that(Registry::getRequest()->getRequestEscapedParameter( 'd3redirect' ))->notSame('1', 'redirect already performed');
+        $this->isUserInFrontend();
+        Assert::that($oCountry->getId())->notBlank('no country loaded');
+        Assert::that(Registry::getConfig()->isMall())->true('no mall installation');
+        Assert::that($iNewShop)->greaterThan(-1, 'no target shop id set');
+        Assert::that(
+            $iNewShop != Registry::getConfig()->getShopId() ||
+            strtolower( Registry::getConfig()->getActiveView()->getClassKey() ) == 'mallstart'
+        )->true('no different shop and no mallstart');
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    protected function isUserInFrontend()
+    {
+        Assert::that($this->isAdmin())->false('User is in admin');
+        Assert::that(Registry::getUtils()->isSearchEngine())->false('User is search engine');
     }
 }
 
