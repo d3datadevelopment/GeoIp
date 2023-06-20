@@ -264,7 +264,7 @@ class d3geoip extends BaseModel
             && $oCountry->getId() && $oCountry->getFieldData('d3geoiplang') > -1
         ) {
             $language = (int) $oCountry->getFieldData('d3geoiplang');
-            $this->_getModConfig()->info(
+            $this->_getModConfig()->d3getLog()->info(
                 __CLASS__,
                 __FUNCTION__,
                 __LINE__,
