@@ -1,5 +1,9 @@
 # Changelog
 
+- 4.1.2.0
+  - verwendet Assertions für Bedingungsprüfung
+  - fehlerhaften Methodenaufruf korrigiert
+
 - 4.1.1.0
   - Support für OXID 6.5.2
   - Logging erweitert
